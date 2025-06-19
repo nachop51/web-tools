@@ -1,13 +1,12 @@
 <script lang="ts">
-	import Navbar from '$lib/components/navbar.svelte'
-	import '../app.css'
+	import '../app.css';
+	import favicon from '$lib/assets/favicon.svg';
+	
+	let { children } = $props();
 </script>
 
 <svelte:head>
-	<title>Tools</title>
+	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="bg-gradient transition-colors" />
-<Navbar />
-
-<slot />
+{@render children()}
