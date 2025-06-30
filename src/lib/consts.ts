@@ -1,0 +1,1 @@
+export const allowedCharactersForBases = '0123456789abcdefghijklmnopqrstuvwxyz'

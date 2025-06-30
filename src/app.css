@@ -1,1 +1,8 @@
 @import 'tailwindcss';
+@plugin "daisyui" {
+	themes: sunset --default;
+}
+
+body {
+	font-family: 'Gabarito Variable', sans-serif;
+}
