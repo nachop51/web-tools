@@ -1,87 +1,182 @@
 <script lang="ts">
 	import { cn } from '$lib/utils/fns'
+	import { computeOutputNumber, NumberMode, validateNumberBase } from '$lib/utils/numbers/converter'
 
 	let value = $state<number>()
 	let inputError = $state<string | null>(null)
 
-	let valueBase = $state<string>('10')
-	let targetBase = $state<string>('2')
+	let selectedValueBase = $state<string>('10')
+	let selectedTargetBase = $state<string>('2')
 
-	function getBinary(n: number | null | undefined, targetBase: number): string {
-		if (n == null) return ''
+	let valueBase = $state(10)
+	let targetBase = $state(2)
 
-		return n.toString(targetBase)
-	}
+	let selectedMode = $state(NumberMode.INT)
 
-	let binary = $derived(getBinary(value, parseInt(targetBase)))
+	let outputNumber = $derived(computeOutputNumber(value, valueBase, targetBase, selectedMode))
 
-	function validateNumberInput(input: string, base: number): number | null {
-		if (!input) return null
+	$effect(() => {
+		const isValid = validateNumberBase(value, valueBase, selectedMode)
 
-		const parsed = parseInt(input, base)
-		if (isNaN(parsed)) return null
-
-		return parsed
-	}
-
-	function handleInput(event: Event) {
-		const input = (event.target as HTMLInputElement).value
-		const res = validateNumberInput(input, parseInt(valueBase))
-
-		if (res == null) {
-			inputError = 'Invalid number for the selected base'
+		if (isValid !== true) {
+			inputError = isValid
 			return
 		}
+
 		inputError = null
-		value = res
-	}
+	})
+
+	$effect(() => {
+		if (selectedValueBase !== 'custom') {
+			valueBase = parseInt(selectedValueBase)
+		}
+	})
+
+	$effect(() => {
+		if (selectedTargetBase !== 'custom') {
+			targetBase = parseInt(selectedTargetBase)
+		}
+	})
+
+	const options = [
+		{
+			title: 'Integer only',
+			description: 'Accepts any integer numbers.',
+			mode: NumberMode.INT
+		},
+		{
+			title: '32-bit Integer only',
+			description: 'Only 32-bit integer numbers.',
+			mode: NumberMode.INT32
+		},
+		{
+			title: 'Float 32 (Decimal & Binary)',
+			description: 'Floats with single precision.',
+			mode: NumberMode.FLOAT32
+		},
+		{
+			title: 'Float 64 (Decimal & Binary)',
+			description: 'Double precision floats.',
+			mode: NumberMode.FLOAT64
+		}
+	]
+
+	const commonOptions = [
+		{ label: 'Binary', value: '2' },
+		{ label: 'Octal', value: '8' },
+		{ label: 'Decimal', value: '10' },
+		{ label: 'Hexadecimal', value: '16' },
+		{ label: 'Custom', value: 'custom' }
+	]
 </script>
 
 <main class="flex gap-4 justify-center min-h-screen items-start p-8">
 	<section>
 		<header>
-			<h2>Input number settings</h2>
+			<h2>Input number</h2>
 		</header>
 
-		<div class="mb-8">
-			<label>
-				<span>Input number</span>
-				<input
-					type="number"
-					bind:value
-					class={cn('input input-primary', inputError && 'input-error!')}
-					oninput={handleInput}
-				/>
-			</label>
+		<div>
+			<textarea
+				bind:value
+				class={cn('textarea textarea-primary textarea-lg w-full', inputError && 'textarea-error!')}
+				placeholder="Insert your number"
+			>
+			</textarea>
 			{#if inputError}
-				<p class="text-error">{inputError}</p>
+				<p class="text-error mt-2">{inputError}</p>
 			{/if}
 		</div>
 
-		<div class="flex flex-col gap-4">
+		<hr class="my-6" />
+
+		<div class="flex flex-col gap-4 mb-4">
 			<header>
 				<h3 class="text-xl">Input settings</h3>
 			</header>
 
 			<label>
 				<span>Input base</span>
-				<select bind:value={valueBase} class="select">
-					<option value="2">Binary</option>
-					<option value="8">Octal</option>
-					<option value="10" selected>Decimal</option>
-					<option value="16">Hexadecimal</option>
+				<select bind:value={selectedValueBase} class="select w-full">
+					{#each commonOptions as option (option.value)}
+						<option value={option.value} selected={option.value === selectedValueBase}>
+							{option.label}
+						</option>
+					{/each}
 				</select>
+				{#if selectedValueBase === 'custom'}
+					<input
+						type="number"
+						max="36"
+						min="2"
+						step="1"
+						bind:value={valueBase}
+						placeholder="Enter custom base"
+						class={cn(
+							'input input-primary mt-2 w-full',
+							valueBase < 2 || (valueBase > 36 && 'input-error!')
+						)}
+					/>
+					{#if valueBase < 2 || valueBase > 36}
+						<p class="text-error">Input base must be between 2 and 36</p>
+					{/if}
+				{/if}
 			</label>
 
 			<label>
 				<span>Target base</span>
-				<select bind:value={targetBase} class="select">
-					<option value="2" selected>Binary</option>
-					<option value="8">Octal</option>
-					<option value="10">Decimal</option>
-					<option value="16">Hexadecimal</option>
+				<select bind:value={selectedTargetBase} class="select w-full">
+					{#each commonOptions as option (option.value)}
+						<option
+							value={option.value}
+							selected={option.value === selectedTargetBase}
+							disabled={option.value !== 'custom' && option.value === selectedValueBase}
+						>
+							{option.label}
+						</option>
+					{/each}
 				</select>
+				{#if selectedTargetBase === 'custom'}
+					<input
+						type="number"
+						max="36"
+						min="2"
+						step="1"
+						bind:value={targetBase}
+						placeholder="Enter custom base"
+						class={cn(
+							'input input-primary mt-2 w-full',
+							targetBase < 2 || (targetBase > 36 && 'input-error!')
+						)}
+					/>
+					{#if targetBase < 2 || targetBase > 36}
+						<p class="text-error">Target base must be between 2 and 36</p>
+					{/if}
+				{/if}
 			</label>
+
+			<!-- <label class="flex items-center gap-2">
+				<input type="checkbox" class="checkbox checkbox-primary" />
+				Signed to unsigned conversion
+			</label> -->
+		</div>
+
+		<div class="space-y-2">
+			{#each options as button (button.title)}
+				<button
+					class={cn(
+						'border-2 border-base-content rounded-xl block px-4 py-2 text-sm transition-colors hover:border-primary/60 hover:bg-primary/10 text-left w-full disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
+						selectedMode === button.mode && 'border-primary bg-primary/20'
+					)}
+					onclick={() => (selectedMode = button.mode)}
+					disabled={(targetBase !== 2 || valueBase !== 10) &&
+						(button.mode === NumberMode.FLOAT32 || button.mode === NumberMode.FLOAT64)}
+				>
+					<span class="block font-semibold text-base">{button.title}</span>
+
+					<span> {button.description} </span>
+				</button>
+			{/each}
 		</div>
 	</section>
 
@@ -90,10 +185,20 @@
 			<h2>Output number</h2>
 		</header>
 
-		<label>
-			<span> Output number </span>
-			<textarea class="textarea textarea-primary" readonly bind:value={binary}></textarea>
-		</label>
+		<textarea
+			class="textarea textarea-primary textarea-lg w-full"
+			readonly
+			bind:value={outputNumber}
+			placeholder="Result will appear here"
+		></textarea>
+
+		<hr class="my-6" />
+
+		<div>
+			<header>
+				<h3 class="text-xl">Breakdown of the conversion</h3>
+			</header>
+		</div>
 	</section>
 </main>
 
@@ -101,7 +206,7 @@
 	@reference '../../app.css';
 
 	section {
-		@apply bg-base-200 p-8 rounded-lg border border-base-300;
+		@apply bg-base-200 p-8 rounded-lg border border-base-300 max-w-md w-full;
 	}
 
 	section > header {
