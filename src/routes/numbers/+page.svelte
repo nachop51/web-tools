@@ -1,42 +1,11 @@
 <script lang="ts">
+	import { page } from '$app/state'
 	import { cn } from '$lib/utils/fns'
 	import { computeOutputNumber, NumberMode, validateNumberBase } from '$lib/utils/numbers/converter'
+	import { SvelteURLSearchParams } from 'svelte/reactivity'
 
 	let value = $state<number>()
 	let inputError = $state<string | null>(null)
-
-	let selectedValueBase = $state<string>('10')
-	let selectedTargetBase = $state<string>('2')
-
-	let valueBase = $state(10)
-	let targetBase = $state(2)
-
-	let selectedMode = $state(NumberMode.INT)
-
-	let outputNumber = $derived(computeOutputNumber(value, valueBase, targetBase, selectedMode))
-
-	$effect(() => {
-		const isValid = validateNumberBase(value, valueBase, selectedMode)
-
-		if (isValid !== true) {
-			inputError = isValid
-			return
-		}
-
-		inputError = null
-	})
-
-	$effect(() => {
-		if (selectedValueBase !== 'custom') {
-			valueBase = parseInt(selectedValueBase)
-		}
-	})
-
-	$effect(() => {
-		if (selectedTargetBase !== 'custom') {
-			targetBase = parseInt(selectedTargetBase)
-		}
-	})
 
 	const options = [
 		{
@@ -68,6 +37,66 @@
 		{ label: 'Hexadecimal', value: '16' },
 		{ label: 'Custom', value: 'custom' }
 	]
+
+	const urlParams = new SvelteURLSearchParams(page.url.searchParams)
+
+	function parseSelectedParam(param: string | null, defaultValue: string): string {
+		if (!param) return defaultValue
+
+		if (commonOptions.some((option) => option.value === param)) {
+			return param
+		}
+
+		return 'custom'
+	}
+
+	function parseValueParam(param: string | null, defaultValue: number): number {
+		if (!param) return defaultValue
+
+		const parsed = Number(param)
+
+		if (isNaN(parsed)) return defaultValue
+
+		return parsed
+	}
+
+	let selectedValueBase = $state<string>(parseSelectedParam(urlParams.get('valueBase'), '10'))
+	let selectedTargetBase = $state<string>(parseSelectedParam(urlParams.get('targetBase'), '2'))
+
+	let valueBase = $state(parseValueParam(urlParams.get('valueBase'), 10))
+	let targetBase = $state(parseValueParam(urlParams.get('targetBase'), 2))
+
+	let selectedMode = $state(NumberMode.INT)
+
+	let outputNumber = $derived(computeOutputNumber(value, valueBase, targetBase, selectedMode))
+
+	$effect(() => {
+		const isValid = validateNumberBase(value, valueBase, selectedMode)
+
+		if (isValid !== true) {
+			inputError = isValid
+			return
+		}
+
+		inputError = null
+	})
+
+	$effect(() => {
+		if (selectedValueBase !== 'custom') {
+			valueBase = parseInt(selectedValueBase)
+		}
+		if (selectedTargetBase !== 'custom') {
+			targetBase = parseInt(selectedTargetBase)
+		}
+	})
+
+	$effect(() => {
+		if (selectedValueBase === selectedTargetBase && selectedValueBase !== 'custom') {
+			// Auto switch target base to custom if both are the same
+			selectedTargetBase = '10'
+			targetBase = valueBase === 2 ? 10 : 2
+		}
+	})
 </script>
 
 <main class="flex gap-4 justify-center min-h-screen items-start p-8">
@@ -81,8 +110,7 @@
 				bind:value
 				class={cn('textarea textarea-primary textarea-lg w-full', inputError && 'textarea-error!')}
 				placeholder="Insert your number"
-			>
-			</textarea>
+			></textarea>
 			{#if inputError}
 				<p class="text-error mt-2">{inputError}</p>
 			{/if}
