@@ -1,0 +1,598 @@
+export type CategoryId = "numbers" | "units" | "strings" | "encoding" | "datetime" | "code" | "color" | "electrical" | "math" | "finance" | "geometry";
+
+export type Category = {
+  id: CategoryId;
+  name: string;
+  description: string;
+  href: string;
+};
+
+export type Tool = {
+  slug: string;
+  category: CategoryId;
+  name: string;
+  description: string;
+  href: string;
+  keywords: string[];
+};
+
+export const categories: Category[] = [
+  {
+    id: "numbers",
+    name: "Numbers",
+    description: "Convert between bases, Roman numerals, words, and more.",
+    href: "/numbers",
+  },
+  {
+    id: "units",
+    name: "Units",
+    description: "Length, mass, temperature, and other measurement conversions.",
+    href: "/units",
+  },
+  {
+    id: "strings",
+    name: "Strings",
+    description: "Count, transform case, slugify, and clean up text.",
+    href: "/strings",
+  },
+  {
+    id: "encoding",
+    name: "Encoding",
+    description: "Encode and decode Base64, URL, and HTML entities safely.",
+    href: "/encoding",
+  },
+  {
+    id: "datetime",
+    name: "Datetime",
+    description: "Unix timestamps, ISO strings, duration calculators, and more.",
+    href: "/datetime",
+  },
+  {
+    id: "code",
+    name: "Code",
+    description: "JSON formatter, UUID generator, and other developer utilities.",
+    href: "/code",
+  },
+  {
+    id: "color",
+    name: "Color",
+    description: "Convert colors, generate palettes, check contrast, and explore gradients.",
+    href: "/color",
+  },
+  {
+    id: "electrical",
+    name: "Electrical",
+    description: "Ohm's law, power formulas, and unit conversions for electronics.",
+    href: "/electrical",
+  },
+  {
+    id: "math",
+    name: "Math",
+    description: "Percentages, fractions, primes, and other math calculators.",
+    href: "/math",
+  },
+  {
+    id: "finance",
+    name: "Finance",
+    description: "Tip, discount, interest, and salary calculators.",
+    href: "/finance",
+  },
+  {
+    id: "geometry",
+    name: "Geometry",
+    description: "Area, perimeter, volume, and shape calculators.",
+    href: "/geometry",
+  },
+];
+
+export const tools: Tool[] = [
+  // Numbers
+  {
+    slug: "base-converter",
+    category: "numbers",
+    name: "Base converter",
+    description: "Convert numbers between binary, octal, decimal, hexadecimal, and any custom base from 2 to 36.",
+    href: "/numbers/base-converter",
+    keywords: ["binary", "decimal", "hex", "hexadecimal", "octal", "base", "radix"],
+  },
+  {
+    slug: "roman",
+    category: "numbers",
+    name: "Roman numerals",
+    description: "Convert between Arabic numbers (1–3999) and Roman numerals. Direction is detected automatically.",
+    href: "/numbers/roman",
+    keywords: ["roman", "numeral", "latin", "convert", "I", "V", "X", "L", "C", "D", "M"],
+  },
+  {
+    slug: "to-words",
+    category: "numbers",
+    name: "Number to words",
+    description: "Convert any integer up to ±999 billion into its English word representation.",
+    href: "/numbers/to-words",
+    keywords: ["words", "english", "text", "spell", "written", "number", "convert"],
+  },
+
+  // Units
+  {
+    slug: "length",
+    category: "units",
+    name: "Length converter",
+    description: "Convert between meters, kilometers, miles, feet, inches, and more.",
+    href: "/units/length",
+    keywords: ["length", "meter", "kilometer", "mile", "foot", "inch", "yard"],
+  },
+  {
+    slug: "mass",
+    category: "units",
+    name: "Mass converter",
+    description: "Convert between grams, kilograms, pounds, ounces, and more.",
+    href: "/units/mass",
+    keywords: ["mass", "weight", "gram", "kilogram", "pound", "ounce"],
+  },
+  {
+    slug: "temperature",
+    category: "units",
+    name: "Temperature converter",
+    description: "Convert between Celsius, Fahrenheit, and Kelvin.",
+    href: "/units/temperature",
+    keywords: ["temperature", "celsius", "fahrenheit", "kelvin"],
+  },
+  {
+    slug: "time",
+    category: "units",
+    name: "Time converter",
+    description: "Convert between milliseconds, seconds, minutes, hours, days, weeks, and years.",
+    href: "/units/time",
+    keywords: ["time", "second", "minute", "hour", "day", "week", "year", "millisecond"],
+  },
+  {
+    slug: "data",
+    category: "units",
+    name: "Data size",
+    description: "Convert between bytes, kilobytes, megabytes, gigabytes, and binary equivalents (KiB, MiB, GiB, TiB).",
+    href: "/units/data",
+    keywords: ["data", "byte", "kilobyte", "megabyte", "gigabyte", "terabyte", "kibibyte", "mebibyte"],
+  },
+  {
+    slug: "speed",
+    category: "units",
+    name: "Speed converter",
+    description: "Convert between m/s, km/h, mph, ft/s, knots, and mach.",
+    href: "/units/speed",
+    keywords: ["speed", "velocity", "mph", "kmh", "meter", "knot", "mach", "feet"],
+  },
+
+  // Strings
+  {
+    slug: "count",
+    category: "strings",
+    name: "Character count",
+    description: "Count characters, words, lines, bytes, sentences, and paragraphs.",
+    href: "/strings/count",
+    keywords: ["count", "character", "word", "line", "byte", "length"],
+  },
+  {
+    slug: "case",
+    category: "strings",
+    name: "Case converter",
+    description: "Convert text between upper, lower, title, camel, snake, kebab, and other cases.",
+    href: "/strings/case",
+    keywords: ["case", "camel", "snake", "kebab", "upper", "lower", "title", "pascal"],
+  },
+  {
+    slug: "slugify",
+    category: "strings",
+    name: "Slugify",
+    description: "Convert text to a URL-friendly slug.",
+    href: "/strings/slugify",
+    keywords: ["slug", "url", "kebab", "dash", "normalize"],
+  },
+  {
+    slug: "trim",
+    category: "strings",
+    name: "Trim & clean",
+    description: "Trim whitespace, collapse spaces, normalize line endings, and deduplicate lines.",
+    href: "/strings/trim",
+    keywords: ["trim", "whitespace", "clean", "lines", "dedupe"],
+  },
+
+  // Encoding
+  {
+    slug: "base64",
+    category: "encoding",
+    name: "Base64",
+    description: "Encode and decode Base64 text, with full Unicode/UTF-8 support.",
+    href: "/encoding/base64",
+    keywords: ["base64", "encode", "decode", "binary", "utf8"],
+  },
+  {
+    slug: "url",
+    category: "encoding",
+    name: "URL encode",
+    description: "URL-encode and decode strings with encodeURIComponent or encodeURI.",
+    href: "/encoding/url",
+    keywords: ["url", "encode", "decode", "percent", "uri", "query"],
+  },
+  {
+    slug: "html-entities",
+    category: "encoding",
+    name: "HTML entities",
+    description: "Encode and decode HTML entities, including &, <, >, and numeric entities.",
+    href: "/encoding/html-entities",
+    keywords: ["html", "entities", "encode", "decode", "escape", "unescape"],
+  },
+  {
+    slug: "hash",
+    category: "encoding",
+    name: "Hash generator",
+    description: "Generate SHA-1, SHA-256, SHA-384, and SHA-512 hashes from any text using the Web Crypto API.",
+    href: "/encoding/hash",
+    keywords: ["hash", "sha", "sha256", "sha512", "sha1", "sha384", "digest", "checksum", "crypto"],
+  },
+  {
+    slug: "jwt",
+    category: "encoding",
+    name: "JWT decoder",
+    description: "Decode and inspect JWT header, payload, and signature. Client-side only, no verification.",
+    href: "/encoding/jwt",
+    keywords: ["jwt", "json web token", "decode", "header", "payload", "signature", "bearer", "auth"],
+  },
+
+  // Datetime
+  {
+    slug: "unix",
+    category: "datetime",
+    name: "Unix timestamp",
+    description: "Convert Unix timestamps to ISO, UTC, and local dates, or parse a date string back to a Unix timestamp.",
+    href: "/datetime/unix",
+    keywords: ["unix", "timestamp", "epoch", "iso", "utc", "date", "time", "convert"],
+  },
+  {
+    slug: "duration",
+    category: "datetime",
+    name: "Duration calculator",
+    description: "Parse durations like \"1d 2h 30m\", HH:MM:SS, or raw seconds into a full breakdown.",
+    href: "/datetime/duration",
+    keywords: ["duration", "time", "seconds", "minutes", "hours", "days", "parse", "convert"],
+  },
+
+  // Numbers Phase 3
+  {
+    slug: "random-number",
+    category: "numbers",
+    name: "Random number",
+    description: "Generate random integers or floats between a min and max, in bulk.",
+    href: "/numbers/random-number",
+    keywords: ["random", "number", "generate", "integer", "float", "bulk"],
+  },
+  {
+    slug: "decimal-precision",
+    category: "numbers",
+    name: "Decimal precision",
+    description: "Round, floor, ceil, or truncate a decimal to N places or significant figures.",
+    href: "/numbers/decimal-precision",
+    keywords: ["round", "floor", "ceil", "truncate", "decimal", "precision", "significant figures"],
+  },
+  // Numbers Phase 5
+  {
+    slug: "percentage",
+    category: "numbers",
+    name: "Percentage calculator",
+    description: "Solve X% of Y, what % is X of Y, percentage change, and percent error.",
+    href: "/numbers/percentage",
+    keywords: ["percentage", "percent", "change", "error", "calculator"],
+  },
+  {
+    slug: "gcf-lcm",
+    category: "numbers",
+    name: "GCF / LCM",
+    description: "Find the Greatest Common Factor and Least Common Multiple of two or more integers.",
+    href: "/numbers/gcf-lcm",
+    keywords: ["gcf", "gcd", "lcm", "greatest common factor", "least common multiple", "divisor"],
+  },
+
+  // Units Phase 4
+  {
+    slug: "volume",
+    category: "units",
+    name: "Volume converter",
+    description: "Convert between liters, milliliters, gallons, cups, fluid ounces, and more.",
+    href: "/units/volume",
+    keywords: ["volume", "liter", "gallon", "cup", "fluid ounce", "milliliter"],
+  },
+  {
+    slug: "area",
+    category: "units",
+    name: "Area converter",
+    description: "Convert between square meters, acres, hectares, square feet, and more.",
+    href: "/units/area",
+    keywords: ["area", "square meter", "acre", "hectare", "square feet", "square kilometer"],
+  },
+  // Units Phase 5
+  {
+    slug: "energy",
+    category: "units",
+    name: "Energy converter",
+    description: "Convert between joules, calories, kilowatt-hours, BTU, and more.",
+    href: "/units/energy",
+    keywords: ["energy", "joule", "calorie", "kilowatt-hour", "btu", "electron volt"],
+  },
+  {
+    slug: "pressure",
+    category: "units",
+    name: "Pressure converter",
+    description: "Convert between pascals, bar, PSI, atmospheres, mmHg, and torr.",
+    href: "/units/pressure",
+    keywords: ["pressure", "pascal", "bar", "psi", "atmosphere", "mmhg", "torr"],
+  },
+  {
+    slug: "angle",
+    category: "units",
+    name: "Angle converter",
+    description: "Convert between degrees, radians, gradians, arcminutes, arcseconds, and turns.",
+    href: "/units/angle",
+    keywords: ["angle", "degree", "radian", "gradian", "arcminute", "arcsecond", "turn"],
+  },
+  // Units Phase 6
+  {
+    slug: "power-unit",
+    category: "units",
+    name: "Power converter",
+    description: "Convert between watts, kilowatts, horsepower, BTU/hour, and more.",
+    href: "/units/power-unit",
+    keywords: ["power", "watt", "kilowatt", "horsepower", "btu", "megawatt"],
+  },
+
+  // Strings Phase 3
+  {
+    slug: "sort-lines",
+    category: "strings",
+    name: "Sort lines",
+    description: "Sort lines of text alphabetically, numerically, or by length; optionally deduplicate.",
+    href: "/strings/sort-lines",
+    keywords: ["sort", "lines", "alphabetical", "numeric", "dedupe", "order"],
+  },
+  {
+    slug: "find-replace",
+    category: "strings",
+    name: "Find & replace",
+    description: "Find and replace text or regex patterns with live match count.",
+    href: "/strings/find-replace",
+    keywords: ["find", "replace", "regex", "pattern", "search", "substitute"],
+  },
+  {
+    slug: "escape",
+    category: "strings",
+    name: "Escape / unescape",
+    description: "Escape or unescape special characters for JS, JSON, regex, CSV, and SQL.",
+    href: "/strings/escape",
+    keywords: ["escape", "unescape", "special characters", "js", "regex", "csv", "sql"],
+  },
+  // Strings Phase 4
+  {
+    slug: "reverse",
+    category: "strings",
+    name: "Reverse text",
+    description: "Reverse text by characters, by words, or by lines.",
+    href: "/strings/reverse",
+    keywords: ["reverse", "text", "chars", "words", "lines", "flip"],
+  },
+
+  // Encoding Phase 3
+  {
+    slug: "base32",
+    category: "encoding",
+    name: "Base32",
+    description: "Encode and decode Base32 (RFC 4648), compatible with TOTP/2FA secrets.",
+    href: "/encoding/base32",
+    keywords: ["base32", "encode", "decode", "totp", "2fa", "rfc4648"],
+  },
+  // Encoding Phase 6
+  {
+    slug: "base58",
+    category: "encoding",
+    name: "Base58",
+    description: "Encode and decode Base58 (Bitcoin/IPFS alphabet).",
+    href: "/encoding/base58",
+    keywords: ["base58", "encode", "decode", "bitcoin", "ipfs", "wallet"],
+  },
+  {
+    slug: "binary-text",
+    category: "encoding",
+    name: "Binary / text",
+    description: "Convert text to binary (8-bit groups), hex bytes, or decimal bytes, and back.",
+    href: "/encoding/binary-text",
+    keywords: ["binary", "text", "hex", "bytes", "decimal", "encode", "decode"],
+  },
+  {
+    slug: "morse",
+    category: "encoding",
+    name: "Morse code",
+    description: "Translate text to Morse code and Morse code back to text (ITU-R).",
+    href: "/encoding/morse",
+    keywords: ["morse", "code", "encode", "decode", "dots", "dashes", "telegraph"],
+  },
+
+  // Datetime Phase 3
+  {
+    slug: "cron",
+    category: "datetime",
+    name: "Cron preview",
+    description: "Parse a cron expression and list the next scheduled run times.",
+    href: "/datetime/cron",
+    keywords: ["cron", "schedule", "expression", "next run", "crontab"],
+  },
+  // Datetime Phase 6
+  {
+    slug: "date-diff",
+    category: "datetime",
+    name: "Date difference",
+    description: "Calculate the exact difference between two dates, or compute an age from a birthdate.",
+    href: "/datetime/date-diff",
+    keywords: ["date", "difference", "age", "birthdate", "years", "months", "days"],
+  },
+
+  // Code
+  {
+    slug: "json",
+    category: "code",
+    name: "JSON formatter",
+    description: "Format, minify, and validate JSON. Shows parse errors with line and column.",
+    href: "/code/json",
+    keywords: ["json", "format", "minify", "validate", "pretty", "lint", "beautify"],
+  },
+  {
+    slug: "uuid",
+    category: "code",
+    name: "UUID generator",
+    description: "Generate random UUID v4 values using the browser's crypto API, one or in bulk.",
+    href: "/code/uuid",
+    keywords: ["uuid", "guid", "random", "id", "v4", "generate", "unique"],
+  },
+  {
+    slug: "fake-data",
+    category: "code",
+    name: "Fake data generator",
+    description: "Generate mock JSON, CSV, or SQL from a visual schema or JSON template. Schema is portable for API use.",
+    href: "/code/fake-data",
+    keywords: ["fake", "mock", "data", "generator", "json", "csv", "sql", "random", "schema", "seed", "fixture"],
+  },
+  // Code Phase 4
+  {
+    slug: "regex",
+    category: "code",
+    name: "Regex tester",
+    description: "Test a regex against multi-line input with live match highlighting and group capture display.",
+    href: "/code/regex",
+    keywords: ["regex", "regular expression", "pattern", "match", "test", "flags"],
+  },
+  {
+    slug: "password",
+    category: "code",
+    name: "Password generator",
+    description: "Generate secure random passwords with configurable length, charset, and entropy display.",
+    href: "/code/password",
+    keywords: ["password", "generator", "random", "secure", "entropy", "strength"],
+  },
+  {
+    slug: "ascii-table",
+    category: "code",
+    name: "ASCII table",
+    description: "Browse the full ASCII table (0–127) with decimal, hex, octal, binary, and HTML entity columns.",
+    href: "/code/ascii-table",
+    keywords: ["ascii", "table", "characters", "hex", "binary", "decimal", "entities"],
+  },
+  {
+    slug: "url-parser",
+    category: "code",
+    name: "URL parser",
+    description: "Decompose a URL into protocol, host, path, query params, and fragment.",
+    href: "/code/url-parser",
+    keywords: ["url", "parser", "parse", "query", "params", "protocol", "host", "path"],
+  },
+  {
+    slug: "yaml-json",
+    category: "code",
+    name: "YAML ↔ JSON",
+    description: "Convert between YAML and JSON with pretty-printing and error display.",
+    href: "/code/yaml-json",
+    keywords: ["yaml", "json", "convert", "transform", "format"],
+  },
+  // Code Phase 6
+  {
+    slug: "qr-code",
+    category: "code",
+    name: "QR code",
+    description: "Generate QR codes for any text or URL with size and error correction controls.",
+    href: "/code/qr-code",
+    keywords: ["qr", "qrcode", "generate", "barcode", "url", "text"],
+  },
+
+  // Color Phase 5
+  {
+    slug: "color-converter",
+    category: "color",
+    name: "Color converter",
+    description: "Convert a color between HEX, RGB, HSL, HSV, and OKLCH formats with a live preview.",
+    href: "/color/color-converter",
+    keywords: ["color", "hex", "rgb", "hsl", "hsv", "oklch", "convert"],
+  },
+  {
+    slug: "contrast",
+    category: "color",
+    name: "Contrast checker",
+    description: "Calculate the WCAG 2.1 contrast ratio between two colors and show AA/AAA pass/fail badges.",
+    href: "/color/contrast",
+    keywords: ["contrast", "wcag", "accessibility", "color", "ratio", "aa", "aaa"],
+  },
+  { slug: "picker", category: "color", name: "Color picker", description: "Pick a color visually and copy it as HEX, RGB, HSL, or OKLCH.", href: "/color/picker", keywords: ["color", "picker", "hex", "rgb", "hsl", "oklch", "visual"] },
+  { slug: "tint-shade", category: "color", name: "Tint / shade scale", description: "Generate a Tailwind-style 11-step tint and shade scale in OKLCH colorspace.", href: "/color/tint-shade", keywords: ["tint", "shade", "scale", "palette", "tailwind", "oklch", "tokens"] },
+  { slug: "palette", category: "color", name: "Palette generator", description: "Generate complementary, triadic, analogous, and other color harmony palettes.", href: "/color/palette", keywords: ["palette", "harmony", "complementary", "triadic", "analogous", "oklch"] },
+  { slug: "gradient", category: "color", name: "Gradient builder", description: "Build linear, radial, or conic gradients with color interpolation in OKLCH, HSL, or sRGB.", href: "/color/gradient", keywords: ["gradient", "oklch", "hsl", "css", "linear", "radial", "conic"] },
+  { slug: "color-blindness", category: "color", name: "Color blindness", description: "Simulate how a color appears with protanopia, deuteranopia, tritanopia, and achromatopsia.", href: "/color/color-blindness", keywords: ["color blindness", "accessibility", "protanopia", "deuteranopia", "tritanopia"] },
+  { slug: "apca", category: "color", name: "APCA contrast", description: "Calculate the APCA (WCAG 3 draft) Lc contrast value for text readability.", href: "/color/apca", keywords: ["apca", "contrast", "wcag3", "accessibility", "lc", "text", "readability"] },
+  { slug: "mixer", category: "color", name: "Color mixer", description: "Mix two colors at any ratio in OKLCH, HSL, or sRGB with a live gradient preview.", href: "/color/mixer", keywords: ["mix", "blend", "interpolate", "oklch", "gradient", "color"] },
+  { slug: "named-colors", category: "color", name: "Named colors", description: "Browse and search all 148 CSS named colors with hex and RGB values.", href: "/color/named-colors", keywords: ["named", "css", "color", "rebeccapurple", "hex", "rgb", "reference"] },
+
+  // Math
+  { slug: "percentage", category: "math", name: "Percentage calculator", description: "Calculate percentages: find % of a number, % change, increase, decrease, error, and reverse.", href: "/math/percentage", keywords: ["percentage", "percent", "change", "increase", "decrease", "error", "calculate"] },
+  { slug: "fractions", category: "math", name: "Fraction calculator", description: "Add, subtract, multiply, and divide fractions with automatic simplification.", href: "/math/fractions", keywords: ["fraction", "numerator", "denominator", "add", "subtract", "multiply", "divide", "simplify"] },
+  { slug: "ratio", category: "math", name: "Ratio solver", description: "Simplify ratios to lowest terms or solve for a missing value in a proportion.", href: "/math/ratio", keywords: ["ratio", "proportion", "simplify", "solve", "missing"] },
+  { slug: "factorial", category: "math", name: "Factorial & combinations", description: "Calculate n!, permutations (nPr), and combinations (nCr).", href: "/math/factorial", keywords: ["factorial", "permutation", "combination", "ncr", "npr", "combinatorics"] },
+  { slug: "quadratic", category: "math", name: "Quadratic formula", description: "Solve ax²+bx+c=0. Shows discriminant and real or complex roots.", href: "/math/quadratic", keywords: ["quadratic", "equation", "roots", "discriminant", "formula", "parabola", "solve"] },
+  { slug: "scientific-notation", category: "math", name: "Scientific notation", description: "Convert numbers between standard decimal and scientific notation.", href: "/math/scientific-notation", keywords: ["scientific", "notation", "exponent", "exponential", "engineering", "convert"] },
+  { slug: "modulo", category: "math", name: "Modulo calculator", description: "Compute a mod m showing quotient and remainder for JS, Python, and math conventions.", href: "/math/modulo", keywords: ["modulo", "modulus", "remainder", "quotient", "division", "mod"] },
+
+  // Finance
+  { slug: "tip", category: "finance", name: "Tip calculator", description: "Calculate tip amount, total, and per-person split for any bill.", href: "/finance/tip", keywords: ["tip", "gratuity", "bill", "restaurant", "split", "per person"] },
+  { slug: "discount", category: "finance", name: "Discount & sales tax", description: "Apply a percentage discount or sales tax to a price.", href: "/finance/discount", keywords: ["discount", "sale", "tax", "price", "savings", "percent off"] },
+  { slug: "simple-interest", category: "finance", name: "Simple interest", description: "Calculate interest earned using I = P × r × t.", href: "/finance/simple-interest", keywords: ["simple", "interest", "principal", "rate", "time", "loan"] },
+  { slug: "compound-interest", category: "finance", name: "Compound interest", description: "Calculate compound interest with yearly breakdown and multiple compounding frequencies.", href: "/finance/compound-interest", keywords: ["compound", "interest", "principal", "rate", "annual", "monthly", "savings"] },
+  { slug: "salary", category: "finance", name: "Salary converter", description: "Convert between annual, monthly, bi-weekly, weekly, daily, and hourly pay rates.", href: "/finance/salary", keywords: ["salary", "hourly", "wage", "annual", "monthly", "weekly", "pay", "income"] },
+
+  // Geometry
+  { slug: "circle", category: "geometry", name: "Circle calculator", description: "Find radius, diameter, circumference, and area from any one property.", href: "/geometry/circle", keywords: ["circle", "radius", "diameter", "circumference", "area", "pi"] },
+  { slug: "rectangle", category: "geometry", name: "Rectangle calculator", description: "Calculate area, perimeter, and diagonal of a rectangle or square.", href: "/geometry/rectangle", keywords: ["rectangle", "square", "area", "perimeter", "diagonal", "width", "height"] },
+  { slug: "triangle", category: "geometry", name: "Triangle calculator", description: "Solve right triangles and general triangles from sides and angles.", href: "/geometry/triangle", keywords: ["triangle", "right", "pythagorean", "angles", "area", "sides", "law of cosines"] },
+  { slug: "pythagorean", category: "geometry", name: "Pythagorean theorem", description: "Solve for any side of a right triangle using a² + b² = c².", href: "/geometry/pythagorean", keywords: ["pythagorean", "theorem", "hypotenuse", "right triangle", "legs"] },
+
+  // Datetime additions
+  { slug: "date-add", category: "datetime", name: "Add / subtract date", description: "Add or subtract days, weeks, months, or years from any date.", href: "/datetime/date-add", keywords: ["date", "add", "subtract", "days", "weeks", "months", "years", "calculator"] },
+
+  // Strings additions
+  { slug: "diff", category: "strings", name: "Text diff", description: "Compare two pieces of text and highlight additions and deletions line by line.", href: "/strings/diff", keywords: ["diff", "compare", "difference", "text", "lines", "changes"] },
+
+  // Electrical Phase 7
+  {
+    slug: "ohms-law",
+    category: "electrical",
+    name: "Ohm's law",
+    description: "Solve for voltage, current, or resistance given any two of the three (V = IR).",
+    href: "/electrical/ohms-law",
+    keywords: ["ohm", "voltage", "current", "resistance", "vir", "law"],
+  },
+  {
+    slug: "power",
+    category: "electrical",
+    name: "Power calculator",
+    description: "Calculate electrical power using P = IV, P = V²/R, or P = I²R.",
+    href: "/electrical/power",
+    keywords: ["power", "watts", "voltage", "current", "resistance", "horsepower"],
+  },
+  {
+    slug: "amps-watts-volts",
+    category: "electrical",
+    name: "Amps / watts / volts",
+    description: "Convert between amps, watts, and volts given a known third value.",
+    href: "/electrical/amps-watts-volts",
+    keywords: ["amps", "watts", "volts", "convert", "power", "electrical"],
+  },
+];
+
+export function toolsByCategory(id: CategoryId): Tool[] {
+  return tools.filter((tool) => tool.category === id);
+}
+
+export function categoryById(id: CategoryId): Category | undefined {
+  return categories.find((c) => c.id === id);
+}

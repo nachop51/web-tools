@@ -1,8 +1,282 @@
-@import 'tailwindcss';
-@plugin "daisyui" {
-	themes: sunset --default;
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
 }
 
-body {
-	font-family: 'Gabarito Variable', sans-serif;
+@theme inline {
+  --color-background: oklch(var(--background));
+  --color-foreground: oklch(var(--foreground));
+  --color-muted: oklch(var(--muted));
+  --color-muted-foreground: oklch(var(--muted-foreground));
+  --color-popover: oklch(var(--popover));
+  --color-popover-foreground: oklch(var(--popover-foreground));
+  --color-border: oklch(var(--border));
+  --color-input: oklch(var(--input));
+  --color-card: oklch(var(--card));
+  --color-card-foreground: oklch(var(--card-foreground));
+  --color-primary: oklch(var(--primary));
+  --color-primary-foreground: oklch(var(--primary-foreground));
+  --color-secondary: oklch(var(--secondary));
+  --color-secondary-foreground: oklch(var(--secondary-foreground));
+  --color-accent: oklch(var(--accent));
+  --color-accent-foreground: oklch(var(--accent-foreground));
+  --color-violet: oklch(var(--violet));
+  --color-violet-foreground: oklch(var(--violet-foreground));
+  --color-violet-muted: oklch(var(--violet-muted));
+  --color-destructive: oklch(var(--destructive));
+  --color-destructive-foreground: oklch(var(--destructive-foreground));
+  --color-info: oklch(var(--info));
+  --color-info-foreground: oklch(var(--info-foreground));
+  --color-success: oklch(var(--success));
+  --color-success-foreground: oklch(var(--success-foreground));
+  --color-warning: oklch(var(--warning));
+  --color-warning-foreground: oklch(var(--warning-foreground));
+  --color-error: oklch(var(--error));
+  --color-error-foreground: oklch(var(--error-foreground));
+  --color-ring: oklch(var(--ring));
+}
+
+@layer base {
+  :root {
+    /* Monochromatic base (pure neutrals via oklch) */
+    --background: 1 0 0;
+    --foreground: 0.18 0.005 285;
+
+    --muted: 0.97 0.003 285;
+    --muted-foreground: 0.52 0.008 285;
+
+    --popover: 1 0 0;
+    --popover-foreground: 0.18 0.005 285;
+
+    --border: 0.92 0.004 285;
+    --input: 0.92 0.004 285;
+
+    --card: 1 0 0;
+    --card-foreground: 0.18 0.005 285;
+
+    --primary: 0.18 0.005 285;
+    --primary-foreground: 0.985 0 0;
+
+    --secondary: 0.97 0.003 285;
+    --secondary-foreground: 0.18 0.005 285;
+
+    --accent: 0.97 0.003 285;
+    --accent-foreground: 0.18 0.005 285;
+
+    /* Sharp violet accent (saturated, deep, not pastel) */
+    --violet: 0.55 0.245 295;
+    --violet-foreground: 0.985 0 0;
+    --violet-muted: 0.96 0.03 295;
+
+    --destructive: 0.62 0.235 27;
+    --destructive-foreground: 0.985 0 0;
+
+    --info: 0.95 0.04 235;
+    --info-foreground: 0.55 0.18 240;
+
+    --success: 0.94 0.06 155;
+    --success-foreground: 0.55 0.16 160;
+
+    --warning: 0.95 0.08 85;
+    --warning-foreground: 0.65 0.18 50;
+
+    --error: 0.95 0.04 25;
+    --error-foreground: 0.6 0.22 25;
+
+    /* Ring uses violet for visible, branded focus */
+    --ring: 0.55 0.245 295;
+
+    --radius: 0.5rem;
+  }
+
+  .dark,
+  [data-kb-theme="dark"] {
+    --background: 0.14 0.005 285;
+    --foreground: 0.985 0 0;
+
+    --muted: 0.21 0.008 285;
+    --muted-foreground: 0.66 0.012 285;
+
+    --accent: 0.21 0.008 285;
+    --accent-foreground: 0.985 0 0;
+
+    --popover: 0.14 0.005 285;
+    --popover-foreground: 0.985 0 0;
+
+    --border: 0.24 0.01 285;
+    --input: 0.24 0.01 285;
+
+    --card: 0.16 0.006 285;
+    --card-foreground: 0.985 0 0;
+
+    --primary: 0.985 0 0;
+    --primary-foreground: 0.18 0.005 285;
+
+    --secondary: 0.21 0.008 285;
+    --secondary-foreground: 0.985 0 0;
+
+    /* Violet stays bright in dark mode for that pop */
+    --violet: 0.66 0.235 295;
+    --violet-foreground: 0.14 0.005 285;
+    --violet-muted: 0.26 0.06 295;
+
+    --destructive: 0.45 0.19 27;
+    --destructive-foreground: 0.985 0 0;
+
+    --info: 0.95 0.04 235;
+    --info-foreground: 0.55 0.18 240;
+
+    --success: 0.94 0.06 155;
+    --success-foreground: 0.55 0.16 160;
+
+    --warning: 0.95 0.08 85;
+    --warning-foreground: 0.65 0.18 50;
+
+    --error: 0.95 0.04 25;
+    --error-foreground: 0.6 0.22 25;
+
+    --ring: 0.66 0.235 295;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    /* Snappy default for color/background changes site-wide */
+    transition-property: background-color, color, border-color;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Selection echoes the violet accent */
+  ::selection {
+    background: oklch(var(--violet) / 0.25);
+    color: oklch(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .step {
+    counter-increment: step;
+  }
+
+  .step:before {
+    @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
+    @apply ml-[-50px] mt-[-4px];
+    content: counter(step);
+  }
+
+  /* Snappy enter animation for content reveals (tool output, route mounts). */
+  .anim-fade-up {
+    animation: fade-up 200ms cubic-bezier(0.2, 0, 0.2, 1) both;
+  }
+
+  .anim-fade-in {
+    animation: fade-in 160ms ease-out both;
+  }
+
+  /* Per-card stagger for grids: combine with .anim-fade-up; pass --stagger via inline style */
+  .anim-stagger {
+    animation-delay: calc(var(--stagger, 0) * 35ms);
+  }
+
+  /* Used by CopyButton for a subtle violet pulse on success. */
+  .anim-copy-pulse {
+    animation: copy-pulse 380ms cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  /* Underline grow used on the tool header title. */
+  .accent-underline {
+    background-image: linear-gradient(to right, oklch(var(--violet)), oklch(var(--violet)));
+    background-size: 0% 2px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 220ms cubic-bezier(0.2, 0, 0.2, 1);
+  }
+  .accent-underline.is-active {
+    background-size: 100% 2px;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes copy-pulse {
+  0% {
+    box-shadow: 0 0 0 0 oklch(var(--violet) / 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 8px oklch(var(--violet) / 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  border: 4px solid transparent;
+  background-clip: content-box;
+  @apply bg-accent;
+  transition: background-color 160ms;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(var(--violet) / 0.5);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
 }

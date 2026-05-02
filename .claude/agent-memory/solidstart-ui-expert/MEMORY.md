@@ -1,0 +1,3 @@
+- [Design tokens — violet accent](design_violet_accent.md) — sharp violet token palette layered on monochromatic base; oklch-based.
+- [Animation utilities](design_animations.md) — fade-up, fade-in, copy-pulse, anim-stagger; reduced-motion respected.
+- [Screenshots folder](workflow_screenshots.md) — Playwright captures go to /screenshots, gitignored.

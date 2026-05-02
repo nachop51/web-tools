@@ -1,38 +1,42 @@
-# sv
+# web-tools
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A growing collection of small, fast, client-side developer utilities: number
+conversions, unit conversions, string transforms, encoding tools, and more.
 
-## Creating a project
+Built with **SolidStart** + **Tailwind CSS 4**. Every tool runs entirely in the
+browser; deep links via URL search params make tool configurations shareable.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Quickstart
 
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+```bash
+bun install
+bun run dev      # http://localhost:5173
 ```
 
-## Developing
+Other scripts:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+bun run build    # production build (SSR + SSG-ready)
+bun run test     # vitest unit tests for pure logic modules
 ```
 
-## Building
+Requires Node ≥ 22 (or bun ≥ 1.x).
 
-To create a production version of your app:
+## Tools
 
-```sh
-npm run build
-```
+### Numbers
+- **[Base converter](/numbers/base-converter)**: convert between binary, octal,
+  decimal, hexadecimal, and any custom base from 2 to 36. Supports INT, INT32,
+  FLOAT32, and FLOAT64 modes.
 
-You can preview the production build with `npm run preview`.
+More on the way. See [docs/roadmap.md](docs/roadmap.md) for the full backlog.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Project layout
+
+See [CLAUDE.md](CLAUDE.md) for conventions and folder structure, and
+[docs/adding-a-tool.md](docs/adding-a-tool.md) for the step-by-step recipe to add
+a new tool.
+
+## License
+
+MIT.
