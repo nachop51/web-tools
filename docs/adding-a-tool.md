@@ -13,29 +13,29 @@ We'll use a hypothetical **kebab-case** string converter under
 ```ts
 export function toKebabCase(input: string): string {
   return input
-    .replace(/([a-z])([A-Z])/g, "$1-$2")
-    .replace(/[\s_]+/g, "-")
-    .toLowerCase();
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase()
 }
 ```
 
 `src/lib/utils/strings/kebab-case.spec.ts`:
 
 ```ts
-import { describe, expect, it } from "vitest";
-import { toKebabCase } from "./kebab-case";
+import { describe, expect, it } from 'vitest'
+import { toKebabCase } from './kebab-case'
 
-describe("toKebabCase", () => {
-  it("converts camelCase", () => {
-    expect(toKebabCase("helloWorld")).toBe("hello-world");
-  });
-  it("converts snake_case", () => {
-    expect(toKebabCase("hello_world")).toBe("hello-world");
-  });
-  it("collapses whitespace", () => {
-    expect(toKebabCase("Hello   World")).toBe("hello-world");
-  });
-});
+describe('toKebabCase', () => {
+  it('converts camelCase', () => {
+    expect(toKebabCase('helloWorld')).toBe('hello-world')
+  })
+  it('converts snake_case', () => {
+    expect(toKebabCase('hello_world')).toBe('hello-world')
+  })
+  it('collapses whitespace', () => {
+    expect(toKebabCase('Hello   World')).toBe('hello-world')
+  })
+})
 ```
 
 Run `bun run test` to confirm it passes.
@@ -49,23 +49,19 @@ other tools.
 `src/routes/strings/kebab-case.tsx`:
 
 ```tsx
-import { createMemo, createSignal } from "solid-js";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { toKebabCase } from "~/lib/utils/strings/kebab-case";
+import { createMemo, createSignal } from 'solid-js'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
+import { toKebabCase } from '~/lib/utils/strings/kebab-case'
 
 export default function KebabCase() {
-  const [input, setInput] = createSignal("");
-  const output = createMemo(() => toKebabCase(input()));
+  const [input, setInput] = createSignal('')
+  const output = createMemo(() => toKebabCase(input()))
 
   return (
     <main class="mx-auto max-w-5xl px-4 py-10">
-      <ToolHeader
-        category="strings"
-        name="Kebab case"
-        description="Convert text to kebab-case."
-      />
+      <ToolHeader category="strings" name="Kebab case" description="Convert text to kebab-case." />
       <div class="grid gap-6 md:grid-cols-2">
         <section class="rounded-xl border bg-card p-6 shadow-sm">
           <h2 class="mb-4 text-xl font-semibold">Input</h2>
@@ -84,7 +80,7 @@ export default function KebabCase() {
         </section>
       </div>
     </main>
-  );
+  )
 }
 ```
 
@@ -94,15 +90,15 @@ component file lands in `src/components/ui/` and you own it from there.
 
 ### Idioms cheat sheet
 
-| Need | Pattern |
-| --- | --- |
-| Local state | `const [x, setX] = createSignal(initial)` |
-| Derived value | `const y = createMemo(() => f(x()))` |
-| Side effect | `createEffect(() => { ... })` |
+| Need            | Pattern                                                            |
+| --------------- | ------------------------------------------------------------------ |
+| Local state     | `const [x, setX] = createSignal(initial)`                          |
+| Derived value   | `const y = createMemo(() => f(x()))`                               |
+| Side effect     | `createEffect(() => { ... })`                                      |
 | Read URL params | `const [params] = useSearchParams<{...}>()` from `@solidjs/router` |
-| List rendering | `<For each={items}>{(item) => ...}</For>` |
-| Conditional | `<Show when={cond()}>...</Show>` |
-| Style classes | `class={cn("base", flag() && "extra")}` (`cn` from `~/lib/utils`) |
+| List rendering  | `<For each={items}>{(item) => ...}</For>`                          |
+| Conditional     | `<Show when={cond()}>...</Show>`                                   |
+| Style classes   | `class={cn("base", flag() && "extra")}` (`cn` from `~/lib/utils`)  |
 
 ## 3. Register
 
@@ -119,7 +115,14 @@ Append to `src/lib/tools/registry.ts`:
 }
 ```
 
-The homepage and `/strings` index will pick it up automatically.
+The homepage, `/strings` index, AND the global Ctrl+K palette will pick it up
+automatically. `keywords[]` is the highest-boosted FTS field in the palette
+after `name` — make it rich (synonyms, common abbreviations, alternate
+spellings). See [search.md](search.md) for the index details.
+
+If the tool is a unit converter, also extend `src/lib/search/unit-aliases.ts`
+so queries like `mb to gb` resolve to it; the alias spec will fail until you
+do.
 
 ## 4. Verify
 
@@ -131,6 +134,15 @@ bun run dev
 - Open `/strings/kebab-case` — the tool loads
 - Run `bun run test` — your spec runs alongside the others
 - Run `bun run build` — production build succeeds
+
+## When the tool has a mode picker
+
+If your tool has a primary mode toggle (encode/decode, calculation mode, "solve
+for", operation, etc.), put it in the **chromeless toolbar** above the
+Input/Output cards — never in its own full-width card. See
+[tool-toolbar.md](tool-toolbar.md) for the primitives, decision tree (segmented
+vs Select vs chip), and visual rules. Canonical example:
+`src/routes/encoding/html-entities.tsx`.
 
 ## When to add a UI primitive
 

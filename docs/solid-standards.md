@@ -5,7 +5,7 @@ Read this before touching any `.tsx` in `src/`. Rules here override defaults.
 ## File and folder naming
 
 - **All component files are kebab-case**: `tool-header.tsx`, `copy-button.tsx`,
-  `category-index.tsx`. Never `ToolHeader.tsx`. The component *export* stays
+  `category-index.tsx`. Never `ToolHeader.tsx`. The component _export_ stays
   PascalCase (`export function ToolHeader`); only the filename is kebab-case.
 - Pure-logic modules are kebab-case too: `base-converter.ts`, `kebab-case.ts`.
 - Test files sit next to source: `<name>.spec.ts`.
@@ -17,7 +17,7 @@ Read this before touching any `.tsx` in `src/`. Rules here override defaults.
 - **`index.tsx` must contain the actual page structure.** Do not write
   `index.tsx` as a one-line wrapper that delegates to another component
   (e.g. `return <CategoryIndex id="numbers" />`). The page lives in the route
-  file. Shared building blocks belong in `src/components/`, but the *page* —
+  file. Shared building blocks belong in `src/components/`, but the _page_ —
   layout, headings, data wiring — is authored in `index.tsx` itself.
 - One route file = one default-exported page component.
 - Co-locate route-specific helpers in the same file unless they're reused.
@@ -38,12 +38,12 @@ the live binding.
 ```tsx
 // BAD — `value` is frozen at first render
 function Field({ value, label }: Props) {
-  return <input value={value} />;
+  return <input value={value} />
 }
 
 // GOOD — read through props, or alias to an accessor
 function Field(props: Props) {
-  return <input value={props.value} />;
+  return <input value={props.value} />
 }
 ```
 
@@ -56,7 +56,7 @@ If you need to pass a prop into a helper that expects a function, wrap it:
 - **`createSignal`** for local mutable state.
 - **Inline derived values** (`() => a() + b()`) are fine for cheap, single-use
   reads.
-- **`createMemo`** when the derivation is expensive *or* read in multiple places
+- **`createMemo`** when the derivation is expensive _or_ read in multiple places
   — memos cache; plain derived functions re-run per call site.
 - **`createEffect`** only for side effects (DOM imperative work, syncing to
   storage, logging). Never for deriving values — use a memo.
@@ -73,13 +73,13 @@ Don't use `&&`, ternaries, or `.map()` in JSX for reactive content — they
 re-execute the entire branch on each change and lose Solid's fine-grained
 updates.
 
-| Need | Use |
-| --- | --- |
-| Conditional render | `<Show when={cond()} fallback={...}>` |
-| Multi-branch | `<Switch><Match when={...}>...</Match></Switch>` |
-| List | `<For each={items()}>{(item) => ...}</For>` |
-| Keyed list (rare) | `<Index each={items()}>{(item) => ...}</Index>` |
-| Lazy component | `lazy(() => import("./x"))` + `<Suspense>` |
+| Need               | Use                                              |
+| ------------------ | ------------------------------------------------ |
+| Conditional render | `<Show when={cond()} fallback={...}>`            |
+| Multi-branch       | `<Switch><Match when={...}>...</Match></Switch>` |
+| List               | `<For each={items()}>{(item) => ...}</For>`      |
+| Keyed list (rare)  | `<Index each={items()}>{(item) => ...}</Index>`  |
+| Lazy component     | `lazy(() => import("./x"))` + `<Suspense>`       |
 
 `<For>` keys by reference (efficient for stable lists). `<Index>` keys by
 position (use when items mutate in place).
@@ -95,7 +95,7 @@ position (use when items mutate in place).
 ### Refs
 
 `let el!: HTMLDivElement; <div ref={el}>` — refs are assigned synchronously
-*after* mount. Read them inside `onMount` or an effect, not during render.
+_after_ mount. Read them inside `onMount` or an effect, not during render.
 
 ## Async and data
 

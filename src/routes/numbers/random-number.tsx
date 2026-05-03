@@ -1,7 +1,9 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For, Show } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
+import { Button } from '~/components/ui/button'
 import {
   NumberField,
   NumberFieldGroup,
@@ -9,39 +11,70 @@ import {
   NumberFieldDecrementTrigger,
   NumberFieldInput,
   NumberFieldLabel,
-} from "~/components/ui/number-field";
-import { cn } from "~/lib/utils";
-import { randomBatch } from "~/lib/utils/numbers/random";
-import { setToolPageMeta } from "~/lib/seo";
+} from '~/components/ui/number-field'
+import { randomBatch } from '~/lib/utils/numbers/random'
+import { setToolPageMeta } from '~/lib/seo'
 
-type Mode = "int" | "float";
+type Mode = 'int' | 'float'
+
+const modeOptions: { value: Mode; label: string }[] = [
+  { value: 'int', label: 'Integer' },
+  { value: 'float', label: 'Float' },
+]
 
 export default function RandomNumberTool() {
-  setToolPageMeta("numbers", "random-number");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
+  setToolPageMeta('numbers', 'random-number')
+  const [params, setParams] = useSearchParams<{ mode?: string }>()
 
-  const [min, setMin] = createSignal("-100");
-  const [max, setMax] = createSignal("100");
-  const [count, setCount] = createSignal("10");
-  const [decimals, setDecimals] = createSignal("2");
-  const [results, setResults] = createSignal<number[]>([]);
+  const [min, setMin] = createSignal('-100')
+  const [max, setMax] = createSignal('100')
+  const [count, setCount] = createSignal('10')
+  const [decimals, setDecimals] = createSignal('2')
+  const [results, setResults] = createSignal<number[]>([])
+  const [animKey, setAnimKey] = createSignal(0)
 
   const mode = createMemo<Mode>(() => {
-    const p = params.mode;
-    return p === "float" ? "float" : "int";
-  });
+    const p = params.mode
+    return p === 'float' ? 'float' : 'int'
+  })
 
-  const outputText = createMemo(() => results().join("\n"));
+  const outputText = createMemo(() => results().join('\n'))
+
+  const isInvalid = createMemo(() => {
+    const minN = parseFloat(min())
+    const maxN = parseFloat(max())
+    return isNaN(minN) || isNaN(maxN) || minN > maxN
+  })
+
+  const countNum = createMemo(() => {
+    return Math.min(100, Math.max(1, parseInt(count(), 10) || 1))
+  })
 
   function generate() {
-    const minN = parseFloat(min());
-    const maxN = parseFloat(max());
-    const countN = Math.min(100, Math.max(1, parseInt(count(), 10) || 1));
-    const decN = Math.min(20, Math.max(0, parseInt(decimals(), 10) || 0));
+    const minN = parseFloat(min())
+    const maxN = parseFloat(max())
+    const countN = countNum()
+    const decN = Math.min(20, Math.max(0, parseInt(decimals(), 10) || 0))
 
-    if (isNaN(minN) || isNaN(maxN) || minN > maxN) return;
-    setResults(randomBatch(minN, maxN, countN, mode(), decN));
+    if (isNaN(minN) || isNaN(maxN) || minN > maxN) return
+    setResults(randomBatch(minN, maxN, countN, mode(), decN))
+    setAnimKey((k) => k + 1)
   }
+
+  onMount(() => {
+    generate()
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        const target = e.target as HTMLElement | null
+        if (target?.tagName === 'TEXTAREA') return
+        e.preventDefault()
+        generate()
+      }
+    }
+    document.addEventListener('keydown', handler)
+    onCleanup(() => document.removeEventListener('keydown', handler))
+  })
 
   return (
     <main class="w-full py-10">
@@ -51,123 +84,151 @@ export default function RandomNumberTool() {
         description="Generate random integers or floats within a range."
       />
 
-      <div class="grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <h2 class="mb-4 text-base font-semibold">Options</h2>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Number mode"
+            value={mode()}
+            onChange={(v) => setParams({ mode: v })}
+            options={modeOptions}
+          />
+        </ToolToolbar>
 
-          <div class="mb-4 flex gap-2">
-            <For each={["int", "float"] as Mode[]}>
-              {(m) => (
-                <button
-                  type="button"
-                  class={cn(
-                    "flex-1 rounded-md border-2 px-3 py-1.5 text-sm font-medium transition-colors",
-                    mode() === m
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "border-input hover:border-primary/50 hover:bg-accent/30",
-                  )}
-                  onClick={() => setParams({ mode: m })}
-                >
-                  {m === "int" ? "Integer" : "Float"}
-                </button>
-              )}
-            </For>
-          </div>
+        <div class="grid gap-6 lg:grid-cols-[22rem_1fr]">
+          {/* Controls */}
+          <section class="relative flex flex-col rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Configuration</h2>
+            </div>
 
-          <div class="space-y-4">
-            <NumberField
-              value={min()}
-              onChange={setMin}
-              format={false}
-              class="flex flex-col gap-1"
-            >
-              <NumberFieldLabel>Min</NumberFieldLabel>
-              <NumberFieldGroup>
-                <NumberFieldInput placeholder="-100" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-            </NumberField>
-
-            <NumberField
-              value={max()}
-              onChange={setMax}
-              format={false}
-              class="flex flex-col gap-1"
-            >
-              <NumberFieldLabel>Max</NumberFieldLabel>
-              <NumberFieldGroup>
-                <NumberFieldInput placeholder="100" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-            </NumberField>
-
-            <NumberField
-              value={count()}
-              onChange={setCount}
-              minValue={1}
-              maxValue={100}
-              format={false}
-              class="flex flex-col gap-1"
-            >
-              <NumberFieldLabel>Count (1–100)</NumberFieldLabel>
-              <NumberFieldGroup>
-                <NumberFieldInput placeholder="10" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-            </NumberField>
-
-            <Show when={mode() === "float"}>
-              <NumberField
-                value={decimals()}
-                onChange={setDecimals}
-                minValue={0}
-                maxValue={20}
-                format={false}
-                class="flex flex-col gap-1"
-              >
-                <NumberFieldLabel>Decimal places</NumberFieldLabel>
+            {/* Min / Max */}
+            <div class="grid grid-cols-2 gap-3">
+              <NumberField value={min()} onChange={setMin} format={false} class="flex flex-col gap-1.5">
+                <NumberFieldLabel>Min</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput placeholder="2" />
+                  <NumberFieldInput placeholder="-100" class="h-11 font-mono text-sm" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>
               </NumberField>
-            </Show>
-          </div>
 
-          <button
-            type="button"
-            class="mt-6 w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-            onClick={generate}
-          >
-            Generate
-          </button>
-        </aside>
+              <NumberField value={max()} onChange={setMax} format={false} class="flex flex-col gap-1.5">
+                <NumberFieldLabel>Max</NumberFieldLabel>
+                <NumberFieldGroup>
+                  <NumberFieldInput placeholder="100" class="h-11 font-mono text-sm" />
+                  <NumberFieldIncrementTrigger />
+                  <NumberFieldDecrementTrigger />
+                </NumberFieldGroup>
+              </NumberField>
+            </div>
 
-        <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-base font-semibold">
-              Results{" "}
-              <Show when={results().length > 0}>
-                <span class="text-sm font-normal text-muted-foreground">({results().length})</span>
+            {/* Count / Decimals */}
+            <div class="mt-3 grid grid-cols-2 gap-3">
+              <NumberField
+                value={count()}
+                onChange={setCount}
+                minValue={1}
+                maxValue={100}
+                format={false}
+                class="flex flex-col gap-1.5"
+              >
+                <NumberFieldLabel>Count</NumberFieldLabel>
+                <NumberFieldGroup>
+                  <NumberFieldInput placeholder="10" class="h-11 font-mono text-sm" />
+                  <NumberFieldIncrementTrigger />
+                  <NumberFieldDecrementTrigger />
+                </NumberFieldGroup>
+              </NumberField>
+
+              <Show when={mode() === 'float'} fallback={<div aria-hidden />}>
+                <NumberField
+                  value={decimals()}
+                  onChange={setDecimals}
+                  minValue={0}
+                  maxValue={20}
+                  format={false}
+                  class="flex flex-col gap-1.5"
+                >
+                  <NumberFieldLabel>Decimals</NumberFieldLabel>
+                  <NumberFieldGroup>
+                    <NumberFieldInput placeholder="2" class="h-11 font-mono text-sm" />
+                    <NumberFieldIncrementTrigger />
+                    <NumberFieldDecrementTrigger />
+                  </NumberFieldGroup>
+                </NumberField>
               </Show>
-            </h2>
-            <Show when={results().length > 0}>
-              <CopyButton value={outputText} />
+            </div>
+
+            <div class="mt-auto pt-6">
+              <hr class="mb-6 border-border" />
+              <Show when={isInvalid()}>
+                <p class="mb-3 text-xs text-destructive">Min must be a number less than or equal to max.</p>
+              </Show>
+              <Button class="w-full" onClick={generate} disabled={isInvalid()}>
+                Generate
+              </Button>
+              <p class="mt-2 text-center text-xs text-muted-foreground">or press ↵ Enter</p>
+            </div>
+          </section>
+
+          {/* Output */}
+          <section class="relative flex flex-col rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Show when={countNum() === 1} fallback="Results">
+                    Result
+                  </Show>
+                </h2>
+                <Show when={results().length > 1}>
+                  <span class="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    {results().length} values
+                  </span>
+                </Show>
+              </div>
+              <Show when={results().length > 1}>
+                <CopyButton value={outputText} />
+              </Show>
+            </div>
+
+            <Show
+              when={results().length > 0}
+              fallback={
+                <div class="flex min-h-[20rem] flex-1 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                  Click Generate or press Enter
+                </div>
+              }
+            >
+              <Show
+                when={results().length === 1}
+                fallback={
+                  <div class="anim-fade-up grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-5" data-key={animKey()}>
+                    <For each={results()}>
+                      {(n) => (
+                        <div class="rounded-md border border-border bg-muted/40 px-3 py-2 text-center font-mono text-sm">
+                          {n}
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                }
+              >
+                <div
+                  class="anim-fade-up flex min-h-[20rem] flex-1 flex-col items-center justify-center gap-6"
+                  data-key={animKey()}
+                >
+                  <div class="break-all text-center font-mono text-7xl font-bold tracking-tight sm:text-8xl">
+                    {results()[0]}
+                  </div>
+                  <CopyButton value={outputText} />
+                </div>
+              </Show>
             </Show>
-          </div>
-          <div class="min-h-[200px] rounded-lg border bg-muted/20 p-4 font-mono text-sm">
-            <Show when={results().length > 0} fallback={<p class="text-muted-foreground">Click Generate to produce numbers.</p>}>
-              <For each={results()}>
-                {(n) => <div class="leading-6">{n}</div>}
-              </For>
-            </Show>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </main>
-  );
+  )
 }

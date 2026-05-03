@@ -5,24 +5,19 @@ import {
   filterDeficiencyDeuter,
   filterDeficiencyTrit,
   filterGrayscale,
-} from "culori";
+} from 'culori'
 
-export type BlindnessType =
-  | "normal"
-  | "protanopia"
-  | "deuteranopia"
-  | "tritanopia"
-  | "achromatopsia";
+export type BlindnessType = 'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'
 
-export type BlindnessResult = Record<BlindnessType, string>;
+export type BlindnessResult = Record<BlindnessType, string>
 
-const protFilter = filterDeficiencyProt(1);
-const deutFilter = filterDeficiencyDeuter(1);
-const tritFilter = filterDeficiencyTrit(1);
-const grayFilter = filterGrayscale(1);
+const protFilter = filterDeficiencyProt(1)
+const deutFilter = filterDeficiencyDeuter(1)
+const tritFilter = filterDeficiencyTrit(1)
+const grayFilter = filterGrayscale(1)
 
 export function simulateBlindness(hex: string): BlindnessResult {
-  const color = parse(hex);
+  const color = parse(hex)
   if (!color) {
     return {
       normal: hex,
@@ -30,7 +25,7 @@ export function simulateBlindness(hex: string): BlindnessResult {
       deuteranopia: hex,
       tritanopia: hex,
       achromatopsia: hex,
-    };
+    }
   }
 
   return {
@@ -39,5 +34,5 @@ export function simulateBlindness(hex: string): BlindnessResult {
     deuteranopia: formatHex(deutFilter(color))!.toUpperCase(),
     tritanopia: formatHex(tritFilter(color))!.toUpperCase(),
     achromatopsia: formatHex(grayFilter(color))!.toUpperCase(),
-  };
+  }
 }

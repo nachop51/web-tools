@@ -1,3 +1,6 @@
 - [Design tokens — violet accent](design_violet_accent.md) — sharp violet token palette layered on monochromatic base; oklch-based.
 - [Animation utilities](design_animations.md) — fade-up, fade-in, copy-pulse, anim-stagger; reduced-motion respected.
 - [Screenshots folder](workflow_screenshots.md) — Playwright captures go to /screenshots, gitignored.
+- [Dual-pane converter pattern](design_dual_pane_pattern.md) — bidirectional editable panes + swap pivot, prototyped on html-entities.
+- [Hydration mismatch from JSX prop + Show](feedback_hydration_jsx_props.md) — don't pass JSX-children through a prop wrapped in Show; inline instead.
+- [Pattern E toolbar primitives](design_pattern_e_toolbar.md) — ToolToolbar/ToolbarSegmented/ToolbarChip in src/components/tool-toolbar.tsx; replaces Mode cards.

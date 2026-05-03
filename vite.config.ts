@@ -1,15 +1,12 @@
-import { defineConfig } from "vite";
-import { nitroV2Plugin as nitro } from "@solidjs/vite-plugin-nitro-2";
-import { solidStart } from "@solidjs/start/config";
-import tailwindcss from "@tailwindcss/vite";
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite'
+import { nitroV2Plugin as nitro } from '@solidjs/vite-plugin-nitro-2'
+import { solidStart } from '@solidjs/start/config'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    solidStart(),
-    tailwindcss(),
-    nitro()
-  ],
+  plugins: [solidStart(), tailwindcss(), nitro()],
   test: {
-    exclude: [".claude/**", "node_modules/**"],
+    exclude: ['.claude/**', 'node_modules/**'],
   },
-});
+})

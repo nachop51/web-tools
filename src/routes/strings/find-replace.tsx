@@ -1,30 +1,31 @@
-import { createMemo, createSignal } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
-import { Checkbox, CheckboxLabel } from "~/components/ui/checkbox";
-import { TextField, TextFieldInput, TextFieldLabel, TextFieldTextArea } from "~/components/ui/text-field";
-import { findReplace } from "~/lib/utils/strings/find-replace";
-import { setToolPageMeta } from "~/lib/seo";
+import { createMemo, createSignal, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { Checkbox, CheckboxLabel } from '~/components/ui/checkbox'
+import { TextField, TextFieldInput, TextFieldLabel, TextFieldTextArea } from '~/components/ui/text-field'
+import { findReplace } from '~/lib/utils/strings/find-replace'
+import { setToolPageMeta } from '~/lib/seo'
 
 export default function FindReplacePage() {
-  setToolPageMeta("strings", "find-replace");
-  const [text, setText] = createSignal("");
-  const [find, setFind] = createSignal("");
-  const [replace, setReplace] = createSignal("");
-  const [useRegex, setUseRegex] = createSignal(false);
-  const [caseSensitive, setCaseSensitive] = createSignal(true);
-  const [wholeWord, setWholeWord] = createSignal(false);
+  setToolPageMeta('strings', 'find-replace')
+  const [text, setText] = createSignal('')
+  const [find, setFind] = createSignal('')
+  const [replace, setReplace] = createSignal('')
+  const [useRegex, setUseRegex] = createSignal(false)
+  const [caseSensitive, setCaseSensitive] = createSignal(true)
+  const [wholeWord, setWholeWord] = createSignal(false)
 
   const processed = createMemo(() =>
     findReplace(text(), find(), replace(), {
       useRegex: useRegex(),
       caseSensitive: caseSensitive(),
       wholeWord: wholeWord(),
-    }),
-  );
+    })
+  )
 
-  const output = createMemo(() => processed().result);
-  const matchCount = createMemo(() => processed().count);
+  const output = createMemo(() => processed().result)
+  const matchCount = createMemo(() => processed().count)
+  const hasMatches = createMemo(() => find() !== '' && text() !== '')
 
   return (
     <main class="w-full py-10">
@@ -34,50 +35,32 @@ export default function FindReplacePage() {
         description="Find and replace text with optional regex, case, and whole-word controls."
       />
 
-      <div class="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <div class="space-y-4">
-          <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-            <h2 class="mb-3 text-base font-semibold">Input</h2>
-            <TextField value={text()} onChange={setText}>
-              <TextFieldTextArea rows={10} placeholder="Paste text here…" class="resize-y" />
-            </TextField>
-          </section>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        {/* Find & replace controls */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Find &amp; replace</h2>
+          </div>
 
-          <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-            <div class="mb-3 flex items-center justify-between">
-              <h2 class="text-base font-semibold">
-                Output{" "}
-                {find() && text() && (
-                  <span class="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-normal text-primary">
-                    {matchCount()} match{matchCount() !== 1 ? "es" : ""}
-                  </span>
-                )}
-              </h2>
-              <CopyButton value={output} />
-            </div>
-            <TextField value={output()}>
-              <TextFieldTextArea readOnly rows={10} class="resize-y bg-muted/30" placeholder="Result will appear here" />
-            </TextField>
-          </section>
-        </div>
-
-        <aside class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <h2 class="mb-4 text-base font-semibold">Find & Replace</h2>
-
-          <div class="space-y-4">
-            <TextField value={find()} onChange={setFind}>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <TextField value={find()} onChange={setFind} class="flex flex-col gap-1.5">
               <TextFieldLabel>Find</TextFieldLabel>
-              <TextFieldInput type="text" placeholder={useRegex() ? "regex pattern" : "search text"} class="font-mono" />
+              <TextFieldInput
+                autofocus
+                type="text"
+                placeholder={useRegex() ? 'regex pattern' : 'search text'}
+                class="h-12 font-mono text-base"
+              />
             </TextField>
 
-            <TextField value={replace()} onChange={setReplace}>
+            <TextField value={replace()} onChange={setReplace} class="flex flex-col gap-1.5">
               <TextFieldLabel>Replace with</TextFieldLabel>
-              <TextFieldInput type="text" placeholder="replacement" class="font-mono" />
+              <TextFieldInput type="text" placeholder="replacement" class="h-12 font-mono text-base" />
             </TextField>
           </div>
 
-          <div class="mt-6 space-y-3">
-            <p class="text-sm font-medium">Options</p>
+          <div class="mt-6 flex flex-wrap gap-x-6 gap-y-3">
             <Checkbox checked={useRegex()} onChange={setUseRegex}>
               <CheckboxLabel>Use regex</CheckboxLabel>
             </Checkbox>
@@ -88,8 +71,53 @@ export default function FindReplacePage() {
               <CheckboxLabel>Whole word</CheckboxLabel>
             </Checkbox>
           </div>
-        </aside>
+        </section>
+
+        <div class="grid gap-6 md:grid-cols-2">
+          {/* Input */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+            </div>
+
+            <TextField value={text()} onChange={setText}>
+              <TextFieldTextArea placeholder="Paste text here…" class="min-h-[10rem] resize-y font-mono text-sm" />
+            </TextField>
+          </section>
+
+          {/* Output */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+              </div>
+              <Show when={hasMatches()}>
+                <span class="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  {matchCount()} match{matchCount() !== 1 ? 'es' : ''}
+                </span>
+              </Show>
+            </div>
+
+            <div class="relative">
+              <Show
+                when={output()}
+                fallback={
+                  <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Result will appear here
+                  </div>
+                }
+              >
+                <div class="anim-fade-up min-h-[8.25rem] rounded-md border border-violet/30 bg-violet/5 p-4 pr-14 font-mono text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  {output()}
+                </div>
+                <CopyButton value={() => output()} class="absolute right-2 top-2" />
+              </Show>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
-  );
+  )
 }

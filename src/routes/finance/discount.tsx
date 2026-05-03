@@ -1,56 +1,63 @@
-import { createMemo, createSignal } from "solid-js";
-import { useSearchParams } from "@solidjs/router";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
+import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import {
   NumberField,
   NumberFieldGroup,
   NumberFieldIncrementTrigger,
   NumberFieldDecrementTrigger,
   NumberFieldInput,
-} from "~/components/ui/number-field";
-import { cn } from "~/lib/utils";
-import { applyDiscount, applyTax } from "~/lib/utils/finance/discount";
-import { setToolPageMeta } from "~/lib/seo";
+  NumberFieldLabel,
+} from '~/components/ui/number-field'
+import { applyDiscount, applyTax } from '~/lib/utils/finance/discount'
+import { setToolPageMeta } from '~/lib/seo'
 
-type Mode = "discount" | "tax";
+type Mode = 'discount' | 'tax'
 
-const modes: { value: Mode; label: string }[] = [
-  { value: "discount", label: "Discount" },
-  { value: "tax",      label: "Sales tax" },
-];
+const modeOptions: { value: Mode; label: string }[] = [
+  { value: 'discount', label: 'Discount' },
+  { value: 'tax', label: 'Sales tax' },
+]
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return "—";
-  return n.toFixed(2);
+  if (!isFinite(n)) return '—'
+  return n.toFixed(2)
 }
 
 export default function DiscountCalculator() {
-  setToolPageMeta("finance", "discount");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
+  setToolPageMeta('finance', 'discount')
+  const [params, setParams] = useSearchParams<{ mode?: string }>()
 
-  const mode = createMemo<Mode>(() =>
-    params.mode === "tax" ? "tax" : "discount",
-  );
+  const mode = createMemo<Mode>(() => (params.mode === 'tax' ? 'tax' : 'discount'))
 
-  const [price, setPrice] = createSignal("");
-  const [pct, setPct] = createSignal("");
+  const [price, setPrice] = createSignal('')
+  const [pct, setPct] = createSignal('')
 
   const discountResult = createMemo(() => {
-    if (mode() !== "discount") return null;
-    const p = parseFloat(price());
-    const d = parseFloat(pct());
-    if (!isFinite(p) || p < 0 || !isFinite(d) || d < 0) return null;
-    return applyDiscount(p, d);
-  });
+    if (mode() !== 'discount') return null
+    const p = parseFloat(price())
+    const d = parseFloat(pct())
+    if (!isFinite(p) || p < 0 || !isFinite(d) || d < 0) return null
+    return applyDiscount(p, d)
+  })
 
   const taxResult = createMemo(() => {
-    if (mode() !== "tax") return null;
-    const p = parseFloat(price());
-    const t = parseFloat(pct());
-    if (!isFinite(p) || p < 0 || !isFinite(t) || t < 0) return null;
-    return applyTax(p, t);
-  });
+    if (mode() !== 'tax') return null
+    const p = parseFloat(price())
+    const t = parseFloat(pct())
+    if (!isFinite(p) || p < 0 || !isFinite(t) || t < 0) return null
+    return applyTax(p, t)
+  })
+
+  const hasResult = createMemo(() => discountResult() !== null || taxResult() !== null)
+
+  function handleModeChange(m: Mode) {
+    setParams({ mode: m })
+    setPrice('')
+    setPct('')
+  }
 
   return (
     <main class="w-full py-10">
@@ -60,147 +67,95 @@ export default function DiscountCalculator() {
         description="Apply a percentage discount or sales tax to a price."
       />
 
-      <div class="space-y-6">
-        <div class="flex flex-wrap gap-2">
-          {modes.map((m) => (
-            <button
-              type="button"
-              class={cn(
-                "px-4 py-2 text-sm font-medium border rounded-md transition-colors",
-                "hover:border-primary/60 hover:bg-primary/10",
-                mode() === m.value
-                  ? "border-primary bg-primary/15"
-                  : "border-input bg-background",
-              )}
-              onClick={() => {
-                setParams({ mode: m.value });
-                setPrice("");
-                setPct("");
-              }}
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented label="Mode" value={mode()} onChange={handleModeChange} options={modeOptions} />
+        </ToolToolbar>
+
+        {/* Inputs */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <NumberField onChange={setPrice} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>{mode() === 'discount' ? 'Original price ($)' : 'Pre-tax price ($)'}</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput autofocus placeholder="e.g. 100.00" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+
+            <NumberField
+              onChange={setPct}
+              minValue={0}
+              maxValue={100}
+              step={0.1}
+              format={false}
+              class="flex flex-col gap-1.5"
             >
-              {m.label}
-            </button>
-          ))}
-        </div>
+              <NumberFieldLabel>{mode() === 'discount' ? 'Discount (%)' : 'Tax rate (%)'}</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput placeholder="e.g. 20" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+          </div>
+        </section>
 
-        <div class="grid gap-6 md:grid-cols-2">
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold">
-              {mode() === "discount" ? "Discount" : "Sales tax"}
-            </h2>
+        {/* Results */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Results</h2>
+          </div>
 
-            <div class="space-y-4">
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium">
-                  {mode() === "discount" ? "Original price ($)" : "Pre-tax price ($)"}
-                </label>
-                <NumberField
-                  value={price()}
-                  onChange={setPrice}
-                  minValue={0}
-                  step={0.01}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 100.00" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
+          <Show
+            when={hasResult()}
+            fallback={
+              <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Enter a price and percentage to see results
               </div>
-
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium">
-                  {mode() === "discount" ? "Discount (%)" : "Tax rate (%)"}
-                </label>
-                <NumberField
-                  value={pct()}
-                  onChange={setPct}
-                  minValue={0}
-                  maxValue={100}
-                  step={0.1}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 20" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
+            }
+          >
+            <Show when={mode() === 'discount' && discountResult()}>
+              <div class="overflow-hidden rounded-md border border-border">
+                <ResultRow label="Discount amount" value={fmt(discountResult()!.discountAmount)} prefix="$" />
+                <ResultRow label="Final price" value={fmt(discountResult()!.finalPrice)} prefix="$" />
+                <ResultRow label="You save" value={fmt(discountResult()!.savings)} prefix="$" />
               </div>
-            </div>
-          </section>
-
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold">Results</h2>
-
-            {mode() === "discount" ? (
-              <div class="divide-y divide-border rounded-lg border">
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="text-sm font-medium">Discount amount</span>
-                  <span class="flex-1 font-mono text-sm text-right">
-                    ${discountResult() ? fmt(discountResult()!.discountAmount) : "—"}
-                  </span>
-                  <CopyButton
-                    value={() =>
-                      discountResult() ? fmt(discountResult()!.discountAmount) : "—"
-                    }
-                  />
-                </div>
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="text-sm font-medium">Final price</span>
-                  <span class="flex-1 font-mono text-sm text-right">
-                    ${discountResult() ? fmt(discountResult()!.finalPrice) : "—"}
-                  </span>
-                  <CopyButton
-                    value={() =>
-                      discountResult() ? fmt(discountResult()!.finalPrice) : "—"
-                    }
-                  />
-                </div>
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="text-sm font-medium">You save</span>
-                  <span class="flex-1 font-mono text-sm text-right">
-                    ${discountResult() ? fmt(discountResult()!.savings) : "—"}
-                  </span>
-                  <CopyButton
-                    value={() =>
-                      discountResult() ? fmt(discountResult()!.savings) : "—"
-                    }
-                  />
-                </div>
+            </Show>
+            <Show when={mode() === 'tax' && taxResult()}>
+              <div class="overflow-hidden rounded-md border border-border">
+                <ResultRow label="Tax amount" value={fmt(taxResult()!.taxAmount)} prefix="$" />
+                <ResultRow label="Total price" value={fmt(taxResult()!.totalPrice)} prefix="$" />
               </div>
-            ) : (
-              <div class="divide-y divide-border rounded-lg border">
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="text-sm font-medium">Tax amount</span>
-                  <span class="flex-1 font-mono text-sm text-right">
-                    ${taxResult() ? fmt(taxResult()!.taxAmount) : "—"}
-                  </span>
-                  <CopyButton
-                    value={() =>
-                      taxResult() ? fmt(taxResult()!.taxAmount) : "—"
-                    }
-                  />
-                </div>
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="text-sm font-medium">Total price</span>
-                  <span class="flex-1 font-mono text-sm text-right">
-                    ${taxResult() ? fmt(taxResult()!.totalPrice) : "—"}
-                  </span>
-                  <CopyButton
-                    value={() =>
-                      taxResult() ? fmt(taxResult()!.totalPrice) : "—"
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
+            </Show>
+          </Show>
+        </section>
       </div>
     </main>
-  );
+  )
+}
+
+type ResultRowProps = {
+  label: string
+  value: string
+  prefix?: string
+  suffix?: string
+}
+
+function ResultRow(props: ResultRowProps) {
+  const full = () => `${props.prefix ?? ''}${props.value}${props.suffix ?? ''}`
+  return (
+    <div class="flex items-center gap-3 border-t border-border/50 px-4 py-3 text-sm first:border-t-0">
+      <span class="w-40 shrink-0 text-muted-foreground">{props.label}</span>
+      <span class="flex-1 text-right font-mono tabular-nums text-base font-semibold">{full()}</span>
+      <CopyButton value={full} />
+    </div>
+  )
 }

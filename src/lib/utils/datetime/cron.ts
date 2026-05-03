@@ -1,56 +1,56 @@
 export type CronFields = {
-  minutes: number[];
-  hours: number[];
-  dom: number[];
-  month: number[];
-  dow: number[];
-};
+  minutes: number[]
+  hours: number[]
+  dom: number[]
+  month: number[]
+  dow: number[]
+}
 
 function parseField(field: string, min: number, max: number): number[] {
-  if (field === "*") {
-    return Array.from({ length: max - min + 1 }, (_, i) => i + min);
+  if (field === '*') {
+    return Array.from({ length: max - min + 1 }, (_, i) => i + min)
   }
 
-  const result = new Set<number>();
+  const result = new Set<number>()
 
-  for (const part of field.split(",")) {
-    const stepMatch = part.match(/^(\*|(\d+)(?:-(\d+))?)\/(\d+)$/);
+  for (const part of field.split(',')) {
+    const stepMatch = part.match(/^(\*|(\d+)(?:-(\d+))?)\/(\d+)$/)
     if (stepMatch) {
-      const step = parseInt(stepMatch[4], 10);
-      const from = stepMatch[2] !== undefined ? parseInt(stepMatch[2], 10) : min;
-      const to = stepMatch[3] !== undefined ? parseInt(stepMatch[3], 10) : max;
+      const step = parseInt(stepMatch[4], 10)
+      const from = stepMatch[2] !== undefined ? parseInt(stepMatch[2], 10) : min
+      const to = stepMatch[3] !== undefined ? parseInt(stepMatch[3], 10) : max
       for (let i = from; i <= to; i += step) {
-        if (i >= min && i <= max) result.add(i);
+        if (i >= min && i <= max) result.add(i)
       }
-      continue;
+      continue
     }
 
-    const rangeMatch = part.match(/^(\d+)-(\d+)$/);
+    const rangeMatch = part.match(/^(\d+)-(\d+)$/)
     if (rangeMatch) {
-      const from = parseInt(rangeMatch[1], 10);
-      const to = parseInt(rangeMatch[2], 10);
+      const from = parseInt(rangeMatch[1], 10)
+      const to = parseInt(rangeMatch[2], 10)
       for (let i = from; i <= to; i++) {
-        if (i >= min && i <= max) result.add(i);
+        if (i >= min && i <= max) result.add(i)
       }
-      continue;
+      continue
     }
 
     if (/^\d+$/.test(part)) {
-      const n = parseInt(part, 10);
-      if (n >= min && n <= max) result.add(n);
-      continue;
+      const n = parseInt(part, 10)
+      if (n >= min && n <= max) result.add(n)
+      continue
     }
 
-    throw new Error(`Invalid cron field value: "${part}"`);
+    throw new Error(`Invalid cron field value: "${part}"`)
   }
 
-  return Array.from(result).sort((a, b) => a - b);
+  return Array.from(result).sort((a, b) => a - b)
 }
 
 export function parseCron(expr: string): CronFields {
-  const parts = expr.trim().split(/\s+/);
+  const parts = expr.trim().split(/\s+/)
   if (parts.length !== 5) {
-    throw new Error(`Expected 5 fields, got ${parts.length}`);
+    throw new Error(`Expected 5 fields, got ${parts.length}`)
   }
 
   return {
@@ -59,113 +59,131 @@ export function parseCron(expr: string): CronFields {
     dom: parseField(parts[2], 1, 31),
     month: parseField(parts[3], 1, 12),
     dow: parseField(parts[4], 0, 6),
-  };
+  }
 }
 
 export function nextRuns(fields: CronFields, from: Date, count: number): Date[] {
-  const results: Date[] = [];
+  const results: Date[] = []
   // Start from the next minute
-  let d = new Date(from);
-  d.setSeconds(0, 0);
-  d.setMinutes(d.getMinutes() + 1);
+  let d = new Date(from)
+  d.setSeconds(0, 0)
+  d.setMinutes(d.getMinutes() + 1)
 
-  const maxIter = 366 * 24 * 60 * 2; // guard against infinite loop
-  let iter = 0;
+  const maxIter = 366 * 24 * 60 * 2 // guard against infinite loop
+  let iter = 0
 
   while (results.length < count && iter < maxIter) {
-    iter++;
-    const month = d.getMonth() + 1; // 1-12
-    const dom = d.getDate();
-    const hour = d.getHours();
-    const minute = d.getMinutes();
-    const dow = d.getDay(); // 0-6
+    iter++
+    const month = d.getMonth() + 1 // 1-12
+    const dom = d.getDate()
+    const hour = d.getHours()
+    const minute = d.getMinutes()
+    const dow = d.getDay() // 0-6
 
     if (!fields.month.includes(month)) {
       // advance to next month
-      d.setMonth(d.getMonth() + 1);
-      d.setDate(1);
-      d.setHours(0, 0, 0, 0);
-      continue;
+      d.setMonth(d.getMonth() + 1)
+      d.setDate(1)
+      d.setHours(0, 0, 0, 0)
+      continue
     }
 
-    if (!fields.dom.includes(dom) || !fields.dow.includes(dow)) {
-      d.setDate(d.getDate() + 1);
-      d.setHours(0, 0, 0, 0);
-      continue;
+    // Vixie cron: if both dom and dow are restricted, the day matches if EITHER matches.
+    const domAll = fields.dom.length === 31
+    const dowAll = fields.dow.length === 7
+    let dayMatches: boolean
+    if (domAll && dowAll) dayMatches = true
+    else if (!domAll && dowAll) dayMatches = fields.dom.includes(dom)
+    else if (domAll && !dowAll) dayMatches = fields.dow.includes(dow)
+    else dayMatches = fields.dom.includes(dom) || fields.dow.includes(dow)
+    if (!dayMatches) {
+      d.setDate(d.getDate() + 1)
+      d.setHours(0, 0, 0, 0)
+      continue
     }
 
     if (!fields.hours.includes(hour)) {
-      d.setHours(d.getHours() + 1, 0, 0, 0);
-      continue;
+      d.setHours(d.getHours() + 1, 0, 0, 0)
+      continue
     }
 
     if (!fields.minutes.includes(minute)) {
-      d.setMinutes(d.getMinutes() + 1, 0, 0);
-      continue;
+      d.setMinutes(d.getMinutes() + 1, 0, 0)
+      continue
     }
 
-    results.push(new Date(d));
-    d.setMinutes(d.getMinutes() + 1, 0, 0);
+    results.push(new Date(d))
+    d.setMinutes(d.getMinutes() + 1, 0, 0)
   }
 
-  return results;
+  return results
 }
 
 function ordinal(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
 
-const DOW_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DOW_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 export function describeCron(fields: CronFields): string {
-  const { minutes, hours, dom, month, dow } = fields;
+  const { minutes, hours, dom, month, dow } = fields
 
-  const allMinutes = minutes.length === 60;
-  const allHours = hours.length === 24;
-  const allDom = dom.length === 31;
-  const allMonth = month.length === 12;
-  const allDow = dow.length === 7;
+  const allMinutes = minutes.length === 60
+  const allHours = hours.length === 24
+  const allDom = dom.length === 31
+  const allMonth = month.length === 12
+  const allDow = dow.length === 7
 
   // Time description
-  let timePart = "";
+  let timePart = ''
   if (allMinutes && allHours) {
-    timePart = "every minute";
+    timePart = 'every minute'
   } else if (allMinutes) {
-    timePart = `every minute of hour ${hours.length === 1 ? hours[0] : hours.join(", ")}`;
+    timePart = `every minute of hour ${hours.length === 1 ? hours[0] : hours.join(', ')}`
   } else if (allHours) {
-    const minStr = minutes.length === 1 ? `minute ${minutes[0]}` : `minutes ${minutes.join(", ")}`;
-    timePart = `every hour at ${minStr}`;
+    const minStr = minutes.length === 1 ? `minute ${minutes[0]}` : `minutes ${minutes.join(', ')}`
+    timePart = `every hour at ${minStr}`
   } else {
-    const h = hours.length === 1 ? String(hours[0]).padStart(2, "0") : hours.join(",");
-    const m = minutes.length === 1 ? String(minutes[0]).padStart(2, "0") : minutes.join(",");
-    timePart = `at ${h}:${m}`;
+    const h = hours.length === 1 ? String(hours[0]).padStart(2, '0') : hours.join(',')
+    const m = minutes.length === 1 ? String(minutes[0]).padStart(2, '0') : minutes.join(',')
+    timePart = `at ${h}:${m}`
   }
 
   // Day description
-  let dayPart = "";
+  let dayPart = ''
   if (allDom && allDow) {
-    dayPart = "every day";
+    dayPart = 'every day'
   } else if (!allDom && allDow) {
-    dayPart = dom.length === 1 ? `on the ${ordinal(dom[0])}` : `on days ${dom.join(", ")}`;
+    dayPart = dom.length === 1 ? `on the ${ordinal(dom[0])}` : `on days ${dom.join(', ')}`
   } else if (allDom && !allDow) {
-    dayPart = dow.length === 1 ? `on ${DOW_NAMES[dow[0]]}` : `on ${dow.map((d) => DOW_NAMES[d]).join(", ")}`;
+    dayPart = dow.length === 1 ? `on ${DOW_NAMES[dow[0]]}` : `on ${dow.map((d) => DOW_NAMES[d]).join(', ')}`
   } else {
-    dayPart = `on day ${dom.join(",")} if ${dow.map((d) => DOW_NAMES[d]).join("/")}`;
+    dayPart = `on day ${dom.join(',')} if ${dow.map((d) => DOW_NAMES[d]).join('/')}`
   }
 
   // Month description
-  let monthPart = "";
+  let monthPart = ''
   if (!allMonth) {
-    monthPart = `in ${month.map((m) => MONTH_NAMES[m - 1]).join(", ")}`;
+    monthPart = `in ${month.map((m) => MONTH_NAMES[m - 1]).join(', ')}`
   }
 
-  const parts = [timePart, dayPart, monthPart].filter(Boolean);
-  return parts.join(", ") || "every minute";
+  const parts = [timePart, dayPart, monthPart].filter(Boolean)
+  return parts.join(', ') || 'every minute'
 }

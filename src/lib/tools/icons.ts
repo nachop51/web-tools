@@ -4,28 +4,28 @@
  * intentionally framework-agnostic (no solid-js imports).
  */
 export const categoryIconName: Record<string, string> = {
-  numbers:  "PhHash",
-  units:    "PhRuler",
-  strings:  "PhTextAa",
-  encoding: "PhBracketsCurly",
-};
+  numbers: 'PhHash',
+  units: 'PhRuler',
+  strings: 'PhTextAa',
+  encoding: 'PhBracketsCurly',
+}
 
 export const toolIconName: Record<string, string> = {
   // Numbers
-  "base-converter": "PhArrowsLeftRight",
-  "roman":          "PhScroll",
-  "to-words":       "PhTextT",
+  'base-converter': 'PhArrowsLeftRight',
+  roman: 'PhScroll',
+  'to-words': 'PhTextT',
   // Units
-  "length":         "PhRuler",
-  "mass":           "PhScales",
-  "temperature":    "PhThermometer",
+  length: 'PhRuler',
+  mass: 'PhScales',
+  temperature: 'PhThermometer',
   // Strings
-  "count":          "PhListNumbers",
-  "case":           "PhTextAa",
-  "slugify":        "PhLink",
-  "trim":           "PhScissors",
+  count: 'PhListNumbers',
+  case: 'PhTextAa',
+  slugify: 'PhLink',
+  trim: 'PhScissors',
   // Encoding
-  "base64":         "PhBinary",
-  "url":            "PhGlobe",
-  "html-entities":  "PhBracketsCurly",
-};
+  base64: 'PhBinary',
+  url: 'PhGlobe',
+  'html-entities': 'PhBracketsCurly',
+}

@@ -1,25 +1,30 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { cn } from "~/lib/utils";
-import { caseDefs, caseConverters, type CaseKey } from "~/lib/utils/strings/case";
-import { setToolPageMeta } from "~/lib/seo";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar } from '~/components/tool-toolbar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
+import { caseDefs, caseConverters, type CaseKey } from '~/lib/utils/strings/case'
+import { setToolPageMeta } from '~/lib/seo'
+
+type CaseDef = (typeof caseDefs)[number]
 
 export default function CaseConverter() {
-  setToolPageMeta("strings", "case");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
+  setToolPageMeta('strings', 'case')
+  const [params, setParams] = useSearchParams<{ mode?: string }>()
 
-  const [input, setInput] = createSignal("");
+  const [input, setInput] = createSignal('')
 
   const mode = createMemo<CaseKey>(() => {
-    const p = params.mode;
-    if (p && p in caseConverters) return p as CaseKey;
-    return "upper";
-  });
+    const p = params.mode
+    if (p && p in caseConverters) return p as CaseKey
+    return 'upper'
+  })
 
-  const output = createMemo(() => caseConverters[mode()](input()));
+  const selectedDef = createMemo<CaseDef>(() => caseDefs.find((d) => d.key === mode()) ?? caseDefs[0])
+
+  const output = createMemo(() => caseConverters[mode()](input()))
 
   return (
     <main class="w-full py-10">
@@ -29,54 +34,73 @@ export default function CaseConverter() {
         description="Convert text between upper, lower, title, camel, snake, kebab, and other cases."
       />
 
-      <div class="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        <For each={caseDefs}>
-          {(def) => (
-            <button
-              type="button"
-              class={cn(
-                "rounded-lg border-2 px-3 py-2 text-left text-sm transition-colors",
-                "hover:border-primary/60 hover:bg-primary/10",
-                mode() === def.key
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-input",
-              )}
-              onClick={() => setParams({ mode: def.key })}
-            >
-              <span class="block font-medium">{def.label}</span>
-              <span class="text-xs text-muted-foreground">{def.example}</span>
-            </button>
-          )}
-        </For>
-      </div>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Case</span>
+          <Select<CaseDef>
+            options={caseDefs}
+            optionValue="key"
+            optionTextValue="label"
+            value={selectedDef()}
+            onChange={(v) => v && setParams({ mode: v.key })}
+            itemComponent={(itemProps) => (
+              <SelectItem item={itemProps.item}>
+                <span class="flex flex-col">
+                  <span class="font-mono text-sm">{itemProps.item.rawValue.label}</span>
+                  <span class="font-mono text-xs text-muted-foreground">{itemProps.item.rawValue.example}</span>
+                </span>
+              </SelectItem>
+            )}
+          >
+            <SelectTrigger aria-label="Case" class="h-8 w-56 font-mono text-sm">
+              <SelectValue<CaseDef>>{(state) => state.selectedOption()?.label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+        </ToolToolbar>
 
-      <div class="grid gap-4 md:grid-cols-2">
-        <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <h2 class="mb-3 text-base font-semibold">Input</h2>
-          <TextField value={input()} onChange={setInput}>
-            <TextFieldTextArea
-              rows={12}
-              placeholder="Paste text here…"
-              class="resize-y"
-            />
-          </TextField>
-        </section>
+        <div class="grid gap-6 md:grid-cols-2">
+          {/* Input */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+            </div>
 
-        <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <div class="mb-3 flex items-center justify-between">
-            <h2 class="text-base font-semibold">Output</h2>
-            <CopyButton value={output} />
-          </div>
-          <TextField value={output()}>
-            <TextFieldTextArea
-              readOnly
-              rows={12}
-              class="resize-y bg-muted/30"
-              placeholder="Result will appear here"
-            />
-          </TextField>
-        </section>
+            <TextField value={input()} onChange={setInput}>
+              <TextFieldTextArea
+                autofocus
+                placeholder="Paste text here…"
+                class="min-h-[10rem] resize-y font-mono text-sm"
+              />
+            </TextField>
+          </section>
+
+          {/* Output */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+            </div>
+
+            <div class="relative">
+              <Show
+                when={output()}
+                fallback={
+                  <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Result will appear here
+                  </div>
+                }
+              >
+                <div class="anim-fade-up min-h-[8.25rem] rounded-md border border-violet/30 bg-violet/5 p-4 pr-14 font-mono text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  {output()}
+                </div>
+                <CopyButton value={() => output()} class="absolute right-2 top-2" />
+              </Show>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
-  );
+  )
 }

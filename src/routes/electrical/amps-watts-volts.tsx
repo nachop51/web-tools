@@ -1,86 +1,86 @@
-import { createMemo } from "solid-js";
-import { useSearchParams } from "@solidjs/router";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
-import {
-  NumberField,
-  NumberFieldGroup,
-  NumberFieldIncrementTrigger,
-  NumberFieldDecrementTrigger,
-  NumberFieldInput,
-} from "~/components/ui/number-field";
-import { cn } from "~/lib/utils";
-import { solveAWV, type AWVSolve } from "~/lib/utils/electrical/amps-watts-volts";
-import { setToolPageMeta } from "~/lib/seo";
+import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
+import { Label } from '~/components/ui/label'
+import { TextField, TextFieldInput } from '~/components/ui/text-field'
+import { solveAWV, type AWVSolve } from '~/lib/utils/electrical/amps-watts-volts'
+import { setToolPageMeta } from '~/lib/seo'
 
 type SolveOption = {
-  value: AWVSolve;
-  label: string;
-  labelA: string;
-  labelB: string;
-};
+  value: AWVSolve
+  label: string
+  labelA: string
+  labelB: string
+}
 
 const solveOptions: SolveOption[] = [
   {
-    value: "amps",
-    label: "Amps",
-    labelA: "Watts (W)",
-    labelB: "Volts (V)",
+    value: 'amps',
+    label: 'Amps',
+    labelA: 'Watts (W)',
+    labelB: 'Volts (V)',
   },
   {
-    value: "watts",
-    label: "Watts",
-    labelA: "Amps (A)",
-    labelB: "Volts (V)",
+    value: 'watts',
+    label: 'Watts',
+    labelA: 'Amps (A)',
+    labelB: 'Volts (V)',
   },
   {
-    value: "volts",
-    label: "Volts",
-    labelA: "Watts (W)",
-    labelB: "Amps (A)",
+    value: 'volts',
+    label: 'Volts',
+    labelA: 'Watts (W)',
+    labelB: 'Amps (A)',
   },
-];
+]
+
+const segmentedOptions = solveOptions.map((o) => ({
+  value: o.value,
+  label: o.label,
+}))
 
 function fmtNum(n: number): string {
-  if (!isFinite(n)) return "—";
-  return parseFloat(n.toPrecision(8)).toString();
+  if (!isFinite(n)) return '—'
+  return parseFloat(n.toPrecision(8)).toString()
 }
 
 export default function AmpsWattsVolts() {
-  setToolPageMeta("electrical", "amps-watts-volts");
+  setToolPageMeta('electrical', 'amps-watts-volts')
   const [searchParams, setSearchParams] = useSearchParams<{
-    solve?: string;
-    a?: string;
-    b?: string;
-  }>();
+    solve?: string
+    a?: string
+    b?: string
+  }>()
 
   const solve = createMemo<AWVSolve>(() => {
-    const s = searchParams.solve;
-    if (s === "amps" || s === "watts" || s === "volts") return s;
-    return "amps";
-  });
+    const s = searchParams.solve
+    if (s === 'amps' || s === 'watts' || s === 'volts') return s
+    return 'amps'
+  })
 
-  const aRaw = createMemo(() => searchParams.a ?? "");
-  const bRaw = createMemo(() => searchParams.b ?? "");
+  const [aRaw, setARaw] = createSignal(searchParams.a ?? '')
+  const [bRaw, setBRaw] = createSignal(searchParams.b ?? '')
 
   const result = createMemo(() => {
-    const a = parseFloat(aRaw());
-    const b = parseFloat(bRaw());
-    if (!isFinite(a) || !isFinite(b) || aRaw().trim() === "" || bRaw().trim() === "") {
-      return null;
+    const a = parseFloat(aRaw())
+    const b = parseFloat(bRaw())
+    if (!isFinite(a) || !isFinite(b) || aRaw().trim() === '' || bRaw().trim() === '') {
+      return null
     }
-    return solveAWV(solve(), a, b);
-  });
+    return solveAWV(solve(), a, b)
+  })
 
-  const option = createMemo(() => solveOptions.find((o) => o.value === solve())!);
+  const option = createMemo(() => solveOptions.find((o) => o.value === solve())!)
 
-  const resultValue = createMemo(() => {
-    const r = result();
-    return r ? fmtNum(r.value) : "—";
-  });
+  const outputText = createMemo(() => {
+    const r = result()
+    if (!r) return ''
+    return `${fmtNum(r.value)} ${r.unit}`
+  })
 
-  const resultUnit = createMemo(() => result()?.unit ?? "");
-  const resultFormula = createMemo(() => result()?.formula ?? "");
+  const formula = createMemo(() => result()?.formula ?? '')
 
   return (
     <main class="w-full py-10">
@@ -90,91 +90,92 @@ export default function AmpsWattsVolts() {
         description="Convert between amps, watts, and volts. Provide any two known values to calculate the third."
       />
 
-      <div class="grid gap-6 md:grid-cols-2">
-        {/* Input column */}
-        <section class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Calculate</h2>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Solve for"
+            value={solve()}
+            onChange={(v) => setSearchParams({ solve: v, a: '', b: '' })}
+            options={segmentedOptions}
+          />
+        </ToolToolbar>
 
-          <div class="mb-6 flex flex-wrap gap-2">
-            {solveOptions.map((opt) => (
-              <button
-                type="button"
-                class={cn(
-                  "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                  "hover:border-primary/60 hover:bg-primary/10",
-                  solve() === opt.value
-                    ? "border-primary bg-primary/15 text-foreground"
-                    : "border-input text-muted-foreground",
-                )}
-                onClick={() =>
-                  setSearchParams({ solve: opt.value, a: "", b: "" })
-                }
-              >
-                {opt.label}
-              </button>
-            ))}
+        {/* Inputs */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Inputs</h2>
           </div>
 
-          <div class="space-y-4">
-            <div class="space-y-1.5">
-              <label class="block text-sm font-medium">
-                {option().labelA}
-              </label>
-              <NumberField
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="flex flex-col gap-1.5">
+              <Label class="text-xs text-muted-foreground">{option().labelA}</Label>
+              <TextField
                 value={aRaw()}
-                onChange={(v) => setSearchParams({ a: v })}
-                format={false}
-                class="flex flex-col gap-1"
+                onChange={(v) => {
+                  setARaw(v)
+                  setSearchParams({ a: v })
+                }}
               >
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="Enter value" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
+                <TextFieldInput
+                  type="text"
+                  inputMode="decimal"
+                  autofocus
+                  placeholder="Enter value"
+                  class="h-12 font-mono text-base"
+                />
+              </TextField>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="block text-sm font-medium">
-                {option().labelB}
-              </label>
-              <NumberField
+            <div class="flex flex-col gap-1.5">
+              <Label class="text-xs text-muted-foreground">{option().labelB}</Label>
+              <TextField
                 value={bRaw()}
-                onChange={(v) => setSearchParams({ b: v })}
-                format={false}
-                class="flex flex-col gap-1"
+                onChange={(v) => {
+                  setBRaw(v)
+                  setSearchParams({ b: v })
+                }}
               >
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="Enter value" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
+                <TextFieldInput
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Enter value"
+                  class="h-12 font-mono text-base"
+                />
+              </TextField>
             </div>
           </div>
         </section>
 
-        {/* Result column */}
-        <section class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Result</h2>
-
-          <div class="flex flex-col items-center justify-center rounded-lg bg-muted/50 py-10">
-            <span class="font-mono text-4xl font-bold tracking-tight">
-              {resultValue()}
-              {resultUnit() ? <span class="ml-2 text-2xl text-muted-foreground">{resultUnit()}</span> : null}
-            </span>
-
-            <p class="mt-3 font-mono text-sm text-muted-foreground">
-              {resultFormula() || <span class="text-muted-foreground/50">Enter values to calculate</span>}
-            </p>
+        {/* Output */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Result</h2>
           </div>
 
-          <div class="mt-4 flex items-center justify-between rounded-lg border px-4 py-3">
-            <span class="font-mono text-sm">{resultValue()} {resultUnit()}</span>
-            <CopyButton value={resultValue} />
-          </div>
+          <Show
+            when={result()}
+            fallback={
+              <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Result will appear here
+              </div>
+            }
+          >
+            <div class="anim-fade-up flex items-center gap-3 overflow-hidden rounded-md border border-border px-4 py-3">
+              <div class="flex flex-1 flex-col gap-0.5">
+                <span class="font-mono text-2xl font-semibold tracking-tight text-foreground break-words">
+                  {outputText()}
+                </span>
+                <Show when={formula()}>
+                  <span class="font-mono text-xs text-muted-foreground">{formula()}</span>
+                </Show>
+              </div>
+              <CopyButton value={() => outputText()} />
+            </div>
+          </Show>
         </section>
       </div>
     </main>
-  );
+  )
 }

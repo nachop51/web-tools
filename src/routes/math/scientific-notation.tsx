@@ -1,7 +1,8 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For, Show } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import {
   NumberField,
   NumberFieldGroup,
@@ -9,37 +10,38 @@ import {
   NumberFieldDecrementTrigger,
   NumberFieldInput,
   NumberFieldLabel,
-} from "~/components/ui/number-field";
-import { cn } from "~/lib/utils";
-import { toScientific, fromScientific } from "~/lib/utils/math/scientific-notation";
-import { setToolPageMeta } from "~/lib/seo";
+} from '~/components/ui/number-field'
+import { toScientific, fromScientific } from '~/lib/utils/math/scientific-notation'
+import { setToolPageMeta } from '~/lib/seo'
 
-type Mode = "toSci" | "fromSci";
-const modes: Array<{ id: Mode; label: string }> = [
-  { id: "toSci",   label: "Standard → Scientific" },
-  { id: "fromSci", label: "Scientific → Standard" },
-];
+type Mode = 'toSci' | 'fromSci'
+
+const modeOptions: { value: Mode; label: string }[] = [
+  { value: 'toSci', label: 'Standard → Scientific' },
+  { value: 'fromSci', label: 'Scientific → Standard' },
+]
 
 export default function ScientificNotation() {
-  setToolPageMeta("math", "scientific-notation");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
-  const mode = createMemo<Mode>(() => (params.mode === "fromSci" ? "fromSci" : "toSci"));
+  setToolPageMeta('math', 'scientific-notation')
+  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const mode = createMemo<Mode>(() => (params.mode === 'fromSci' ? 'fromSci' : 'toSci'))
 
-  const [standard, setStandard] = createSignal("299792458");
-  const [coeff, setCoeff] = createSignal("2.99792458");
-  const [exp, setExp] = createSignal("8");
+  const [standard, setStandard] = createSignal('299792458')
+  const [coeff, setCoeff] = createSignal('2.99792458')
+  const [exp, setExp] = createSignal('8')
 
   const sciResult = createMemo(() => {
-    const v = parseFloat(standard());
-    if (isNaN(v)) return null;
-    return toScientific(v);
-  });
+    const v = parseFloat(standard())
+    if (isNaN(v)) return null
+    return toScientific(v)
+  })
 
   const stdResult = createMemo(() => {
-    const c = parseFloat(coeff()), e = parseFloat(exp());
-    if (isNaN(c) || isNaN(e)) return null;
-    return fromScientific(c, e);
-  });
+    const c = parseFloat(coeff()),
+      e = parseFloat(exp())
+    if (isNaN(c) || isNaN(e)) return null
+    return fromScientific(c, e)
+  })
 
   return (
     <main class="w-full py-10">
@@ -49,132 +51,131 @@ export default function ScientificNotation() {
         description="Convert numbers between standard decimal and scientific notation."
       />
 
-      <div class="mb-6 flex gap-2">
-        <For each={modes}>
-          {(m) => (
-            <button
-              type="button"
-              class={cn(
-                "rounded-md px-4 py-1.5 text-sm font-medium border-2 transition-colors",
-                mode() === m.id
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-input hover:border-primary/50 hover:bg-accent/30",
-              )}
-              onClick={() => setParams({ mode: m.id })}
-            >
-              {m.label}
-            </button>
-          )}
-        </For>
-      </div>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Mode"
+            value={mode()}
+            onChange={(v) => setParams({ mode: v })}
+            options={modeOptions}
+          />
+        </ToolToolbar>
 
-      <Show when={mode() === "toSci"}>
-        <div class="grid gap-6 md:grid-cols-2">
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <h2 class="mb-4 text-base font-semibold">Standard number</h2>
-            <NumberField
-              value={standard()}
-              onChange={setStandard}
-              format={false}
-              class="flex flex-col gap-1"
-            >
-              <NumberFieldLabel>Value</NumberFieldLabel>
-              <NumberFieldGroup>
-                <NumberFieldInput placeholder="299792458" class="font-mono" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-            </NumberField>
-          </section>
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <h2 class="mb-4 text-base font-semibold">Scientific notation</h2>
-            <Show
-              when={sciResult()}
-              fallback={<p class="text-sm text-muted-foreground">Enter a number.</p>}
-            >
-              {(r) => (
-                <div class="divide-y divide-border rounded-lg border text-sm">
-                  <div class="flex items-center justify-between gap-4 px-4 py-3">
-                    <span class="text-muted-foreground">Coefficient</span>
-                    <span class="font-mono">{r().coefficient}</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-4 px-4 py-3">
-                    <span class="text-muted-foreground">Exponent</span>
-                    <span class="font-mono">{r().exponent}</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-4 px-4 py-3">
-                    <span class="text-muted-foreground">Scientific</span>
-                    <div class="flex items-center gap-2">
-                      <span class="font-mono">{r().formatted}</span>
-                      <CopyButton value={() => r().formatted} />
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between gap-4 px-4 py-3">
-                    <span class="text-muted-foreground">Engineering</span>
-                    <div class="flex items-center gap-2">
-                      <span class="font-mono">{r().engineering}</span>
-                      <CopyButton value={() => r().engineering} />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </Show>
-          </section>
-        </div>
-      </Show>
-
-      <Show when={mode() === "fromSci"}>
-        <div class="grid gap-6 md:grid-cols-2">
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <h2 class="mb-4 text-base font-semibold">Scientific notation</h2>
-            <div class="flex items-end gap-3">
-              <NumberField
-                value={coeff()}
-                onChange={setCoeff}
-                format={false}
-                class="flex flex-col gap-1"
-              >
-                <NumberFieldLabel>Coefficient</NumberFieldLabel>
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="2.998" class="font-mono w-32" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
-              <span class="pb-2 font-mono text-muted-foreground">× 10^</span>
-              <NumberField
-                value={exp()}
-                onChange={setExp}
-                format={false}
-                class="flex flex-col gap-1"
-              >
-                <NumberFieldLabel>Exponent</NumberFieldLabel>
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="8" class="font-mono w-20" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
-            </div>
-          </section>
-          <section class="rounded-xl border bg-card p-5 shadow-sm">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-base font-semibold">Standard number</h2>
-              <Show when={stdResult() !== null}>
-                <CopyButton value={() => String(stdResult())} />
-              </Show>
-            </div>
-            <Show
-              when={stdResult() !== null}
-              fallback={<p class="text-sm text-muted-foreground">Enter values.</p>}
-            >
-              <div class="rounded-lg bg-muted/50 p-4 font-mono text-xl break-all">
-                {stdResult()}
+        <Show when={mode() === 'toSci'}>
+          <div class="grid gap-6 md:grid-cols-2">
+            <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+              <div class="mb-4 flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Standard number</h2>
               </div>
-            </Show>
-          </section>
-        </div>
-      </Show>
+              <NumberField value={standard()} onChange={setStandard} format={false} class="flex flex-col gap-2">
+                <NumberFieldLabel>Value</NumberFieldLabel>
+                <NumberFieldGroup>
+                  <NumberFieldInput autofocus placeholder="299792458" class="h-12 font-mono text-base" />
+                  <NumberFieldIncrementTrigger />
+                  <NumberFieldDecrementTrigger />
+                </NumberFieldGroup>
+              </NumberField>
+            </section>
+
+            <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+              <div class="mb-4 flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Scientific notation
+                </h2>
+              </div>
+              <Show
+                when={sciResult()}
+                fallback={
+                  <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Enter a number
+                  </div>
+                }
+              >
+                {(r) => (
+                  <div class="anim-fade-up divide-y divide-border rounded-md border border-border text-sm">
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                      <span class="text-muted-foreground">Coefficient</span>
+                      <span class="font-mono">{r().coefficient}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                      <span class="text-muted-foreground">Exponent</span>
+                      <span class="font-mono">{r().exponent}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                      <span class="text-muted-foreground">Scientific</span>
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono">{r().formatted}</span>
+                        <CopyButton value={() => r().formatted} />
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                      <span class="text-muted-foreground">Engineering</span>
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono">{r().engineering}</span>
+                        <CopyButton value={() => r().engineering} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Show>
+            </section>
+          </div>
+        </Show>
+
+        <Show when={mode() === 'fromSci'}>
+          <div class="grid gap-6 md:grid-cols-2">
+            <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+              <div class="mb-4 flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Scientific notation
+                </h2>
+              </div>
+              <div class="flex flex-wrap items-end gap-3">
+                <NumberField value={coeff()} onChange={setCoeff} format={false} class="flex flex-col gap-2">
+                  <NumberFieldLabel>Coefficient</NumberFieldLabel>
+                  <NumberFieldGroup>
+                    <NumberFieldInput autofocus placeholder="2.998" class="h-12 w-32 font-mono text-base" />
+                    <NumberFieldIncrementTrigger />
+                    <NumberFieldDecrementTrigger />
+                  </NumberFieldGroup>
+                </NumberField>
+                <span class="pb-3 font-mono text-base text-muted-foreground">× 10^</span>
+                <NumberField value={exp()} onChange={setExp} format={false} class="flex flex-col gap-2">
+                  <NumberFieldLabel>Exponent</NumberFieldLabel>
+                  <NumberFieldGroup>
+                    <NumberFieldInput placeholder="8" class="h-12 w-20 font-mono text-base" />
+                    <NumberFieldIncrementTrigger />
+                    <NumberFieldDecrementTrigger />
+                  </NumberFieldGroup>
+                </NumberField>
+              </div>
+            </section>
+
+            <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+              <div class="mb-4 flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Standard number</h2>
+              </div>
+              <Show
+                when={stdResult() !== null}
+                fallback={
+                  <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Enter values
+                  </div>
+                }
+              >
+                <div class="anim-fade-up flex items-center gap-3 overflow-hidden rounded-md border border-border px-4 py-3">
+                  <span class="flex-1 font-mono text-xl font-semibold tabular-nums break-all">{stdResult()}</span>
+                  <CopyButton value={() => String(stdResult())} />
+                </div>
+              </Show>
+            </section>
+          </div>
+        </Show>
+      </div>
     </main>
-  );
+  )
 }

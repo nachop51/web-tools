@@ -1,16 +1,12 @@
-import { createMemo, Show, splitProps } from "solid-js"
-import * as ColorAreaPrimitive from "@kobalte/core/color-area"
-import * as ColorSliderPrimitive from "@kobalte/core/color-slider"
-import { parseColor } from "@kobalte/core/colors"
-import type { Color } from "@kobalte/core/colors"
+import { createMemo, Show, splitProps } from 'solid-js'
+import * as ColorAreaPrimitive from '@kobalte/core/color-area'
+import * as ColorSliderPrimitive from '@kobalte/core/color-slider'
+import { parseColor } from '@kobalte/core/colors'
+import type { Color } from '@kobalte/core/colors'
 
-import { cn } from "~/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover"
-import {
-  TextField,
-  TextFieldInput,
-  TextFieldLabel,
-} from "~/components/ui/text-field"
+import { cn } from '~/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
+import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/
 
@@ -19,14 +15,14 @@ function isValidHex(h: string): boolean {
 }
 
 function normalizeHex(h: string): string {
-  return `#${h.replace(/^#/, "").toUpperCase()}`
+  return `#${h.replace(/^#/, '').toUpperCase()}`
 }
 
 function parseToHsb(hex: string): Color {
   try {
-    return parseColor(normalizeHex(hex)).toFormat("hsb")
+    return parseColor(normalizeHex(hex)).toFormat('hsb')
   } catch {
-    return parseColor("#3B82F6").toFormat("hsb")
+    return parseColor('#3B82F6').toFormat('hsb')
   }
 }
 
@@ -37,16 +33,16 @@ type ColorPickerProps = {
 }
 
 const ColorPicker = (props: ColorPickerProps) => {
-  const [local, others] = splitProps(props, ["value", "onChange", "class"])
+  const [local, others] = splitProps(props, ['value', 'onChange', 'class'])
 
   const color = createMemo(() => parseToHsb(local.value))
 
   function emit(c: Color) {
-    local.onChange(c.toString("hex").toUpperCase())
+    local.onChange(c.toString('hex').toUpperCase())
   }
 
   return (
-    <div class={cn("flex w-full flex-col gap-3", local.class)} {...others}>
+    <div class={cn('flex w-full flex-col gap-3', local.class)} {...others}>
       <ColorAreaPrimitive.Root
         value={color()}
         onChange={emit}
@@ -79,7 +75,7 @@ const ColorPicker = (props: ColorPickerProps) => {
 
       <div
         class="h-8 w-full rounded-md border border-border transition-colors duration-150"
-        style={{ "background-color": isValidHex(local.value) ? normalizeHex(local.value) : "#888" }}
+        style={{ 'background-color': isValidHex(local.value) ? normalizeHex(local.value) : '#888' }}
       />
     </div>
   )
@@ -94,34 +90,26 @@ type ColorInputProps = {
 }
 
 const ColorInput = (props: ColorInputProps) => {
-  const [local, others] = splitProps(props, [
-    "value",
-    "onChange",
-    "label",
-    "placeholder",
-    "class",
-  ])
+  const [local, others] = splitProps(props, ['value', 'onChange', 'label', 'placeholder', 'class'])
 
   const isValid = createMemo(() => isValidHex(local.value))
-  const swatchColor = createMemo(() =>
-    isValid() ? normalizeHex(local.value) : "#888888"
-  )
+  const swatchColor = createMemo(() => (isValid() ? normalizeHex(local.value) : '#888888'))
 
   return (
-    <div class={cn("flex items-end gap-2", local.class)} {...others}>
+    <div class={cn('flex items-end gap-2', local.class)} {...others}>
       <Popover>
         <PopoverTrigger
           aria-label="Open color picker"
           class={cn(
-            "h-10 w-12 flex-shrink-0 rounded-md border border-border shadow-sm transition-all duration-150",
-            "hover:border-violet/50 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            "data-[expanded]:ring-2 data-[expanded]:ring-ring data-[expanded]:ring-offset-2 data-[expanded]:ring-offset-background"
+            'h-10 w-12 flex-shrink-0 rounded-md border border-border shadow-sm transition-all duration-150 cursor-pointer',
+            'hover:border-violet/50 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            'data-[expanded]:ring-2 data-[expanded]:ring-ring data-[expanded]:ring-offset-2 data-[expanded]:ring-offset-background'
           )}
-          style={{ "background-color": swatchColor() }}
+          style={{ 'background-color': swatchColor() }}
         />
         <PopoverContent class="w-64 p-3">
           <ColorPicker
-            value={isValid() ? normalizeHex(local.value) : "#3B82F6"}
+            value={isValid() ? normalizeHex(local.value) : '#3B82F6'}
             onChange={(hex) => local.onChange(hex)}
           />
         </PopoverContent>
@@ -131,19 +119,51 @@ const ColorInput = (props: ColorInputProps) => {
         value={local.value}
         onChange={(v) => local.onChange(v)}
         class="flex-1"
-        validationState={local.value.length > 0 && !isValid() ? "invalid" : "valid"}
+        validationState={local.value.length > 0 && !isValid() ? 'invalid' : 'valid'}
       >
         <Show when={local.label}>
           <TextFieldLabel>{local.label}</TextFieldLabel>
         </Show>
-        <TextFieldInput
-          type="text"
-          placeholder={local.placeholder ?? "#3B82F6"}
-          class="font-mono uppercase"
-        />
+        <TextFieldInput type="text" placeholder={local.placeholder ?? '#3B82F6'} class="font-mono uppercase" />
       </TextField>
     </div>
   )
 }
 
-export { ColorPicker, ColorInput }
+type ColorSwatchPickerProps = {
+  value: string
+  onChange: (hex: string) => void
+  class?: string
+  ariaLabel?: string
+}
+
+const ColorSwatchPicker = (props: ColorSwatchPickerProps) => {
+  const [local, others] = splitProps(props, ['value', 'onChange', 'class', 'ariaLabel'])
+
+  const isValid = createMemo(() => isValidHex(local.value))
+  const swatchColor = createMemo(() => (isValid() ? normalizeHex(local.value) : '#888888'))
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        aria-label={local.ariaLabel ?? 'Open color picker'}
+        class={cn(
+          'size-12 flex-shrink-0 rounded-md border border-border shadow-sm transition-all duration-200 cursor-pointer',
+          'hover:border-violet/50 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'data-[expanded]:ring-2 data-[expanded]:ring-ring data-[expanded]:ring-offset-2 data-[expanded]:ring-offset-background',
+          local.class
+        )}
+        style={{ 'background-color': swatchColor() }}
+        {...others}
+      />
+      <PopoverContent class="w-64 p-3">
+        <ColorPicker
+          value={isValid() ? normalizeHex(local.value) : '#3B82F6'}
+          onChange={(hex) => local.onChange(hex)}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export { ColorPicker, ColorInput, ColorSwatchPicker }

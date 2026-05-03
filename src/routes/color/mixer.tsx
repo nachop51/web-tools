@@ -1,109 +1,98 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For, Show } from "solid-js";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { ColorInput } from "~/components/ui/color-picker";
-import { Slider, SliderFill, SliderThumb, SliderTrack } from "~/components/ui/slider";
-import { mixColors, getGradientStrip, type MixSpace } from "~/lib/utils/color/mixer";
-import { setToolPageMeta } from "~/lib/seo";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
+import { TextField, TextFieldInput, TextFieldErrorMessage } from '~/components/ui/text-field'
+import { ColorSwatchPicker } from '~/components/ui/color-picker'
+import { Slider, SliderFill, SliderThumb, SliderTrack } from '~/components/ui/slider'
+import { mixColors, getGradientStrip, type MixSpace } from '~/lib/utils/color/mixer'
+import { setToolPageMeta } from '~/lib/seo'
 
-const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
+const HEX_RE = /^#?[0-9A-Fa-f]{6}$/
 
 function normalizeHex(h: string): string {
-  return `#${h.replace(/^#/, "").toUpperCase()}`;
+  return `#${h.replace(/^#/, '').toUpperCase()}`
 }
 
 function isValid(h: string): boolean {
-  return HEX_RE.test(h);
+  return HEX_RE.test(h)
 }
 
-type SpaceOption = { label: string; value: MixSpace };
-
-const SPACE_OPTIONS: SpaceOption[] = [
-  { label: "OKLCH (perceptual)", value: "oklch" },
-  { label: "HSL", value: "hsl" },
-  { label: "sRGB", value: "srgb" },
-];
+const SPACE_OPTIONS: { value: MixSpace; label: string }[] = [
+  { value: 'oklch', label: 'OKLCH' },
+  { value: 'hsl', label: 'HSL' },
+  { value: 'srgb', label: 'sRGB' },
+]
 
 function isSpace(s: string): s is MixSpace {
-  return ["oklch", "hsl", "srgb"].includes(s);
+  return ['oklch', 'hsl', 'srgb'].includes(s)
 }
 
 export default function ColorMixer() {
-  setToolPageMeta("color", "mixer");
+  setToolPageMeta('color', 'mixer')
   const [params, setParams] = useSearchParams<{
-    a?: string;
-    b?: string;
-    r?: string;
-    space?: string;
-  }>();
+    a?: string
+    b?: string
+    r?: string
+    space?: string
+  }>()
 
-  const initialA = isValid(params.a ?? "") ? normalizeHex(params.a!) : "#FF6B6B";
-  const initialB = isValid(params.b ?? "") ? normalizeHex(params.b!) : "#4ECDC4";
-  const initialR = Number.isFinite(parseInt(params.r ?? ""))
-    ? Math.max(0, Math.min(100, parseInt(params.r!)))
-    : 50;
-  const initialSpace: MixSpace = isSpace(params.space ?? "")
-    ? (params.space as MixSpace)
-    : "oklch";
+  const initialA = isValid(params.a ?? '') ? normalizeHex(params.a!) : '#FF6B6B'
+  const initialB = isValid(params.b ?? '') ? normalizeHex(params.b!) : '#4ECDC4'
+  const initialR = Number.isFinite(parseInt(params.r ?? '')) ? Math.max(0, Math.min(100, parseInt(params.r!))) : 50
+  const initialSpace: MixSpace = isSpace(params.space ?? '') ? (params.space as MixSpace) : 'oklch'
 
-  const [colorA, setColorA] = createSignal(initialA);
-  const [colorB, setColorB] = createSignal(initialB);
-  const [ratio, setRatio] = createSignal(initialR);
-  const [space, setSpace] = createSignal<MixSpace>(initialSpace);
+  const [colorA, setColorA] = createSignal(initialA)
+  const [colorB, setColorB] = createSignal(initialB)
+  const [ratio, setRatio] = createSignal(initialR)
+  const [space, setSpace] = createSignal<MixSpace>(initialSpace)
 
   function syncParams() {
     setParams({
-      a: colorA().replace("#", ""),
-      b: colorB().replace("#", ""),
+      a: colorA().replace('#', ''),
+      b: colorB().replace('#', ''),
       r: String(ratio()),
       space: space(),
-    });
+    })
   }
 
-  const aValid = createMemo(() => isValid(colorA()));
-  const bValid = createMemo(() => isValid(colorB()));
+  const aValid = createMemo(() => isValid(colorA()))
+  const bValid = createMemo(() => isValid(colorB()))
+
+  const aInvalidShown = createMemo(() => colorA().length > 0 && !aValid())
+  const bInvalidShown = createMemo(() => colorB().length > 0 && !bValid())
 
   const result = createMemo(() => {
-    if (!aValid() || !bValid()) return null;
-    return mixColors(colorA(), colorB(), ratio(), space());
-  });
+    if (!aValid() || !bValid()) return null
+    return mixColors(colorA(), colorB(), ratio(), space())
+  })
 
   const strip = createMemo(() => {
-    if (!aValid() || !bValid()) return [];
-    return getGradientStrip(colorA(), colorB(), space(), 7);
-  });
+    if (!aValid() || !bValid()) return []
+    return getGradientStrip(colorA(), colorB(), space(), 7)
+  })
 
-  const selectedSpace = createMemo(() => SPACE_OPTIONS.find((o) => o.value === space()));
-
-  const hexStr = createMemo(() => result()?.hex ?? "");
+  const hexStr = createMemo(() => result()?.hex ?? '')
   const rgbStr = createMemo(() => {
-    const r = result();
-    return r ? `rgb(${r.rgb.r}, ${r.rgb.g}, ${r.rgb.b})` : "";
-  });
+    const r = result()
+    return r ? `rgb(${r.rgb.r}, ${r.rgb.g}, ${r.rgb.b})` : ''
+  })
   const hslStr = createMemo(() => {
-    const r = result();
-    return r ? `hsl(${r.hsl.h}, ${r.hsl.s}%, ${r.hsl.l}%)` : "";
-  });
+    const r = result()
+    return r ? `hsl(${r.hsl.h}, ${r.hsl.s}%, ${r.hsl.l}%)` : ''
+  })
   const oklchStr = createMemo(() => {
-    const r = result();
-    return r ? `oklch(${r.oklch.l} ${r.oklch.c} ${r.oklch.h})` : "";
-  });
+    const r = result()
+    return r ? `oklch(${r.oklch.l} ${r.oklch.c} ${r.oklch.h})` : ''
+  })
 
   const formats = [
-    { label: "HEX", value: hexStr },
-    { label: "RGB", value: rgbStr },
-    { label: "HSL", value: hslStr },
-    { label: "OKLCH", value: oklchStr },
-  ];
+    { label: 'HEX', value: hexStr },
+    { label: 'RGB', value: rgbStr },
+    { label: 'HSL', value: hslStr },
+    { label: 'OKLCH', value: oklchStr },
+  ]
 
   return (
     <main class="w-full py-10">
@@ -112,64 +101,102 @@ export default function ColorMixer() {
         name="Color mixer"
         description="Mix two colors at any ratio in OKLCH, HSL, or sRGB with a live gradient preview."
       />
-      <div class="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Colors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <ColorInput
-                label="Color A"
-                placeholder="#FF6B6B"
-                value={colorA()}
-                onChange={(v) => {
-                  setColorA(v);
-                  if (isValid(v)) syncParams();
-                }}
-              />
-              <ColorInput
-                label="Color B"
-                placeholder="#4ECDC4"
-                value={colorB()}
-                onChange={(v) => {
-                  setColorB(v);
-                  if (isValid(v)) syncParams();
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Mix</CardTitle>
-          </CardHeader>
-          <CardContent class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Color space</label>
-              <Select<SpaceOption>
-                options={SPACE_OPTIONS}
-                optionValue="value"
-                optionTextValue="label"
-                value={selectedSpace()}
-                onChange={(opt) => {
-                  if (!opt) return;
-                  setSpace(opt.value);
-                  syncParams();
-                }}
-                itemComponent={(p) => <SelectItem item={p.item}>{p.item.rawValue.label}</SelectItem>}
-              >
-                <SelectTrigger class="w-full">
-                  <SelectValue<SpaceOption>>{(s) => s.selectedOption()?.label}</SelectValue>
-                </SelectTrigger>
-                <SelectContent />
-              </Select>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Color space"
+            value={space()}
+            onChange={(v) => {
+              setSpace(v)
+              syncParams()
+            }}
+            options={SPACE_OPTIONS}
+          />
+        </ToolToolbar>
+
+        {/* Colors */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Colors</h2>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Color A</span>
+              <div class="flex items-center gap-3">
+                <ColorSwatchPicker
+                  value={colorA()}
+                  onChange={(v) => {
+                    setColorA(v)
+                    if (isValid(v)) syncParams()
+                  }}
+                  ariaLabel="Open color A picker"
+                />
+                <TextField
+                  value={colorA()}
+                  onChange={(v) => {
+                    setColorA(v)
+                    if (isValid(v)) syncParams()
+                  }}
+                  validationState={aInvalidShown() ? 'invalid' : 'valid'}
+                  class="flex-1"
+                >
+                  <TextFieldInput
+                    autofocus
+                    type="text"
+                    placeholder="#FF6B6B"
+                    class="h-12 font-mono text-base uppercase"
+                  />
+                  <Show when={aInvalidShown()}>
+                    <TextFieldErrorMessage>Enter a valid 6-digit hex color</TextFieldErrorMessage>
+                  </Show>
+                </TextField>
+              </div>
             </div>
 
-            <div class="space-y-2">
+            <div class="flex flex-col gap-2">
+              <span class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Color B</span>
+              <div class="flex items-center gap-3">
+                <ColorSwatchPicker
+                  value={colorB()}
+                  onChange={(v) => {
+                    setColorB(v)
+                    if (isValid(v)) syncParams()
+                  }}
+                  ariaLabel="Open color B picker"
+                />
+                <TextField
+                  value={colorB()}
+                  onChange={(v) => {
+                    setColorB(v)
+                    if (isValid(v)) syncParams()
+                  }}
+                  validationState={bInvalidShown() ? 'invalid' : 'valid'}
+                  class="flex-1"
+                >
+                  <TextFieldInput type="text" placeholder="#4ECDC4" class="h-12 font-mono text-base uppercase" />
+                  <Show when={bInvalidShown()}>
+                    <TextFieldErrorMessage>Enter a valid 6-digit hex color</TextFieldErrorMessage>
+                  </Show>
+                </TextField>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Mix controls */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Mix</h2>
+          </div>
+
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-2">
               <div class="flex items-center justify-between">
-                <span class="text-sm font-medium">Mix ratio</span>
+                <span class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Mix ratio</span>
                 <span class="font-mono text-sm">
                   {100 - ratio()}% A · {ratio()}% B
                 </span>
@@ -177,8 +204,8 @@ export default function ColorMixer() {
               <Slider
                 value={[ratio()]}
                 onChange={(v) => {
-                  setRatio(v[0]);
-                  syncParams();
+                  setRatio(v[0])
+                  syncParams()
                 }}
                 minValue={0}
                 maxValue={100}
@@ -193,43 +220,53 @@ export default function ColorMixer() {
 
             <Show when={strip().length > 0}>
               <div class="flex h-8 overflow-hidden rounded-md border border-border">
-                <For each={strip()}>
-                  {(c) => <div class="flex-1" style={{ "background-color": c }} />}
-                </For>
+                <For each={strip()}>{(c) => <div class="flex-1" style={{ 'background-color': c }} />}</For>
               </div>
             </Show>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Show when={result() !== null}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Result</CardTitle>
-            </CardHeader>
-            <CardContent class="space-y-4">
+        {/* Result */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Result</h2>
+          </div>
+
+          <Show
+            when={result() !== null}
+            fallback={
+              <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Enter two valid colors to see the mix
+              </div>
+            }
+          >
+            <div class="flex flex-col gap-4">
               <div
-                class="h-24 rounded-md border border-border transition-colors duration-200"
-                style={{ "background-color": result()!.hex }}
+                class="anim-fade-up h-24 rounded-md border border-border shadow-sm transition-colors duration-200"
+                style={{ 'background-color': result()!.hex }}
               />
-              <div class="space-y-2">
+              <div class="anim-stagger flex flex-col gap-3">
                 <For each={formats}>
                   {(fmt) => (
-                    <div class="flex items-center justify-between gap-4">
-                      <span class="w-16 text-sm font-mono text-muted-foreground">
+                    <div class="grid grid-cols-[4rem_1fr] items-center gap-3 sm:grid-cols-[5rem_1fr]">
+                      <span class="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {fmt.label}
                       </span>
-                      <code class="flex-1 rounded bg-muted px-2 py-1 text-sm font-mono">
-                        {fmt.value()}
-                      </code>
-                      <CopyButton value={fmt.value} />
+                      <div class="relative">
+                        <div class="min-h-[3rem] rounded-md border border-violet/30 bg-violet/5 px-4 py-3 pr-14 font-mono text-sm leading-relaxed break-all">
+                          {fmt.value()}
+                        </div>
+                        <CopyButton value={fmt.value} class="absolute right-2 top-1/2 -translate-y-1/2" />
+                      </div>
                     </div>
                   )}
                 </For>
               </div>
-            </CardContent>
-          </Card>
-        </Show>
+            </div>
+          </Show>
+        </section>
       </div>
     </main>
-  );
+  )
 }

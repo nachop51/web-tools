@@ -1,60 +1,48 @@
-import { useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
-import { Checkbox, CheckboxLabel } from "~/components/ui/checkbox";
-import { TextField, TextFieldErrorMessage, TextFieldTextArea } from "~/components/ui/text-field";
-import { cn } from "~/lib/utils";
-import { setToolPageMeta } from "~/lib/seo";
-import {
-  decodeHTMLEntities,
-  encodeHTMLEntities,
-} from "~/lib/utils/encoding/html-entities";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented, ToolbarChip } from '~/components/tool-toolbar'
+import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
+import { setToolPageMeta } from '~/lib/seo'
+import { decodeHTMLEntities, encodeHTMLEntities } from '~/lib/utils/encoding/html-entities'
 
-type Mode = "encode" | "decode";
+const COMMON_ENTITIES = [
+  { char: '&', entity: '&amp;' },
+  { char: '<', entity: '&lt;' },
+  { char: '>', entity: '&gt;' },
+  { char: '"', entity: '&quot;' },
+  { char: "'", entity: '&#39;' },
+]
+
+type Direction = 'encode' | 'decode'
 
 export default function HTMLEntitiesTool() {
-  setToolPageMeta("encoding", "html-entities");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
+  setToolPageMeta('encoding', 'html-entities')
+  const [params, setParams] = useSearchParams<{ dir?: string }>()
 
-  const [input, setInput] = createSignal("");
-  const [error, setError] = createSignal<string | null>(null);
-  const [extended, setExtended] = createSignal(false);
+  const [input, setInput] = createSignal('')
+  const [direction, setDirectionSignal] = createSignal<Direction>(params.dir === 'decode' ? 'decode' : 'encode')
+  const [extended, setExtended] = createSignal(false)
 
-  const [mode, setModeSignal] = createSignal<Mode>(
-    params.mode === "decode" ? "decode" : "encode",
-  );
-
-  function setMode(m: Mode) {
-    setModeSignal(m);
-    setParams({ mode: m });
+  function setDirection(d: Direction) {
+    setDirectionSignal(d)
+    setParams({ dir: d })
   }
 
-  const output = createMemo(() => {
-    if (!input()) return "";
+  const result = createMemo<{ value: string; error: string | null }>(() => {
+    const s = input()
+    if (!s) return { value: '', error: null }
     try {
-      return mode() === "encode"
-        ? encodeHTMLEntities(input(), extended())
-        : decodeHTMLEntities(input());
-    } catch {
-      return "";
-    }
-  });
-
-  createEffect(() => {
-    if (!input()) {
-      setError(null);
-      return;
-    }
-    try {
-      mode() === "encode"
-        ? encodeHTMLEntities(input(), extended())
-        : decodeHTMLEntities(input());
-      setError(null);
+      const value = direction() === 'encode' ? encodeHTMLEntities(s, extended()) : decodeHTMLEntities(s)
+      return { value, error: null }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Invalid input");
+      return {
+        value: '',
+        error: e instanceof Error ? e.message : 'Invalid input',
+      }
     }
-  });
+  })
 
   return (
     <main class="w-full py-10">
@@ -64,66 +52,92 @@ export default function HTMLEntitiesTool() {
         description="Encode and decode HTML entities, including &amp;, &lt;, &gt;, and numeric entities."
       />
 
-      <div class="mb-4 flex gap-2">
-        <For each={["encode", "decode"] as Mode[]}>
-          {(m) => (
-            <button
-              type="button"
-              class={cn(
-                "rounded-md px-4 py-1.5 text-sm font-medium border-2 transition-colors",
-                mode() === m
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-input hover:border-primary/50 hover:bg-accent/30",
-              )}
-              onClick={() => setMode(m)}
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        {/* Toolbar — chromeless strip above the input */}
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Direction"
+            value={direction()}
+            onChange={setDirection}
+            options={[
+              { value: 'encode', label: 'Encode' },
+              { value: 'decode', label: 'Decode' },
+            ]}
+          />
+          <div class="ml-auto" />
+          <Show when={direction() === 'encode'}>
+            <ToolbarChip checked={extended()} onChange={setExtended}>
+              non-ASCII as numeric
+            </ToolbarChip>
+          </Show>
+        </ToolToolbar>
+
+        {/* Input → Output */}
+        <div class="grid gap-6 md:grid-cols-2">
+          {/* Input card */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+            </div>
+            <TextField
+              value={input()}
+              onChange={setInput}
+              validationState={result().error ? 'invalid' : 'valid'}
+              class="flex flex-col gap-2"
             >
-              {m.charAt(0).toUpperCase() + m.slice(1)}
-            </button>
-          )}
-        </For>
-      </div>
+              <TextFieldTextArea
+                autofocus
+                rows={8}
+                class="min-h-[12rem] font-mono text-sm resize-y"
+                placeholder={direction() === 'encode' ? 'Type raw HTML or text…' : 'Type or paste HTML entities…'}
+              />
+              <TextFieldErrorMessage>{result().error}</TextFieldErrorMessage>
+            </TextField>
+          </section>
 
-      <Show when={mode() === "encode"}>
-        <div class="mt-3 mb-4">
-          <Checkbox checked={extended()} onChange={setExtended}>
-            <CheckboxLabel>Encode non-ASCII characters as numeric entities</CheckboxLabel>
-          </Checkbox>
+          {/* Output card */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+            </div>
+            <Show
+              when={result().value}
+              fallback={
+                <div class="flex min-h-[12rem] items-center justify-center rounded-md border border-dashed border-border bg-background/40 px-4 py-8 text-center text-sm text-muted-foreground">
+                  Result will appear here
+                </div>
+              }
+            >
+              <div class="anim-fade-in relative">
+                <pre class="min-h-[12rem] overflow-auto rounded-md border border-violet/30 bg-violet/[0.03] p-4 pr-14 font-mono text-sm text-foreground whitespace-pre-wrap break-words">
+                  {result().value}
+                </pre>
+                <CopyButton value={() => result().value} class="absolute right-2 top-2" />
+              </div>
+            </Show>
+          </section>
         </div>
-      </Show>
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <section class="rounded-xl border bg-card p-6 shadow-sm">
-          <h2 class="mb-4 text-xl font-semibold">Input</h2>
-          <TextField
-            value={input()}
-            onChange={setInput}
-            validationState={error() ? "invalid" : "valid"}
-          >
-            <TextFieldTextArea
-              rows={8}
-              class="font-mono"
-              placeholder="Enter HTML to encode or entities to decode…"
-            />
-            <TextFieldErrorMessage>{error()}</TextFieldErrorMessage>
-          </TextField>
-        </section>
-
-        <section class="rounded-xl border bg-card p-6 shadow-sm">
-          <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-xl font-semibold">Output</h2>
-            <CopyButton value={() => output()} />
+        {/* Common entities reference */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Common entities</h2>
           </div>
-          <TextField>
-            <TextFieldTextArea
-              readOnly
-              value={output()}
-              rows={8}
-              class="font-mono"
-              placeholder="Result will appear here"
-            />
-          </TextField>
+          <div class="flex flex-wrap gap-1.5">
+            <For each={COMMON_ENTITIES}>
+              {(item) => (
+                <div class="flex flex-col items-center gap-0.5 rounded-md border border-border bg-background px-3 py-1.5 font-mono">
+                  <span class="text-xs font-semibold text-foreground">{item.char}</span>
+                  <span class="text-xs font-semibold text-violet">{item.entity}</span>
+                </div>
+              )}
+            </For>
+          </div>
         </section>
       </div>
     </main>
-  );
+  )
 }

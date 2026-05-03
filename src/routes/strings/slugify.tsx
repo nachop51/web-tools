@@ -1,114 +1,111 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
-import { RadioGroup, RadioGroupItem, RadioGroupItemLabel } from "~/components/ui/radio-group";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { cn } from "~/lib/utils";
-import { slugify, type SlugifyOptions } from "~/lib/utils/strings/slugify";
-import { setToolPageMeta } from "~/lib/seo";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
+import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
+import { slugify, type SlugifyOptions } from '~/lib/utils/strings/slugify'
+import { setToolPageMeta } from '~/lib/seo'
 
-type Separator = "-" | "_" | ".";
+type Separator = '-' | '_' | '.'
+type CaseOpt = 'lower' | 'preserve'
 
-const separatorOptions: Array<{ value: Separator; label: string }> = [
-  { value: "-", label: "Hyphen (-)" },
-  { value: "_", label: "Underscore (_)" },
-  { value: ".", label: "Dot (.)" },
-];
+const separatorOptions: { value: Separator; label: string }[] = [
+  { value: '-', label: 'Hyphen (-)' },
+  { value: '_', label: 'Underscore (_)' },
+  { value: '.', label: 'Dot (.)' },
+]
+
+const caseOptions: { value: CaseOpt; label: string }[] = [
+  { value: 'lower', label: 'Lowercase' },
+  { value: 'preserve', label: 'Preserve' },
+]
 
 export default function SlugifyTool() {
-  setToolPageMeta("strings", "slugify");
-  const [params, setParams] = useSearchParams<{ sep?: string; lc?: string }>();
+  setToolPageMeta('strings', 'slugify')
+  const [params, setParams] = useSearchParams<{ sep?: string; lc?: string }>()
 
-  const [input, setInput] = createSignal("");
+  const [input, setInput] = createSignal('')
 
   const separator = createMemo<Separator>(() => {
-    const s = params.sep;
-    if (s === "-" || s === "_" || s === ".") return s;
-    return "-";
-  });
+    const s = params.sep
+    if (s === '-' || s === '_' || s === '.') return s
+    return '-'
+  })
 
-  const lowercase = createMemo(() => params.lc !== "0");
+  const lowercase = createMemo(() => params.lc !== '0')
+  const caseValue = createMemo<CaseOpt>(() => (lowercase() ? 'lower' : 'preserve'))
 
   const output = createMemo(() => {
     const opts: SlugifyOptions = {
       separator: separator(),
       lowercase: lowercase(),
-    };
-    return slugify(input(), opts);
-  });
+    }
+    return slugify(input(), opts)
+  })
 
   return (
     <main class="w-full py-10">
-      <ToolHeader
-        category="strings"
-        name="Slugify"
-        description="Convert text to a URL-friendly slug."
-      />
+      <ToolHeader category="strings" name="Slugify" description="Convert text to a URL-friendly slug." />
 
-      <div class="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <div class="space-y-4">
-          <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-            <h2 class="mb-3 text-base font-semibold">Input</h2>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Separator"
+            value={separator()}
+            onChange={(v) => setParams({ sep: v })}
+            options={separatorOptions}
+          />
+          <ToolbarSegmented
+            label="Case"
+            value={caseValue()}
+            onChange={(v) => setParams({ lc: v === 'lower' ? '1' : '0' })}
+            options={caseOptions}
+          />
+        </ToolToolbar>
+
+        <div class="grid gap-6 md:grid-cols-2">
+          {/* Input */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+            </div>
+
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                rows={6}
+                autofocus
                 placeholder="Paste text here…"
-                class="resize-y"
+                class="min-h-[10rem] resize-y font-mono text-sm"
               />
             </TextField>
           </section>
 
-          <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-            <div class="mb-3 flex items-center justify-between">
-              <h2 class="text-base font-semibold">Output</h2>
-              <CopyButton value={output} />
+          {/* Output */}
+          <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+            <div class="mb-4 flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Slug</h2>
             </div>
-            <TextField value={output()}>
-              <TextFieldTextArea
-                readOnly
-                rows={6}
-                class="resize-y bg-muted/30 font-mono"
-                placeholder="Slug will appear here"
-              />
-            </TextField>
+
+            <div class="relative">
+              <Show
+                when={output()}
+                fallback={
+                  <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Slug will appear here
+                  </div>
+                }
+              >
+                <div class="anim-fade-up min-h-[8.25rem] rounded-md border border-violet/30 bg-violet/5 p-4 pr-14 font-mono text-sm leading-relaxed break-words">
+                  {output()}
+                </div>
+                <CopyButton value={() => output()} class="absolute right-2 top-2" />
+              </Show>
+            </div>
           </section>
         </div>
-
-        <aside class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <h2 class="mb-4 text-base font-semibold">Options</h2>
-
-          <div class="mb-6">
-            <p class="mb-2 text-sm font-medium">Separator</p>
-            <RadioGroup value={separator()} onChange={(v) => setParams({ sep: v })}>
-              <For each={separatorOptions}>
-                {(opt) => (
-                  <RadioGroupItem value={opt.value}>
-                    <RadioGroupItemLabel>{opt.label}</RadioGroupItemLabel>
-                  </RadioGroupItem>
-                )}
-              </For>
-            </RadioGroup>
-          </div>
-
-          <div>
-            <p class="mb-2 text-sm font-medium">Case</p>
-            <button
-              type="button"
-              class={cn(
-                "w-full rounded-lg border-2 px-3 py-2 text-sm transition-colors",
-                "hover:border-primary/60 hover:bg-primary/10",
-                lowercase()
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-input",
-              )}
-              onClick={() => setParams({ lc: lowercase() ? "0" : "1" })}
-            >
-              {lowercase() ? "Lowercase enabled" : "Lowercase disabled"}
-            </button>
-          </div>
-        </aside>
       </div>
     </main>
-  );
+  )
 }

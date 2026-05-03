@@ -1,7 +1,8 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, For } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import {
   NumberField,
   NumberFieldGroup,
@@ -9,50 +10,57 @@ import {
   NumberFieldDecrementTrigger,
   NumberFieldInput,
   NumberFieldLabel,
-} from "~/components/ui/number-field";
-import { cn } from "~/lib/utils";
-import { ceilTo, floorTo, roundTo, toSigFigs, truncateTo } from "~/lib/utils/numbers/precision";
-import { setToolPageMeta } from "~/lib/seo";
+} from '~/components/ui/number-field'
+import { ceilTo, floorTo, roundTo, toSigFigs, truncateTo } from '~/lib/utils/numbers/precision'
+import { setToolPageMeta } from '~/lib/seo'
 
-type PrecisionMode = "round" | "floor" | "ceil" | "trunc" | "sigfigs";
+type PrecisionMode = 'round' | 'floor' | 'ceil' | 'trunc' | 'sigfigs'
 
-const modes: Array<{ key: PrecisionMode; label: string }> = [
-  { key: "round", label: "Round" },
-  { key: "floor", label: "Floor" },
-  { key: "ceil", label: "Ceil" },
-  { key: "trunc", label: "Truncate" },
-  { key: "sigfigs", label: "Sig Figs" },
-];
+const modeOptions: { value: PrecisionMode; label: string }[] = [
+  { value: 'round', label: 'Round' },
+  { value: 'floor', label: 'Floor' },
+  { value: 'ceil', label: 'Ceil' },
+  { value: 'trunc', label: 'Truncate' },
+  { value: 'sigfigs', label: 'Sig Figs' },
+]
 
 export default function DecimalPrecision() {
-  setToolPageMeta("numbers", "decimal-precision");
-  const [params, setParams] = useSearchParams<{ mode?: string; places?: string }>();
+  setToolPageMeta('numbers', 'decimal-precision')
+  const [params, setParams] = useSearchParams<{
+    mode?: string
+    places?: string
+  }>()
 
-  const [input, setInput] = createSignal("");
+  const [input, setInput] = createSignal('')
 
   const mode = createMemo<PrecisionMode>(() => {
-    const p = params.mode;
-    if (p && modes.some((m) => m.key === p)) return p as PrecisionMode;
-    return "round";
-  });
+    const p = params.mode
+    if (p && modeOptions.some((m) => m.value === p)) return p as PrecisionMode
+    return 'round'
+  })
 
   const places = createMemo(() => {
-    const p = parseInt(params.places ?? "2", 10);
-    return isNaN(p) ? 2 : Math.min(20, Math.max(0, p));
-  });
+    const p = parseInt(params.places ?? '2', 10)
+    return isNaN(p) ? 2 : Math.min(20, Math.max(0, p))
+  })
 
   const result = createMemo(() => {
-    const n = parseFloat(input());
-    if (input() === "" || isNaN(n)) return "";
-    const p = places();
+    const n = parseFloat(input())
+    if (input() === '' || isNaN(n)) return ''
+    const p = places()
     switch (mode()) {
-      case "round": return String(roundTo(n, p));
-      case "floor": return String(floorTo(n, p));
-      case "ceil": return String(ceilTo(n, p));
-      case "trunc": return String(truncateTo(n, p));
-      case "sigfigs": return String(toSigFigs(n, Math.max(1, p)));
+      case 'round':
+        return String(roundTo(n, p))
+      case 'floor':
+        return String(floorTo(n, p))
+      case 'ceil':
+        return String(ceilTo(n, p))
+      case 'trunc':
+        return String(truncateTo(n, p))
+      case 'sigfigs':
+        return String(toSigFigs(n, Math.max(1, p)))
     }
-  });
+  })
 
   return (
     <main class="w-full py-10">
@@ -62,73 +70,78 @@ export default function DecimalPrecision() {
         description="Round, floor, ceil, truncate, or apply significant figures to a number."
       />
 
-      <div class="mx-auto max-w-xl space-y-6">
-        <div class="flex flex-wrap gap-2">
-          <For each={modes}>
-            {(m) => (
-              <button
-                type="button"
-                class={cn(
-                  "rounded-md border-2 px-4 py-1.5 text-sm font-medium transition-colors",
-                  mode() === m.key
-                    ? "border-primary bg-primary/15 text-primary"
-                    : "border-input hover:border-primary/50 hover:bg-accent/30",
-                )}
-                onClick={() => setParams({ mode: m.key })}
-              >
-                {m.label}
-              </button>
-            )}
-          </For>
-        </div>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented
+            label="Mode"
+            value={mode()}
+            onChange={(v) => setParams({ mode: v })}
+            options={modeOptions}
+          />
+        </ToolToolbar>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <NumberField
-            value={input()}
-            onChange={setInput}
-            format={false}
-            class="flex flex-col gap-1"
-          >
-            <NumberFieldLabel>Number</NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput
-                placeholder="e.g. 3.14159"
-                class="font-mono"
-              />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-
-          <NumberField
-            value={String(places())}
-            onChange={(v) => setParams({ places: v })}
-            minValue={0}
-            maxValue={20}
-            format={false}
-            class="flex flex-col gap-1"
-          >
-            <NumberFieldLabel>
-              {mode() === "sigfigs" ? "Significant figures" : "Decimal places"}
-            </NumberFieldLabel>
-            <NumberFieldGroup>
-              <NumberFieldInput />
-              <NumberFieldIncrementTrigger />
-              <NumberFieldDecrementTrigger />
-            </NumberFieldGroup>
-          </NumberField>
-        </div>
-
-        <section class="rounded-xl border bg-card p-5 text-card-foreground shadow-sm">
-          <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-base font-semibold">Result</h2>
-            <CopyButton value={result} />
+        {/* Inputs */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
           </div>
-          <p class="font-mono text-2xl font-semibold tracking-tight">
-            {result() || <span class="text-muted-foreground text-base font-normal">Enter a number above</span>}
-          </p>
+
+          <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+            <NumberField onChange={setInput} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>Number</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput autofocus placeholder="e.g. 3.14159" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+
+            <NumberField
+              value={String(places())}
+              onChange={(v) => setParams({ places: v })}
+              minValue={0}
+              maxValue={20}
+              format={false}
+              class="flex flex-col gap-1.5 sm:w-44"
+            >
+              <NumberFieldLabel>{mode() === 'sigfigs' ? 'Sig figures' : 'Decimal places'}</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+          </div>
+        </section>
+
+        {/* Result */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Result</h2>
+          </div>
+
+          <Show
+            when={result()}
+            fallback={
+              <div class="flex min-h-20 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Enter a number to see the result
+              </div>
+            }
+          >
+            <div
+              class="anim-fade-up flex items-center gap-3 overflow-hidden rounded-md border border-border px-4 py-3"
+              data-output={result()}
+            >
+              <span class="flex-1 font-mono text-2xl font-semibold tabular-nums tracking-tight break-all">
+                {result()}
+              </span>
+              <CopyButton value={() => result() ?? ''} />
+            </div>
+          </Show>
         </section>
       </div>
     </main>
-  );
+  )
 }

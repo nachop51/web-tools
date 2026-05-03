@@ -1,47 +1,41 @@
-import { createMemo, createSignal, For } from "solid-js";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { ToolToolbar } from '~/components/tool-toolbar'
 import {
   NumberField,
   NumberFieldGroup,
   NumberFieldIncrementTrigger,
   NumberFieldDecrementTrigger,
   NumberFieldInput,
-} from "~/components/ui/number-field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { cn } from "~/lib/utils";
-import { setToolPageMeta } from "~/lib/seo";
-import {
-  convertSalary,
-  salaryPeriods,
-  type SalaryBreakdown,
-} from "~/lib/utils/finance/salary";
+  NumberFieldLabel,
+} from '~/components/ui/number-field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { setToolPageMeta } from '~/lib/seo'
+import { convertSalary, salaryPeriods, type SalaryBreakdown } from '~/lib/utils/finance/salary'
 
-type PeriodOption = { id: keyof SalaryBreakdown; label: string };
+type PeriodId = keyof SalaryBreakdown
+type PeriodOption = (typeof salaryPeriods)[number]
 
 function fmtCurrency(n: number): string {
-  if (!isFinite(n)) return "—";
-  return n.toFixed(2);
+  if (!isFinite(n)) return '—'
+  return n.toFixed(2)
 }
 
 export default function SalaryConverter() {
-  setToolPageMeta("finance", "salary");
-  const [amount, setAmount] = createSignal("");
-  const [period, setPeriod] = createSignal<PeriodOption>(salaryPeriods[0]);
-  const [hoursPerWeek, setHoursPerWeek] = createSignal("40");
+  setToolPageMeta('finance', 'salary')
+  const [amount, setAmount] = createSignal('')
+  const [periodId, setPeriodId] = createSignal<PeriodId>('annual')
+  const [hoursPerWeek, setHoursPerWeek] = createSignal('40')
+
+  const selectedPeriod = createMemo(() => salaryPeriods.find((p) => p.id === periodId()) ?? salaryPeriods[0])
 
   const result = createMemo(() => {
-    const a = parseFloat(amount());
-    const h = parseFloat(hoursPerWeek());
-    if (!isFinite(a) || a < 0 || !isFinite(h) || h <= 0) return null;
-    return convertSalary(a, period().id, h);
-  });
+    const a = parseFloat(amount())
+    const h = parseFloat(hoursPerWeek())
+    if (!isFinite(a) || a < 0 || !isFinite(h) || h <= 0) return null
+    return convertSalary(a, periodId(), h)
+  })
 
   return (
     <main class="w-full py-10">
@@ -51,111 +45,106 @@ export default function SalaryConverter() {
         description="Convert between annual, monthly, bi-weekly, weekly, daily, and hourly pay rates."
       />
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <section class="rounded-xl border bg-card p-5 shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Inputs</h2>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pay period</span>
+          <Select<PeriodOption>
+            options={salaryPeriods}
+            optionValue="id"
+            optionTextValue="label"
+            value={selectedPeriod()}
+            onChange={(opt) => opt && setPeriodId(opt.id)}
+            itemComponent={(itemProps) => (
+              <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
+            )}
+          >
+            <SelectTrigger aria-label="Pay period" class="h-8 w-44 text-sm">
+              <SelectValue<PeriodOption>>{(state) => state.selectedOption()?.label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+        </ToolToolbar>
 
-          <div class="space-y-4">
-            <div class="space-y-1.5">
-              <label class="block text-sm font-medium">Amount ($)</label>
-              <NumberField
-                value={amount()}
-                onChange={setAmount}
-                minValue={0}
-                step={0.01}
-                format={false}
-                class="flex flex-col gap-1"
-              >
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="e.g. 75000" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
-            </div>
+        {/* Inputs */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+          </div>
 
-            <div class="space-y-1.5">
-              <label class="block text-sm font-medium">Pay period</label>
-              <Select<PeriodOption>
-                options={salaryPeriods}
-                optionValue="id"
-                optionTextValue="label"
-                value={period()}
-                onChange={(opt) => opt && setPeriod(opt)}
-                itemComponent={(itemProps) => (
-                  <SelectItem item={itemProps.item}>
-                    {itemProps.item.rawValue.label}
-                  </SelectItem>
-                )}
-              >
-                <SelectTrigger>
-                  <SelectValue<PeriodOption>>
-                    {(state) => state.selectedOption()?.label}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent />
-              </Select>
-            </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <NumberField onChange={setAmount} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>Amount ($)</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput autofocus placeholder="e.g. 75000" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
 
-            <div class="space-y-1.5">
-              <label class="block text-sm font-medium">Hours per week</label>
-              <NumberField
-                value={hoursPerWeek()}
-                onChange={setHoursPerWeek}
-                minValue={1}
-                maxValue={168}
-                step={1}
-                format={false}
-                class="flex flex-col gap-1"
-              >
-                <NumberFieldGroup>
-                  <NumberFieldInput placeholder="40" />
-                  <NumberFieldIncrementTrigger />
-                  <NumberFieldDecrementTrigger />
-                </NumberFieldGroup>
-              </NumberField>
-            </div>
+            <NumberField
+              value={hoursPerWeek()}
+              onChange={setHoursPerWeek}
+              minValue={1}
+              maxValue={168}
+              step={1}
+              format={false}
+              class="flex flex-col gap-1.5"
+            >
+              <NumberFieldLabel>Hours per week</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput placeholder="40" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
           </div>
         </section>
 
-        <section class="rounded-xl border bg-card p-5 shadow-sm">
-          <h2 class="mb-4 text-lg font-semibold">Results</h2>
-
-          <div class="divide-y divide-border rounded-lg border">
-            <For each={salaryPeriods}>
-              {(p) => {
-                const value = createMemo(() => {
-                  const r = result();
-                  if (!r) return "—";
-                  return fmtCurrency(r[p.id]);
-                });
-                const isSelected = () => period().id === p.id;
-                return (
-                  <div
-                    class={cn(
-                      "flex items-center justify-between gap-4 px-4 py-3 transition-colors",
-                      isSelected() && "bg-primary/10",
-                    )}
-                  >
-                    <span
-                      class={cn(
-                        "min-w-[110px] text-sm font-medium",
-                        isSelected() && "text-primary",
-                      )}
-                    >
-                      {p.label}
-                    </span>
-                    <span class="flex-1 font-mono text-sm text-right">
-                      ${value()}
-                    </span>
-                    <CopyButton value={value} />
-                  </div>
-                );
-              }}
-            </For>
+        {/* Results */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Breakdown</h2>
           </div>
+
+          <Show
+            when={result()}
+            fallback={
+              <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Enter an amount to see the salary breakdown
+              </div>
+            }
+          >
+            <div class="overflow-hidden rounded-md border border-border">
+              <For each={salaryPeriods}>
+                {(p) => {
+                  const value = createMemo(() => fmtCurrency(result()![p.id]))
+                  return <ResultRow label={p.label} value={value()} prefix="$" />
+                }}
+              </For>
+            </div>
+          </Show>
         </section>
       </div>
     </main>
-  );
+  )
+}
+
+type ResultRowProps = {
+  label: string
+  value: string
+  prefix?: string
+  suffix?: string
+}
+
+function ResultRow(props: ResultRowProps) {
+  const full = () => `${props.prefix ?? ''}${props.value}${props.suffix ?? ''}`
+  return (
+    <div class="flex items-center gap-3 border-t border-border/50 px-4 py-3 text-sm first:border-t-0">
+      <span class="w-40 shrink-0 text-muted-foreground">{props.label}</span>
+      <span class="flex-1 text-right font-mono tabular-nums text-base font-semibold">{full()}</span>
+      <CopyButton value={full} />
+    </div>
+  )
 }

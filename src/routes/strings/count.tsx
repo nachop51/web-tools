@@ -1,8 +1,7 @@
-import { createMemo, createSignal, For } from "solid-js";
-import { Card, CardContent } from "~/components/ui/card";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { ToolHeader } from "~/components/tool-header";
-import { setToolPageMeta } from "~/lib/seo";
+import { createMemo, createSignal, For } from 'solid-js'
+import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
+import { ToolHeader } from '~/components/tool-header'
+import { setToolPageMeta } from '~/lib/seo'
 import {
   countBytes,
   countChars,
@@ -11,21 +10,21 @@ import {
   countParagraphs,
   countSentences,
   countWords,
-} from "~/lib/utils/strings/count";
+} from '~/lib/utils/strings/count'
 
 const statDefs = [
-  { key: "chars" as const, label: "Characters" },
-  { key: "noSpaces" as const, label: "No spaces" },
-  { key: "words" as const, label: "Words" },
-  { key: "lines" as const, label: "Lines" },
-  { key: "bytes" as const, label: "Bytes" },
-  { key: "sentences" as const, label: "Sentences" },
-  { key: "paragraphs" as const, label: "Paragraphs" },
-];
+  { key: 'chars' as const, label: 'Characters' },
+  { key: 'noSpaces' as const, label: 'No spaces' },
+  { key: 'words' as const, label: 'Words' },
+  { key: 'lines' as const, label: 'Lines' },
+  { key: 'bytes' as const, label: 'Bytes' },
+  { key: 'sentences' as const, label: 'Sentences' },
+  { key: 'paragraphs' as const, label: 'Paragraphs' },
+]
 
 export default function CharacterCount() {
-  setToolPageMeta("strings", "count");
-  const [text, setText] = createSignal("");
+  setToolPageMeta('strings', 'count')
+  const [text, setText] = createSignal('')
 
   const stats = createMemo(() => ({
     chars: countChars(text()),
@@ -35,7 +34,7 @@ export default function CharacterCount() {
     bytes: countBytes(text()),
     sentences: countSentences(text()),
     paragraphs: countParagraphs(text()),
-  }));
+  }))
 
   return (
     <main class="w-full py-10">
@@ -45,28 +44,42 @@ export default function CharacterCount() {
         description="Count characters, words, lines, bytes, sentences, and paragraphs."
       />
 
-      <TextField value={text()} onChange={setText}>
-        <TextFieldTextArea
-          rows={10}
-          placeholder="Paste text here…"
-          class="w-full resize-y"
-        />
-      </TextField>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        {/* Input */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+          </div>
 
-      <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-        <For each={statDefs}>
-          {(def) => (
-            <Card>
-              <CardContent class="pt-4 text-center">
-                <p class="text-3xl font-semibold tabular-nums">
-                  {stats()[def.key]}
-                </p>
-                <p class="mt-1 text-xs text-muted-foreground">{def.label}</p>
-              </CardContent>
-            </Card>
-          )}
-        </For>
+          <TextField value={text()} onChange={setText}>
+            <TextFieldTextArea
+              autofocus
+              placeholder="Paste text here…"
+              class="min-h-[10rem] w-full resize-y font-mono text-sm"
+            />
+          </TextField>
+        </section>
+
+        {/* Stats */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Stats</h2>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            <For each={statDefs}>
+              {(def) => (
+                <div class="rounded-md border border-violet/30 bg-violet/5 p-4 text-center">
+                  <p class="font-mono text-2xl font-semibold tabular-nums tracking-tight">{stats()[def.key]}</p>
+                  <p class="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{def.label}</p>
+                </div>
+              )}
+            </For>
+          </div>
+        </section>
       </div>
     </main>
-  );
+  )
 }

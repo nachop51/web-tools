@@ -1,12 +1,8 @@
-import { useSearchParams } from "@solidjs/router";
-import { createMemo, createSignal, Switch, Match } from "solid-js";
-import { ToolHeader } from "~/components/tool-header";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { useSearchParams } from '@solidjs/router'
+import { createMemo, createSignal, Show, Switch, Match } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import {
   NumberField,
   NumberFieldGroup,
@@ -14,61 +10,72 @@ import {
   NumberFieldDecrementTrigger,
   NumberFieldInput,
   NumberFieldLabel,
-} from "~/components/ui/number-field";
-import {
-  percentOf,
-  whatPercent,
-  percentChange,
-  percentError,
-} from "~/lib/utils/numbers/percentage";
-import { cn } from "~/lib/utils";
-import { setToolPageMeta } from "~/lib/seo";
+} from '~/components/ui/number-field'
+import { percentOf, whatPercent, percentChange, percentError } from '~/lib/utils/numbers/percentage'
+import { setToolPageMeta } from '~/lib/seo'
 
-type Mode = "of" | "what" | "change" | "error";
+type Mode = 'of' | 'what' | 'change' | 'error'
 
-const modes: { value: Mode; label: string }[] = [
-  { value: "of", label: "X% of Y" },
-  { value: "what", label: "What %" },
-  { value: "change", label: "% Change" },
-  { value: "error", label: "% Error" },
-];
+const modeOptions: { value: Mode; label: string }[] = [
+  { value: 'of', label: 'X% of Y' },
+  { value: 'what', label: 'What %' },
+  { value: 'change', label: '% Change' },
+  { value: 'error', label: '% Error' },
+]
 
 function fmtResult(n: number): string {
-  if (!isFinite(n)) return "—";
-  return parseFloat(n.toPrecision(8)).toString();
+  if (!isFinite(n)) return ''
+  return parseFloat(n.toPrecision(8)).toString()
 }
 
 export default function PercentageCalculator() {
-  setToolPageMeta("numbers", "percentage");
-  const [params, setParams] = useSearchParams<{ mode?: string }>();
+  setToolPageMeta('numbers', 'percentage')
+  const [params, setParams] = useSearchParams<{ mode?: string }>()
 
-  const initialMode = (["of", "what", "change", "error"].includes(params.mode ?? "")
-    ? params.mode
-    : "of") as Mode;
+  const initialMode = (['of', 'what', 'change', 'error'].includes(params.mode ?? '') ? params.mode : 'of') as Mode
 
-  const [mode, setMode] = createSignal<Mode>(initialMode);
-  const [a, setA] = createSignal("");
-  const [b, setB] = createSignal("");
+  const [mode, setMode] = createSignal<Mode>(initialMode)
+  const [a, setA] = createSignal('')
+  const [b, setB] = createSignal('')
 
-  const numA = createMemo(() => parseFloat(a()));
-  const numB = createMemo(() => parseFloat(b()));
+  const numA = createMemo(() => parseFloat(a()))
+  const numB = createMemo(() => parseFloat(b()))
 
   const result = createMemo((): string => {
-    const na = numA();
-    const nb = numB();
-    const m = mode();
-    if (isNaN(na) || isNaN(nb)) return "—";
-    if (m === "of") return fmtResult(percentOf(na, nb));
-    if (m === "what") return fmtResult(whatPercent(na, nb));
-    if (m === "change") return fmtResult(percentChange(na, nb));
-    return fmtResult(percentError(na, nb));
-  });
+    const na = numA()
+    const nb = numB()
+    const m = mode()
+    if (isNaN(na) || isNaN(nb)) return ''
+    if (m === 'of') return fmtResult(percentOf(na, nb))
+    if (m === 'what') return fmtResult(whatPercent(na, nb))
+    if (m === 'change') return fmtResult(percentChange(na, nb))
+    return fmtResult(percentError(na, nb))
+  })
+
+  const displayResult = createMemo(() => {
+    const r = result()
+    if (!r) return ''
+    return mode() === 'of' ? r : `${r}%`
+  })
+
+  const labels = createMemo<{ a: string; b: string; aPlaceholder: string; bPlaceholder: string }>(() => {
+    switch (mode()) {
+      case 'of':
+        return { a: 'Percentage (%)', b: 'Of what number?', aPlaceholder: 'e.g. 25', bPlaceholder: 'e.g. 200' }
+      case 'what':
+        return { a: 'Part', b: 'Whole', aPlaceholder: 'e.g. 50', bPlaceholder: 'e.g. 200' }
+      case 'change':
+        return { a: 'From', b: 'To', aPlaceholder: 'e.g. 100', bPlaceholder: 'e.g. 150' }
+      case 'error':
+        return { a: 'Measured value', b: 'Actual value', aPlaceholder: 'e.g. 9.8', bPlaceholder: 'e.g. 10' }
+    }
+  })
 
   function handleModeChange(m: Mode) {
-    setMode(m);
-    setParams({ mode: m });
-    setA("");
-    setB("");
+    setMode(m)
+    setParams({ mode: m })
+    setA('')
+    setB('')
   }
 
   return (
@@ -79,168 +86,76 @@ export default function PercentageCalculator() {
         description="Solve X% of Y, what % is X of Y, percentage change, and percent error."
       />
 
-      <div class="space-y-6">
-        <div class="flex flex-wrap gap-2">
-          {modes.map((m) => (
-            <button
-              type="button"
-              class={cn(
-                "px-4 py-2 text-sm font-medium border rounded-md transition-colors",
-                "hover:border-primary/60 hover:bg-primary/10",
-                mode() === m.value
-                  ? "border-primary bg-primary/15"
-                  : "border-input bg-background",
-              )}
-              onClick={() => handleModeChange(m.value)}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented label="Mode" value={mode()} onChange={handleModeChange} options={modeOptions} />
+        </ToolToolbar>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Switch>
-                <Match when={mode() === "of"}>X% of Y</Match>
-                <Match when={mode() === "what"}>What % is X of Y?</Match>
-                <Match when={mode() === "change"}>Percentage change</Match>
-                <Match when={mode() === "error"}>Percentage error</Match>
-              </Switch>
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="space-y-4">
-            <Switch>
-              <Match when={mode() === "of"}>
-                <NumberField
-                  value={a()}
-                  onChange={setA}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Percentage (%)</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 25" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-                <NumberField
-                  value={b()}
-                  onChange={setB}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Of what number?</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 200" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-              </Match>
-              <Match when={mode() === "what"}>
-                <NumberField
-                  value={a()}
-                  onChange={setA}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Part</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 50" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-                <NumberField
-                  value={b()}
-                  onChange={setB}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Whole</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 200" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-              </Match>
-              <Match when={mode() === "change"}>
-                <NumberField
-                  value={a()}
-                  onChange={setA}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>From</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 100" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-                <NumberField
-                  value={b()}
-                  onChange={setB}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>To</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 150" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-              </Match>
-              <Match when={mode() === "error"}>
-                <NumberField
-                  value={a()}
-                  onChange={setA}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Measured value</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 9.8" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-                <NumberField
-                  value={b()}
-                  onChange={setB}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Actual value</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="e.g. 10" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-              </Match>
-            </Switch>
+        {/* Inputs */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+          </div>
 
-            <div class="mt-4 rounded-md bg-muted px-4 py-3">
-              <p class="text-xs text-muted-foreground mb-1">Result</p>
-              <p class="font-mono text-2xl font-semibold">
-                <Switch>
-                  <Match when={mode() === "of"}>
-                    {result()}
-                  </Match>
-                  <Match when={mode() !== "of"}>
-                    {result() !== "—" ? `${result()}%` : "—"}
-                  </Match>
-                </Switch>
-              </p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <NumberField onChange={setA} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>{labels().a}</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput autofocus placeholder={labels().aPlaceholder} class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+
+            <NumberField onChange={setB} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>{labels().b}</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput placeholder={labels().bPlaceholder} class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+          </div>
+        </section>
+
+        {/* Result */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Result</h2>
             </div>
-          </CardContent>
-        </Card>
+            <span class="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Switch>
+                <Match when={mode() === 'of'}>X% of Y</Match>
+                <Match when={mode() === 'what'}>X is what % of Y</Match>
+                <Match when={mode() === 'change'}>Percentage change</Match>
+                <Match when={mode() === 'error'}>Percentage error</Match>
+              </Switch>
+            </span>
+          </div>
+
+          <Show
+            when={result()}
+            fallback={
+              <div class="flex min-h-[5rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Enter both values to see the result
+              </div>
+            }
+          >
+            <div
+              class="anim-fade-up flex items-center gap-3 overflow-hidden rounded-md border border-border px-4 py-3"
+              data-output={displayResult()}
+            >
+              <span class="flex-1 font-mono text-2xl font-semibold tabular-nums tracking-tight break-all">
+                {displayResult()}
+              </span>
+              <CopyButton value={() => displayResult()} />
+            </div>
+          </Show>
+        </section>
       </div>
     </main>
-  );
+  )
 }

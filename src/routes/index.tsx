@@ -1,45 +1,44 @@
-import { A } from "@solidjs/router";
-import { For } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { A } from '@solidjs/router'
+import { For } from 'solid-js'
+import { Dynamic } from 'solid-js/web'
 import {
   TbOutlineArrowUpRight,
-  TbOutlineBraces,
-  TbOutlineClock,
+  TbOutlineLock,
+  TbOutlineCalendar,
   TbOutlineHash,
   TbOutlineRuler,
   TbOutlineLetterCase,
   TbOutlineTerminal,
   TbOutlinePalette,
   TbOutlineBolt,
-  TbOutlineMathFunction,
-  TbOutlineCoin,
+  TbOutlineCalculator,
+  TbOutlineCurrencyDollar,
   TbOutlineHexagon,
-} from "solid-icons/tb";
-import type { Component } from "solid-js";
-import { categories, toolsByCategory, type CategoryId } from "~/lib/tools/registry";
-import { setPageMeta, getHomeMeta, getHomepageSchema } from "~/lib/seo";
+} from 'solid-icons/tb'
+import type { Component } from 'solid-js'
+import { categories, toolsByCategory, type CategoryId } from '~/lib/tools/registry'
+import { setPageMeta, getHomeMeta, getHomepageSchema } from '~/lib/seo'
 
 const categoryIcons: Record<CategoryId, Component<{ size?: number; class?: string }>> = {
   numbers: TbOutlineHash,
   units: TbOutlineRuler,
   strings: TbOutlineLetterCase,
-  encoding: TbOutlineBraces,
-  datetime: TbOutlineClock,
+  encoding: TbOutlineLock,
+  datetime: TbOutlineCalendar,
   code: TbOutlineTerminal,
   color: TbOutlinePalette,
   electrical: TbOutlineBolt,
-  math: TbOutlineMathFunction,
-  finance: TbOutlineCoin,
+  math: TbOutlineCalculator,
+  finance: TbOutlineCurrencyDollar,
   geometry: TbOutlineHexagon,
-};
+}
 
 export default function Home() {
-  const meta = getHomeMeta();
-  const toolsCount = categories.reduce((sum, cat) => sum + toolsByCategory(cat.id).length, 0);
+  const meta = getHomeMeta()
   setPageMeta({
     ...meta,
-    schema: getHomepageSchema(categories, toolsCount),
-  });
+    schema: getHomepageSchema(),
+  })
 
   return (
     <main class="w-full py-16">
@@ -53,8 +52,7 @@ export default function Home() {
           web<span class="text-violet">-</span>tools
         </h1>
         <p class="mt-4 max-w-xl text-base text-muted-foreground">
-          Fast, browser-native utilities for everyday dev work. No installs, no
-          accounts, no tracking.
+          Fast, browser-native utilities for everyday dev work. No installs, no accounts, no tracking.
         </p>
       </div>
 
@@ -62,13 +60,13 @@ export default function Home() {
       <div class="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
         <For each={categories}>
           {(category, i) => {
-            const count = toolsByCategory(category.id).length;
-            const isComing = count === 0;
+            const count = toolsByCategory(category.id).length
+            const isComing = count === 0
             return (
               <A
                 href={category.href}
                 class="anim-fade-up anim-stagger group relative block bg-background"
-                style={{ "--stagger": String(i()) }}
+                style={{ '--stagger': String(i()) }}
               >
                 {/* Violet hover wash */}
                 <span
@@ -84,8 +82,8 @@ export default function Home() {
                 <div class="relative h-full p-6">
                   <div
                     class={
-                      "mb-5 inline-flex size-10 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-all duration-200 ease-out " +
-                      "group-hover:-translate-y-0.5 group-hover:border-violet/60 group-hover:bg-violet/5 group-hover:text-violet"
+                      'mb-5 inline-flex size-10 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-all duration-200 ease-out ' +
+                      'group-hover:-translate-y-0.5 group-hover:border-violet/60 group-hover:bg-violet/5 group-hover:text-violet'
                     }
                   >
                     <Dynamic component={categoryIcons[category.id]} size={19} />
@@ -94,19 +92,11 @@ export default function Home() {
                   <h2 class="font-mono text-base font-semibold tracking-tight transition-colors duration-150 group-hover:text-foreground">
                     {category.name}
                   </h2>
-                  <p class="mt-1.5 text-sm text-muted-foreground">
-                    {category.description}
-                  </p>
+                  <p class="mt-1.5 text-sm text-muted-foreground">{category.description}</p>
 
                   <div class="mt-4 flex items-center gap-2 font-mono text-xs">
-                    <span
-                      class={
-                        isComing
-                          ? "text-muted-foreground"
-                          : "text-violet"
-                      }
-                    >
-                      {isComing ? "Coming soon" : `${count} tool${count === 1 ? "" : "s"}`}
+                    <span class={isComing ? 'text-muted-foreground' : 'text-violet'}>
+                      {isComing ? 'Coming soon' : `${count} tool${count === 1 ? '' : 's'}`}
                     </span>
                   </div>
 
@@ -116,7 +106,7 @@ export default function Home() {
                   </div>
                 </div>
               </A>
-            );
+            )
           }}
         </For>
       </div>
@@ -126,5 +116,5 @@ export default function Home() {
         Open source · client-side only · no tracking
       </footer>
     </main>
-  );
+  )
 }

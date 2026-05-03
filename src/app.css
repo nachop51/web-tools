@@ -1,10 +1,10 @@
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/jetbrains-mono";
-@import "tailwindcss";
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 }
 
 @theme inline {
@@ -94,7 +94,7 @@
   }
 
   .dark,
-  [data-kb-theme="dark"] {
+  [data-kb-theme='dark'] {
     --background: 0.14 0.005 285;
     --foreground: 0.985 0 0;
 
@@ -158,9 +158,9 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings:
-      "rlig" 1,
-      "calt" 1,
-      "ss01" 1;
+      'rlig' 1,
+      'calt' 1,
+      'ss01' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

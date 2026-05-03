@@ -1,14 +1,8 @@
-import { createMemo, createSignal, For, Show } from "solid-js";
-import { CopyButton } from "~/components/copy-button";
-import { ToolHeader } from "~/components/tool-header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { TextField, TextFieldInput, TextFieldLabel } from "~/components/ui/text-field";
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { CopyButton } from '~/components/copy-button'
+import { ToolHeader } from '~/components/tool-header'
+import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
+import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
 import {
   NumberField,
   NumberFieldGroup,
@@ -16,38 +10,49 @@ import {
   NumberFieldDecrementTrigger,
   NumberFieldInput,
   NumberFieldLabel,
-} from "~/components/ui/number-field";
-import { addToDate, type DateUnit } from "~/lib/utils/datetime/date-add";
-import { setToolPageMeta } from "~/lib/seo";
+} from '~/components/ui/number-field'
+import { addToDate, type DateUnit } from '~/lib/utils/datetime/date-add'
+import { setToolPageMeta } from '~/lib/seo'
 
-const units: Array<{ id: DateUnit; label: string }> = [
-  { id: "days",   label: "Days" },
-  { id: "weeks",  label: "Weeks" },
-  { id: "months", label: "Months" },
-  { id: "years",  label: "Years" },
-];
+const unitOptions: { value: DateUnit; label: string }[] = [
+  { value: 'days', label: 'Days' },
+  { value: 'weeks', label: 'Weeks' },
+  { value: 'months', label: 'Months' },
+  { value: 'years', label: 'Years' },
+]
 
 function today(): string {
-  return new Date().toISOString().split("T")[0];
+  return new Date().toISOString().split('T')[0]
 }
 
 export default function DateAdd() {
-  setToolPageMeta("datetime", "date-add");
-  const [date, setDate] = createSignal(today());
-  const [amount, setAmount] = createSignal("7");
-  const [unit, setUnit] = createSignal<DateUnit>("days");
-
-  const selectedUnit = createMemo(() => units.find((u) => u.id === unit()) ?? units[0]);
+  setToolPageMeta('datetime', 'date-add')
+  const [date, setDate] = createSignal(today())
+  const [amount, setAmount] = createSignal('7')
+  const [unit, setUnit] = createSignal<DateUnit>('days')
 
   const result = createMemo(() => {
-    const d = date(), a = parseInt(amount());
-    if (!d || isNaN(a)) return null;
+    const d = date()
+    const a = parseInt(amount())
+    if (!d || isNaN(a)) return null
     try {
-      return addToDate(d, a, unit());
+      return addToDate(d, a, unit())
     } catch {
-      return null;
+      return null
     }
-  });
+  })
+
+  type Row = { label: string; value: string; copy?: boolean }
+
+  const rows = createMemo<Row[]>(() => {
+    const r = result()
+    if (!r) return []
+    return [
+      { label: 'Date', value: r.resultIso, copy: true },
+      { label: 'Weekday', value: r.weekday },
+      { label: 'Full date', value: r.formatted },
+    ]
+  })
 
   return (
     <main class="w-full py-10">
@@ -57,80 +62,72 @@ export default function DateAdd() {
         description="Add or subtract days, weeks, months, or years from any date."
       />
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <section class="rounded-xl border bg-card p-5 shadow-sm">
-          <h2 class="mb-4 text-base font-semibold">Input</h2>
-          <div class="space-y-4">
-            <TextField value={date()} onChange={setDate}>
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <ToolbarSegmented label="Unit" value={unit()} onChange={setUnit} options={unitOptions} />
+        </ToolToolbar>
+
+        {/* Input */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <TextField value={date()} onChange={setDate} class="flex flex-col gap-1.5">
               <TextFieldLabel>Base date</TextFieldLabel>
-              <TextFieldInput type="date" class="font-mono" />
+              <TextFieldInput autofocus type="date" class="h-12 font-mono text-base" />
             </TextField>
-            <div class="flex gap-3">
-              <div class="flex-1">
-                <NumberField
-                  value={amount()}
-                  onChange={setAmount}
-                  format={false}
-                  class="flex flex-col gap-1"
-                >
-                  <NumberFieldLabel>Amount (negative to subtract)</NumberFieldLabel>
-                  <NumberFieldGroup>
-                    <NumberFieldInput placeholder="7" />
-                    <NumberFieldIncrementTrigger />
-                    <NumberFieldDecrementTrigger />
-                  </NumberFieldGroup>
-                </NumberField>
-              </div>
-              <div class="w-36">
-                <label class="text-sm font-medium">Unit</label>
-                <Select<{ id: DateUnit; label: string }>
-                  options={units}
-                  optionValue="id"
-                  optionTextValue="label"
-                  value={selectedUnit()}
-                  onChange={(opt) => opt && setUnit(opt.id)}
-                  itemComponent={(p) => (
-                    <SelectItem item={p.item}>{p.item.rawValue.label}</SelectItem>
-                  )}
-                >
-                  <SelectTrigger class="mt-1.5 w-full">
-                    <SelectValue<{ id: DateUnit; label: string }>>
-                      {(s) => s.selectedOption()?.label}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent />
-                </Select>
-              </div>
-            </div>
+
+            <NumberField value={amount()} onChange={setAmount} format={false} class="flex flex-col gap-1.5">
+              <NumberFieldLabel>Amount (negative to subtract)</NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput placeholder="7" class="h-12 font-mono text-base" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
           </div>
         </section>
 
-        <section class="rounded-xl border bg-card p-5 shadow-sm">
-          <h2 class="mb-4 text-base font-semibold">Result</h2>
-          <Show
-            when={result()}
-            fallback={<p class="text-sm text-muted-foreground">Enter a date and amount.</p>}
-          >
-            {(r) => (
-              <div class="divide-y divide-border rounded-lg border text-sm">
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="min-w-[90px] text-muted-foreground">Date</span>
-                  <span class="flex-1 font-mono">{r().resultIso}</span>
-                  <CopyButton value={() => r().resultIso} />
+        {/* Result */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center gap-2">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Result</h2>
+          </div>
+
+          <div class="relative">
+            <Show
+              when={result()}
+              fallback={
+                <div class="flex min-h-[8.25rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                  Result will appear here
                 </div>
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="min-w-[90px] text-muted-foreground">Weekday</span>
-                  <span class="flex-1">{r().weekday}</span>
-                </div>
-                <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <span class="min-w-[90px] text-muted-foreground">Full date</span>
-                  <span class="flex-1 text-xs">{r().formatted}</span>
+              }
+            >
+              <div class="anim-fade-up min-h-[8.25rem] overflow-hidden rounded-md border border-violet/30 bg-violet/5">
+                <div class="divide-y divide-violet/15">
+                  <For each={rows()}>
+                    {(row) => (
+                      <div class="flex items-center gap-4 px-4 py-3">
+                        <span class="min-w-[6rem] text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          {row.label}
+                        </span>
+                        <span class="flex-1 break-words font-mono text-sm">{row.value}</span>
+                        <Show when={row.copy}>
+                          <CopyButton value={() => row.value} />
+                        </Show>
+                      </div>
+                    )}
+                  </For>
                 </div>
               </div>
-            )}
-          </Show>
+            </Show>
+          </div>
         </section>
       </div>
     </main>
-  );
+  )
 }

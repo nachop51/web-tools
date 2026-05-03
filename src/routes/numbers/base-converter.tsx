@@ -1,21 +1,13 @@
-import { useSearchParams } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import { ToolHeader } from "~/components/tool-header";
-import { CopyButton } from "~/components/copy-button";
-import { setToolPageMeta } from "~/lib/seo";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
-import {
-  TextField,
-  TextFieldErrorMessage,
-  TextFieldTextArea,
-} from "~/components/ui/text-field";
+import { useSearchParams } from '@solidjs/router'
+import { createEffect, createMemo, createSignal, Show } from 'solid-js'
+import { TbOutlineArrowsExchange } from 'solid-icons/tb'
+import { ToolHeader } from '~/components/tool-header'
+import { CopyButton } from '~/components/copy-button'
+import { ToolToolbar } from '~/components/tool-toolbar'
+import { setToolPageMeta } from '~/lib/seo'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { Label } from '~/components/ui/label'
+import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import {
   NumberField,
   NumberFieldErrorMessage,
@@ -23,140 +15,132 @@ import {
   NumberFieldIncrementTrigger,
   NumberFieldDecrementTrigger,
   NumberFieldInput,
-} from "~/components/ui/number-field";
-import {
-  computeOutputNumber,
-  NumberMode,
-  validateNumberBase,
-} from "~/lib/utils/numbers/converter";
-import { cn } from "~/lib/utils";
+} from '~/components/ui/number-field'
+import { computeOutputNumber, NumberMode, validateNumberBase } from '~/lib/utils/numbers/converter'
+import { cn } from '~/lib/utils'
 
 type BaseOption = {
-  label: string;
-  value: string;
-  disabled?: boolean;
-};
+  label: string
+  value: string
+  disabled?: boolean
+}
+
+type ModeOption = {
+  mode: NumberMode
+  label: string
+  disabled?: boolean
+}
 
 const baseOptions: BaseOption[] = [
-  { label: "Binary", value: "2" },
-  { label: "Octal", value: "8" },
-  { label: "Decimal", value: "10" },
-  { label: "Hexadecimal", value: "16" },
-  { label: "Custom", value: "custom" },
-];
+  { label: 'Binary', value: '2' },
+  { label: 'Octal', value: '8' },
+  { label: 'Decimal', value: '10' },
+  { label: 'Hexadecimal', value: '16' },
+  { label: 'Custom', value: 'custom' },
+]
 
-const modeOptions = [
-  {
-    title: "Integer only",
-    description: "Accepts any integer numbers.",
-    mode: NumberMode.INT,
-  },
-  {
-    title: "32-bit Integer only",
-    description: "Only 32-bit integer numbers.",
-    mode: NumberMode.INT32,
-  },
-  {
-    title: "Float 32 (Decimal & Binary)",
-    description: "Floats with single precision.",
-    mode: NumberMode.FLOAT32,
-  },
-  {
-    title: "Float 64 (Decimal & Binary)",
-    description: "Double precision floats.",
-    mode: NumberMode.FLOAT64,
-  },
-];
+const modeOptions: ModeOption[] = [
+  { mode: NumberMode.INT, label: 'Integer' },
+  { mode: NumberMode.INT32, label: '32-bit integer' },
+  { mode: NumberMode.FLOAT32, label: 'Float 32' },
+  { mode: NumberMode.FLOAT64, label: 'Float 64' },
+]
 
 function parseSelectedParam(param: string | undefined, fallback: string): string {
-  if (!param) return fallback;
-  if (baseOptions.some((o) => o.value === param)) return param;
-  return "custom";
+  if (!param) return fallback
+  if (baseOptions.some((o) => o.value === param)) return param
+  return 'custom'
 }
 
 function parseValueParam(param: string | undefined, fallback: number): number {
-  if (!param) return fallback;
-  const parsed = Number(param);
-  if (Number.isNaN(parsed)) return fallback;
-  return parsed;
+  if (!param) return fallback
+  const parsed = Number(param)
+  if (Number.isNaN(parsed)) return fallback
+  return parsed
 }
 
 export default function BaseConverter() {
-  setToolPageMeta("numbers", "base-converter");
+  setToolPageMeta('numbers', 'base-converter')
 
   const [searchParams] = useSearchParams<{
-    valueBase?: string;
-    targetBase?: string;
-  }>();
+    valueBase?: string
+    targetBase?: string
+  }>()
 
-  const [value, setValue] = createSignal("");
-  const [inputError, setInputError] = createSignal<string | null>(null);
+  const [value, setValue] = createSignal('')
+  const [inputError, setInputError] = createSignal<string | null>(null)
 
-  const [selectedValueBase, setSelectedValueBase] = createSignal(
-    parseSelectedParam(searchParams.valueBase, "10"),
-  );
-  const [selectedTargetBase, setSelectedTargetBase] = createSignal(
-    parseSelectedParam(searchParams.targetBase, "2"),
-  );
-  const [valueBase, setValueBase] = createSignal(
-    parseValueParam(searchParams.valueBase, 10),
-  );
-  const [targetBase, setTargetBase] = createSignal(
-    parseValueParam(searchParams.targetBase, 2),
-  );
-  const [selectedMode, setSelectedMode] = createSignal<NumberMode>(NumberMode.INT);
+  const [selectedValueBase, setSelectedValueBase] = createSignal(parseSelectedParam(searchParams.valueBase, '10'))
+  const [selectedTargetBase, setSelectedTargetBase] = createSignal(parseSelectedParam(searchParams.targetBase, '2'))
+  const [valueBase, setValueBase] = createSignal(parseValueParam(searchParams.valueBase, 10))
+  const [targetBase, setTargetBase] = createSignal(parseValueParam(searchParams.targetBase, 2))
+  const [selectedMode, setSelectedMode] = createSignal<NumberMode>(NumberMode.INT)
 
-  const outputNumber = createMemo(() =>
-    computeOutputNumber(value(), valueBase(), targetBase(), selectedMode()),
-  );
+  const outputNumber = createMemo(() => computeOutputNumber(value(), valueBase(), targetBase(), selectedMode()))
 
   // Validation feedback for the input number.
   createEffect(() => {
-    const isValid = validateNumberBase(value(), valueBase(), selectedMode());
-    setInputError(isValid === true ? null : isValid);
-  });
+    const isValid = validateNumberBase(value(), valueBase(), selectedMode())
+    setInputError(isValid === true ? null : isValid)
+  })
 
   // Reflect select choices into numeric base values.
   createEffect(() => {
-    const sel = selectedValueBase();
-    if (sel !== "custom") setValueBase(parseInt(sel, 10));
-  });
+    const sel = selectedValueBase()
+    if (sel !== 'custom') setValueBase(parseInt(sel, 10))
+  })
 
   createEffect(() => {
-    const sel = selectedTargetBase();
-    if (sel !== "custom") setTargetBase(parseInt(sel, 10));
-  });
+    const sel = selectedTargetBase()
+    if (sel !== 'custom') setTargetBase(parseInt(sel, 10))
+  })
 
-  // If both bases collide on a non-custom value, swap the target.
+  // If both bases collide on a non-custom value, pick a different target.
   createEffect(() => {
-    if (
-      selectedValueBase() === selectedTargetBase() &&
-      selectedValueBase() !== "custom"
-    ) {
-      setSelectedTargetBase("10");
-      setTargetBase(valueBase() === 2 ? 10 : 2);
+    const sel = selectedValueBase()
+    if (sel !== 'custom' && sel === selectedTargetBase()) {
+      const fallback = sel === '2' ? '10' : '2'
+      setSelectedTargetBase(fallback)
+      setTargetBase(parseInt(fallback, 10))
     }
-  });
+  })
 
-  const valueBaseOption = createMemo(() =>
-    baseOptions.find((o) => o.value === selectedValueBase()),
-  );
+  const valueBaseOption = createMemo(() => baseOptions.find((o) => o.value === selectedValueBase()))
 
   // Target options carry a per-option disabled flag that mirrors the input base.
   const targetOptionsForSelect = createMemo<BaseOption[]>(() =>
     baseOptions.map((o) => ({
       ...o,
-      disabled: o.value !== "custom" && o.value === selectedValueBase(),
-    })),
-  );
+      disabled: o.value !== 'custom' && o.value === selectedValueBase(),
+    }))
+  )
 
-  const targetBaseOption = createMemo(() =>
-    targetOptionsForSelect().find((o) => o.value === selectedTargetBase()),
-  );
+  const targetBaseOption = createMemo(() => targetOptionsForSelect().find((o) => o.value === selectedTargetBase()))
 
-  const valueBaseOutOfRange = () => valueBase() < 2 || valueBase() > 36;
-  const targetBaseOutOfRange = () => targetBase() < 2 || targetBase() > 36;
-  const isFloatModeDisabled = () => targetBase() !== 2 || valueBase() !== 10;
+  const valueBaseOutOfRange = () => valueBase() < 2 || valueBase() > 36
+  const targetBaseOutOfRange = () => targetBase() < 2 || targetBase() > 36
+  const isFloatModeDisabled = () => targetBase() !== 2 || valueBase() !== 10
+
+  const modeOptionsForSelect = createMemo<ModeOption[]>(() =>
+    modeOptions.map((o) => ({
+      ...o,
+      disabled: isFloatModeDisabled() && (o.mode === NumberMode.FLOAT32 || o.mode === NumberMode.FLOAT64),
+    }))
+  )
+
+  const selectedModeOption = createMemo(() => modeOptionsForSelect().find((o) => o.mode === selectedMode()))
+
+  function swapBases() {
+    const fromSel = selectedValueBase()
+    const toSel = selectedTargetBase()
+    if (fromSel === toSel && fromSel !== 'custom') return
+    const fromNum = valueBase()
+    const toNum = targetBase()
+    setSelectedValueBase(toSel)
+    setValueBase(toNum)
+    setSelectedTargetBase(fromSel)
+    setTargetBase(fromNum)
+  }
 
   return (
     <main class="w-full py-10">
@@ -166,198 +150,191 @@ export default function BaseConverter() {
         description="Convert numbers between binary, octal, decimal, hexadecimal, and any custom base from 2 to 36."
       />
 
-      <div class="anim-fade-up grid gap-6 md:grid-cols-2" style={{ "animation-delay": "60ms" }}>
-        {/* Input column */}
-        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <div class="mb-4 flex items-center gap-2">
-            <span aria-hidden class="size-2 rounded-full bg-violet" />
-            <h2 class="text-lg font-semibold tracking-tight">Input number</h2>
-          </div>
-
-          <TextField
-            value={value()}
-            onChange={setValue}
-            validationState={inputError() ? "invalid" : "valid"}
+      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
+        <ToolToolbar>
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Number mode</span>
+          <Select<ModeOption>
+            options={modeOptionsForSelect()}
+            optionValue="mode"
+            optionTextValue="label"
+            optionDisabled="disabled"
+            value={selectedModeOption()}
+            onChange={(opt) => opt && setSelectedMode(opt.mode)}
+            itemComponent={(itemProps) => (
+              <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
+            )}
           >
-            <TextFieldTextArea
-              rows={4}
-              class="font-mono"
-              placeholder="Insert your number"
-            />
-            <TextFieldErrorMessage>{inputError()}</TextFieldErrorMessage>
-          </TextField>
+            <SelectTrigger aria-label="Number mode" class="h-8 w-44 text-sm">
+              <SelectValue<ModeOption>>{(state) => state.selectedOption()?.label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+          <Show when={isFloatModeDisabled()}>
+            <span class="text-xs text-muted-foreground">Float modes require input 10 → target 2.</span>
+          </Show>
+        </ToolToolbar>
 
-          <Separator class="my-6" />
+        {/* Converter card: input + bases + output, all together */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-8">
+            {/* Input side */}
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden class="size-2 rounded-full bg-violet" />
+                  <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
+                </div>
+                <BaseSelector
+                  label="From"
+                  options={baseOptions}
+                  selected={valueBaseOption()}
+                  onSelect={(v) => setSelectedValueBase(v)}
+                />
+              </div>
 
-          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Input settings
-          </h3>
-
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <Select<BaseOption>
-                options={baseOptions}
-                optionValue="value"
-                optionTextValue="label"
-                value={valueBaseOption()}
-                onChange={(opt) => opt && setSelectedValueBase(opt.value)}
-                itemComponent={(itemProps) => (
-                  <SelectItem item={itemProps.item}>
-                    {itemProps.item.rawValue.label}
-                  </SelectItem>
-                )}
+              <TextField
+                value={value()}
+                onChange={setValue}
+                validationState={inputError() ? 'invalid' : 'valid'}
+                class="flex flex-1 flex-col"
               >
-                <label class="mb-1 block text-sm font-medium">Input base</label>
-                <SelectTrigger>
-                  <SelectValue<BaseOption>>
-                    {(state) => state.selectedOption()?.label}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent />
-              </Select>
+                <div class="relative flex-1 min-h-[8.25rem]">
+                  <TextFieldTextArea
+                    autofocus
+                    rows={5}
+                    class="absolute inset-0 resize-none font-mono text-base leading-relaxed"
+                    placeholder="Type or paste a number"
+                  />
+                  <TextFieldErrorMessage class="absolute top-full mt-1.5 left-0">{inputError()}</TextFieldErrorMessage>
+                </div>
+              </TextField>
 
-              <Show when={selectedValueBase() === "custom"}>
+              <Show when={selectedValueBase() === 'custom'}>
                 <NumberField
                   rawValue={valueBase()}
-                  onRawValueChange={(v) =>
-                    setValueBase(Number.isNaN(v) ? 0 : v)
-                  }
+                  onRawValueChange={(v) => setValueBase(Number.isNaN(v) ? 0 : v)}
                   minValue={2}
                   maxValue={36}
                   step={1}
                   format={false}
-                  validationState={valueBaseOutOfRange() ? "invalid" : "valid"}
-                  class="flex flex-col gap-1"
+                  validationState={valueBaseOutOfRange() ? 'invalid' : 'valid'}
+                  class="flex flex-col gap-2"
                 >
+                  <Label class="text-xs text-muted-foreground">Custom input base (2–36)</Label>
                   <NumberFieldGroup>
-                    <NumberFieldInput placeholder="Enter custom base" />
+                    <NumberFieldInput placeholder="e.g. 12" />
                     <NumberFieldIncrementTrigger />
                     <NumberFieldDecrementTrigger />
                   </NumberFieldGroup>
                   <Show when={valueBaseOutOfRange()}>
-                    <NumberFieldErrorMessage>
-                      Input base must be between 2 and 36
-                    </NumberFieldErrorMessage>
+                    <NumberFieldErrorMessage>Input base must be between 2 and 36</NumberFieldErrorMessage>
                   </Show>
                 </NumberField>
               </Show>
             </div>
 
-            <div class="space-y-2">
-              <Select<BaseOption>
-                options={targetOptionsForSelect()}
-                optionValue="value"
-                optionTextValue="label"
-                optionDisabled="disabled"
-                value={targetBaseOption()}
-                onChange={(opt) => opt && setSelectedTargetBase(opt.value)}
-                itemComponent={(itemProps) => (
-                  <SelectItem item={itemProps.item}>
-                    {itemProps.item.rawValue.label}
-                  </SelectItem>
+            {/* Swap pivot */}
+            <div class="flex items-center justify-center lg:pt-9">
+              <button
+                type="button"
+                onClick={swapBases}
+                aria-label="Swap input and target bases"
+                class={cn(
+                  'group inline-flex size-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground',
+                  'transition-[transform,border-color,color,background-color] duration-200 ease-out cursor-pointer',
+                  'hover:rotate-180 hover:border-violet hover:text-violet hover:bg-violet/5',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
                 )}
               >
-                <label class="mb-1 block text-sm font-medium">Target base</label>
-                <SelectTrigger>
-                  <SelectValue<BaseOption>>
-                    {(state) => state.selectedOption()?.label}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent />
-              </Select>
+                <TbOutlineArrowsExchange size={18} class="lg:rotate-0 rotate-90" />
+              </button>
+            </div>
 
-              <Show when={selectedTargetBase() === "custom"}>
+            {/* Output side */}
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden class="size-2 rounded-full bg-violet" />
+                  <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+                </div>
+                <BaseSelector
+                  label="To"
+                  options={targetOptionsForSelect()}
+                  selected={targetBaseOption()}
+                  onSelect={(v) => setSelectedTargetBase(v)}
+                />
+              </div>
+
+              <Show
+                when={outputNumber()}
+                fallback={
+                  <div class="flex min-h-[8.25rem] flex-1 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Result will appear here
+                  </div>
+                }
+              >
+                <div
+                  class="anim-fade-up flex flex-1 items-start gap-3 overflow-hidden rounded-md border border-border px-4 py-3"
+                  data-output={outputNumber()}
+                >
+                  <span class="flex-1 font-mono text-base leading-relaxed break-all">{outputNumber()}</span>
+                  <CopyButton value={() => outputNumber()} />
+                </div>
+              </Show>
+
+              <Show when={selectedTargetBase() === 'custom'}>
                 <NumberField
                   rawValue={targetBase()}
-                  onRawValueChange={(v) =>
-                    setTargetBase(Number.isNaN(v) ? 0 : v)
-                  }
+                  onRawValueChange={(v) => setTargetBase(Number.isNaN(v) ? 0 : v)}
                   minValue={2}
                   maxValue={36}
                   step={1}
                   format={false}
-                  validationState={targetBaseOutOfRange() ? "invalid" : "valid"}
-                  class="flex flex-col gap-1"
+                  validationState={targetBaseOutOfRange() ? 'invalid' : 'valid'}
+                  class="flex flex-col gap-2"
                 >
+                  <Label class="text-xs text-muted-foreground">Custom target base (2–36)</Label>
                   <NumberFieldGroup>
-                    <NumberFieldInput placeholder="Enter custom base" />
+                    <NumberFieldInput placeholder="e.g. 12" />
                     <NumberFieldIncrementTrigger />
                     <NumberFieldDecrementTrigger />
                   </NumberFieldGroup>
                   <Show when={targetBaseOutOfRange()}>
-                    <NumberFieldErrorMessage>
-                      Target base must be between 2 and 36
-                    </NumberFieldErrorMessage>
+                    <NumberFieldErrorMessage>Target base must be between 2 and 36</NumberFieldErrorMessage>
                   </Show>
                 </NumberField>
               </Show>
             </div>
           </div>
-
-          <Separator class="my-6" />
-
-          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Mode
-          </h3>
-          <div class="space-y-2">
-            <For each={modeOptions}>
-              {(option) => {
-                const isDisabled = () =>
-                  isFloatModeDisabled() &&
-                  (option.mode === NumberMode.FLOAT32 ||
-                    option.mode === NumberMode.FLOAT64);
-                return (
-                  <button
-                    type="button"
-                    class={cn(
-                      "block w-full rounded-md border-2 px-4 py-2 text-left text-sm",
-                      "transition-[border-color,background-color,transform] duration-150 ease-out",
-                      "hover:border-violet/60 hover:bg-violet/5",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-input disabled:hover:bg-transparent",
-                      selectedMode() === option.mode
-                        ? "border-violet bg-violet/10"
-                        : "border-input",
-                    )}
-                    onClick={() => setSelectedMode(option.mode)}
-                    disabled={isDisabled()}
-                  >
-                    <span class="block text-base font-semibold">{option.title}</span>
-                    <span class="text-muted-foreground">{option.description}</span>
-                  </button>
-                );
-              }}
-            </For>
-          </div>
-        </section>
-
-        {/* Output column */}
-        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <div class="mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span aria-hidden class="size-2 rounded-full bg-violet" />
-              <h2 class="text-lg font-semibold tracking-tight">Output number</h2>
-            </div>
-            <CopyButton value={() => outputNumber()} />
-          </div>
-          <Show
-            when={outputNumber()}
-            fallback={
-              <div class="flex min-h-[7rem] items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-                Result will appear here
-              </div>
-            }
-          >
-            <div
-              class="anim-fade-up rounded-md border border-violet/30 bg-violet/5 p-4 font-mono text-base break-all"
-              // re-mount the animation when the output value changes
-              data-output={outputNumber()}
-            >
-              {outputNumber()}
-            </div>
-          </Show>
         </section>
       </div>
     </main>
-  );
+  )
+}
+
+type BaseSelectorProps = {
+  label: string
+  options: BaseOption[]
+  selected: BaseOption | undefined
+  onSelect: (value: string) => void
+}
+
+function BaseSelector(props: BaseSelectorProps) {
+  return (
+    <Select<BaseOption>
+      options={props.options}
+      optionValue="value"
+      optionTextValue="label"
+      optionDisabled="disabled"
+      value={props.selected}
+      onChange={(opt) => opt && props.onSelect(opt.value)}
+      itemComponent={(itemProps) => <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>}
+    >
+      <SelectTrigger aria-label={props.label} class="h-8 w-auto min-w-[8.5rem] gap-2 px-3 text-xs font-medium">
+        <span class="text-muted-foreground">{props.label}</span>
+        <SelectValue<BaseOption> class="ml-1">{(state) => state.selectedOption()?.label}</SelectValue>
+      </SelectTrigger>
+      <SelectContent />
+    </Select>
+  )
 }
