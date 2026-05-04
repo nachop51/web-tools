@@ -75,7 +75,7 @@ export default function CircleCalculator() {
           <ToolbarSegmented
             label="Known value"
             value={mode()}
-            onChange={(v) => setSearchParams({ mode: v, v: '' })}
+            onChange={(v) => setSearchParams({ mode: v, v: '' }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>
@@ -89,7 +89,7 @@ export default function CircleCalculator() {
 
           <NumberField
             value={raw()}
-            onChange={(v) => setSearchParams({ v })}
+            onChange={(v) => setSearchParams({ v }, { replace: true })}
             minValue={0}
             format={false}
             class="flex flex-col gap-1.5"

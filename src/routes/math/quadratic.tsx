@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import {
@@ -26,9 +27,14 @@ function formatRoot(root: QuadraticRoot): string {
 
 export default function QuadraticFormula() {
   setToolPageMeta('math', 'quadratic')
-  const [a, setA] = createSignal('1')
-  const [b, setB] = createSignal('-5')
-  const [c, setC] = createSignal('6')
+  const [params, setParams] = useSearchParams<{ a?: string; b?: string; c?: string }>()
+  const [a, setASignal] = createSignal(params.a ?? '1')
+  const [b, setBSignal] = createSignal(params.b ?? '-5')
+  const [c, setCSignal] = createSignal(params.c ?? '6')
+
+  function setA(v: string) { setASignal(v); setParams({ a: v || undefined }, { replace: true }) }
+  function setB(v: string) { setBSignal(v); setParams({ b: v || undefined }, { replace: true }) }
+  function setC(v: string) { setCSignal(v); setParams({ c: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const na = parseFloat(a()),

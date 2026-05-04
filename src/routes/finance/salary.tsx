@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import { ToolToolbar } from '~/components/tool-toolbar'
@@ -24,9 +25,23 @@ function fmtCurrency(n: number): string {
 
 export default function SalaryConverter() {
   setToolPageMeta('finance', 'salary')
-  const [amount, setAmount] = createSignal('')
-  const [periodId, setPeriodId] = createSignal<PeriodId>('annual')
-  const [hoursPerWeek, setHoursPerWeek] = createSignal('40')
+  const [params, setParams] = useSearchParams<{
+    amount?: string
+    period?: string
+    hours?: string
+  }>()
+  const validPeriods: PeriodId[] = salaryPeriods.map((p) => p.id)
+  const initialPeriod: PeriodId = validPeriods.includes(params.period as PeriodId)
+    ? (params.period as PeriodId)
+    : 'annual'
+
+  const [amount, setAmountSignal] = createSignal(params.amount ?? '')
+  const [periodId, setPeriodIdSignal] = createSignal<PeriodId>(initialPeriod)
+  const [hoursPerWeek, setHoursPerWeekSignal] = createSignal(params.hours ?? '40')
+
+  function setAmount(v: string) { setAmountSignal(v); setParams({ amount: v || undefined }, { replace: true }) }
+  function setPeriodId(v: PeriodId) { setPeriodIdSignal(v); setParams({ period: v }, { replace: true }) }
+  function setHoursPerWeek(v: string) { setHoursPerWeekSignal(v); setParams({ hours: v || undefined }, { replace: true }) }
 
   const selectedPeriod = createMemo(() => salaryPeriods.find((p) => p.id === periodId()) ?? salaryPeriods[0])
 
@@ -73,7 +88,7 @@ export default function SalaryConverter() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField onChange={setAmount} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={amount()} onChange={setAmount} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Amount ($)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="e.g. 75000" class="h-12 font-mono text-base" />

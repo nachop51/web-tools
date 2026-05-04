@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { hexToRgb, rgbToHex, rgbToHsl, hslToRgb, rgbToHsv, hsvToRgb, rgbToOklch, oklchToRgb } from './convert'
+import {
+  hexToRgb,
+  rgbToHex,
+  rgbToHsl,
+  hslToRgb,
+  rgbToHsv,
+  hsvToRgb,
+  rgbToOklch,
+  oklchToRgb,
+  rgbToCmyk,
+  cmykToRgb,
+} from './convert'
 
 describe('hexToRgb', () => {
   it('parses #RRGGBB', () => {
@@ -90,5 +101,31 @@ describe('rgbToOklch / oklchToRgb roundtrip', () => {
     expect(back.r).toBeCloseTo(original.r, -1)
     expect(back.g).toBeCloseTo(original.g, -1)
     expect(back.b).toBeCloseTo(original.b, -1)
+  })
+})
+
+describe('rgbToCmyk / cmykToRgb', () => {
+  it('black -> K=100', () => {
+    expect(rgbToCmyk({ r: 0, g: 0, b: 0 })).toEqual({ c: 0, m: 0, y: 0, k: 100 })
+  })
+  it('white -> all zero', () => {
+    expect(rgbToCmyk({ r: 255, g: 255, b: 255 })).toEqual({ c: 0, m: 0, y: 0, k: 0 })
+  })
+  it('red -> M=Y=100', () => {
+    const cmyk = rgbToCmyk({ r: 255, g: 0, b: 0 })
+    expect(cmyk.c).toBe(0)
+    expect(cmyk.m).toBe(100)
+    expect(cmyk.y).toBe(100)
+    expect(cmyk.k).toBe(0)
+  })
+  it('CMYK roundtrip', () => {
+    const original = { r: 59, g: 130, b: 246 }
+    const back = cmykToRgb(rgbToCmyk(original))
+    expect(back.r).toBeCloseTo(original.r, -1)
+    expect(back.g).toBeCloseTo(original.g, -1)
+    expect(back.b).toBeCloseTo(original.b, -1)
+  })
+  it('cmykToRgb K=100 returns black', () => {
+    expect(cmykToRgb({ c: 0, m: 0, y: 0, k: 100 })).toEqual({ r: 0, g: 0, b: 0 })
   })
 })

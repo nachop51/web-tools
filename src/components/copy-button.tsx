@@ -28,8 +28,8 @@ export function CopyButton(props: CopyButtonProps) {
       type="button"
       onClick={handleCopy}
       class={cn(
-        'inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-all duration-150 ease-out cursor-pointer',
-        'hover:border-violet/60 hover:text-violet hover:-translate-y-px',
+        'inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-[color,border-color,box-shadow] duration-150 ease-out cursor-pointer',
+        'hover:border-violet/60 hover:text-violet hover:shadow-sm',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         copied() && 'anim-copy-pulse border-violet/60 text-violet',
         props.class

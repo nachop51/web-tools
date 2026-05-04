@@ -9,6 +9,7 @@ export type RGB = { r: number; g: number; b: number }
 export type HSL = { h: number; s: number; l: number }
 export type HSV = { h: number; s: number; v: number }
 export type OKLCH = { l: number; c: number; h: number }
+export type CMYK = { c: number; m: number; y: number; k: number }
 
 export function hexToRgb(hex: string): RGB {
   const c = toRgb(parse(hex))!
@@ -74,5 +75,36 @@ export function oklchToRgb({ l, c, h }: OKLCH): RGB {
     r: Math.round((rgb.r ?? 0) * 255),
     g: Math.round((rgb.g ?? 0) * 255),
     b: Math.round((rgb.b ?? 0) * 255),
+  }
+}
+
+// Naive (device-independent) RGB <-> CMYK. Approximation only; real print
+// output requires an ICC profile so a roundtrip won't be exact for a printer.
+export function rgbToCmyk({ r, g, b }: RGB): CMYK {
+  const rn = r / 255
+  const gn = g / 255
+  const bn = b / 255
+  const k = 1 - Math.max(rn, gn, bn)
+  if (k === 1) return { c: 0, m: 0, y: 0, k: 100 }
+  const c = (1 - rn - k) / (1 - k)
+  const m = (1 - gn - k) / (1 - k)
+  const y = (1 - bn - k) / (1 - k)
+  return {
+    c: Math.round(c * 1000) / 10,
+    m: Math.round(m * 1000) / 10,
+    y: Math.round(y * 1000) / 10,
+    k: Math.round(k * 1000) / 10,
+  }
+}
+
+export function cmykToRgb({ c, m, y, k }: CMYK): RGB {
+  const cn = c / 100
+  const mn = m / 100
+  const yn = y / 100
+  const kn = k / 100
+  return {
+    r: Math.round(255 * (1 - cn) * (1 - kn)),
+    g: Math.round(255 * (1 - mn) * (1 - kn)),
+    b: Math.round(255 * (1 - yn) * (1 - kn)),
   }
 }

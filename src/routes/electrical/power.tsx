@@ -110,7 +110,7 @@ export default function PowerCalculator() {
           <ToolbarSegmented
             label="Formula"
             value={mode()}
-            onChange={(v) => setSearchParams({ mode: v, a: '', b: '' })}
+            onChange={(v) => setSearchParams({ mode: v, a: '', b: '' }, { replace: true })}
             options={segmentedOptions}
           />
         </ToolToolbar>
@@ -134,7 +134,7 @@ export default function PowerCalculator() {
                 value={aRaw()}
                 onChange={(v) => {
                   setARaw(v)
-                  setSearchParams({ a: v })
+                  setSearchParams({ a: v }, { replace: true })
                 }}
               >
                 <TextFieldInput
@@ -153,7 +153,7 @@ export default function PowerCalculator() {
                 value={bRaw()}
                 onChange={(v) => {
                   setBRaw(v)
-                  setSearchParams({ b: v })
+                  setSearchParams({ b: v }, { replace: true })
                 }}
               >
                 <TextFieldInput

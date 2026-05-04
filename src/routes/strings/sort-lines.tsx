@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarChip, ToolbarSegmented } from '~/components/tool-to
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { sortLines, type SortOptions } from '~/lib/utils/strings/sort'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Order = 'asc' | 'desc'
 type SortMode = 'alpha' | 'numeric' | 'length'
@@ -23,10 +24,15 @@ const sortModeOptions: { value: SortMode; label: string }[] = [
 
 export default function SortLinesPage() {
   setToolPageMeta('strings', 'sort-lines')
-  const [params, setParams] = useSearchParams<{ order?: string; mode?: string }>()
+  const [params, setParams] = useSearchParams<{ order?: string; mode?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [dedupe, setDedupe] = createSignal(false)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
   const [caseSensitive, setCaseSensitive] = createSignal(false)
 
   const order = createMemo<Order>(() => {
@@ -62,13 +68,13 @@ export default function SortLinesPage() {
           <ToolbarSegmented
             label="Sort by"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={sortModeOptions}
           />
           <ToolbarSegmented
             label="Order"
             value={order()}
-            onChange={(v) => setParams({ order: v })}
+            onChange={(v) => setParams({ order: v }, { replace: true })}
             options={orderOptions}
           />
           <div class="ml-auto" />

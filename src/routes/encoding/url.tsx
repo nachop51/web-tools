@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { decodeURL, encodeURL, type URLMode } from '~/lib/utils/encoding/url'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Mode = 'encode' | 'decode'
 
@@ -29,22 +30,28 @@ export default function URLTool() {
   const [params, setParams] = useSearchParams<{
     mode?: string
     scope?: string
+    t?: string
   }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [error, setError] = createSignal<string | null>(null)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const [mode, setModeSignal] = createSignal<Mode>(params.mode === 'decode' ? 'decode' : 'encode')
   const [scope, setScopeSignal] = createSignal<URLMode>(params.scope === 'full' ? 'full' : 'component')
 
   function setMode(m: Mode) {
     setModeSignal(m)
-    setParams({ mode: m })
+    setParams({ mode: m }, { replace: true })
   }
 
   function setScope(s: URLMode) {
     setScopeSignal(s)
-    setParams({ scope: s })
+    setParams({ scope: s }, { replace: true })
   }
 
   const output = createMemo(() => {

@@ -226,7 +226,7 @@ export default function SecretGenerator() {
           <ToolbarSegmented
             label="Mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={MODE_OPTIONS}
           />
         </ToolToolbar>
@@ -250,7 +250,7 @@ export default function SecretGenerator() {
                   value={[length()]}
                   onChange={(v) => {
                     setLength(v[0])
-                    setParams({ len: String(v[0]) })
+                    setParams({ len: String(v[0]) }, { replace: true })
                   }}
                   minValue={8}
                   maxValue={128}
@@ -275,7 +275,7 @@ export default function SecretGenerator() {
                         checked={def.get()}
                         onChange={(v) => {
                           def.set(v)
-                          setParams({ [def.key]: v ? '1' : '0' })
+                          setParams({ [def.key]: v ? '1' : '0' }, { replace: true })
                         }}
                       >
                         <CheckboxLabel>{def.label}</CheckboxLabel>
@@ -306,7 +306,7 @@ export default function SecretGenerator() {
                           aria-checked={isSelected()}
                           onClick={() => {
                             setWordCount(n)
-                            setParams({ words: String(n) })
+                            setParams({ words: String(n) }, { replace: true })
                           }}
                           class={cn(
                             'rounded-md border py-2 text-sm font-medium cursor-pointer',
@@ -338,10 +338,10 @@ export default function SecretGenerator() {
                           aria-checked={isSelected()}
                           onClick={() => {
                             setSeparatorId(sep.id)
-                            setParams({ sep: sep.id })
+                            setParams({ sep: sep.id }, { replace: true })
                           }}
                           class={cn(
-                            'rounded-full border px-4 py-1.5 text-sm font-medium cursor-pointer',
+                            'border px-4 py-1.5 text-sm font-medium cursor-pointer',
                             'transition-[border-color,background-color,color] duration-150 ease-out',
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                             isSelected()
@@ -362,7 +362,7 @@ export default function SecretGenerator() {
                   checked={capitalize()}
                   onChange={(v) => {
                     setCapitalize(v)
-                    setParams({ cap: v ? '1' : '0' })
+                    setParams({ cap: v ? '1' : '0' }, { replace: true })
                   }}
                 >
                   <CheckboxLabel>Capitalize words</CheckboxLabel>
@@ -371,7 +371,7 @@ export default function SecretGenerator() {
                   checked={appendNumber()}
                   onChange={(v) => {
                     setAppendNumber(v)
-                    setParams({ num: v ? '1' : '0' })
+                    setParams({ num: v ? '1' : '0' }, { replace: true })
                   }}
                 >
                   <CheckboxLabel>Append 2-digit number</CheckboxLabel>
@@ -399,7 +399,7 @@ export default function SecretGenerator() {
                           aria-checked={isSelected()}
                           onClick={() => {
                             setKeyBytes(n)
-                            setParams({ bytes: String(n) })
+                            setParams({ bytes: String(n) }, { replace: true })
                           }}
                           class={cn(
                             'rounded-md border py-2 text-sm font-medium cursor-pointer',
@@ -431,7 +431,7 @@ export default function SecretGenerator() {
                           aria-checked={isSelected()}
                           onClick={() => {
                             setKeyFormat(f.id)
-                            setParams({ fmt: f.id })
+                            setParams({ fmt: f.id }, { replace: true })
                           }}
                           class={cn(
                             'rounded-md border px-3 py-1.5 text-sm font-medium cursor-pointer',
@@ -502,7 +502,7 @@ export default function SecretGenerator() {
               <span class="text-muted-foreground">Entropy</span>
               <span class="font-mono font-semibold">{entropy().toFixed(1)} bits</span>
               <span
-                class={cn('rounded-full bg-muted/40 px-2.5 py-0.5 text-xs font-semibold', STRENGTH_COLORS[strength()])}
+                class={cn('bg-muted/40 px-2.5 py-0.5 text-xs font-semibold', STRENGTH_COLORS[strength()])}
               >
                 {strength()}
               </span>

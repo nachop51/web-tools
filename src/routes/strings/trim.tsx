@@ -1,11 +1,13 @@
 import { createMemo, createSignal, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarChip, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { applyTrimOps, type TrimOptions } from '~/lib/utils/strings/trim'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type LineEnding = 'none' | 'lf' | 'crlf' | 'cr'
 
@@ -18,7 +20,13 @@ const lineEndingOptions: { value: LineEnding; label: string }[] = [
 
 export default function TrimClean() {
   setToolPageMeta('strings', 'trim')
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const [opts, setOpts] = createStore<TrimOptions>({
     trimEdges: true,

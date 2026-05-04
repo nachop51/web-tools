@@ -24,9 +24,12 @@ function fmt(n: number): string {
 
 export default function PercentageCalculator() {
   setToolPageMeta('math', 'percentage')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
-  const [a, setA] = createSignal('')
-  const [b, setB] = createSignal('')
+  const [params, setParams] = useSearchParams<{ mode?: string; a?: string; b?: string }>()
+  const [a, setASignal] = createSignal(params.a ?? '')
+  const [b, setBSignal] = createSignal(params.b ?? '')
+
+  function setA(v: string) { setASignal(v); setParams({ a: v || undefined }, { replace: true }) }
+  function setB(v: string) { setBSignal(v); setParams({ b: v || undefined }, { replace: true }) }
 
   const mode = createMemo<PercentageMode>(() => {
     const p = params.mode
@@ -65,9 +68,9 @@ export default function PercentageCalculator() {
             value={config()}
             onChange={(opt) => {
               if (!opt) return
-              setParams({ mode: opt.id })
-              setA('')
-              setB('')
+              setASignal('')
+              setBSignal('')
+              setParams({ mode: opt.id, a: undefined, b: undefined }, { replace: true })
             }}
             itemComponent={(itemProps) => (
               <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
@@ -87,7 +90,7 @@ export default function PercentageCalculator() {
             <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{config().inputA}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="0" class="h-12 font-mono text-base" />
@@ -95,7 +98,7 @@ export default function PercentageCalculator() {
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
-            <NumberField onChange={setB} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{config().inputB}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="0" class="h-12 font-mono text-base" />

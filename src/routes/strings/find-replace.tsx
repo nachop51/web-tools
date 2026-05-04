@@ -1,19 +1,35 @@
 import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { Checkbox, CheckboxLabel } from '~/components/ui/checkbox'
 import { TextField, TextFieldInput, TextFieldLabel, TextFieldTextArea } from '~/components/ui/text-field'
 import { findReplace } from '~/lib/utils/strings/find-replace'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 export default function FindReplacePage() {
   setToolPageMeta('strings', 'find-replace')
-  const [text, setText] = createSignal('')
-  const [find, setFind] = createSignal('')
-  const [replace, setReplace] = createSignal('')
+  const [params, setParams] = useSearchParams<{ t?: string; f?: string; r?: string }>()
+  const [text, setTextSignal] = createSignal(params.t ?? '')
+  const [find, setFindSignal] = createSignal(params.f ?? '')
+  const [replace, setReplaceSignal] = createSignal(params.r ?? '')
   const [useRegex, setUseRegex] = createSignal(false)
   const [caseSensitive, setCaseSensitive] = createSignal(true)
   const [wholeWord, setWholeWord] = createSignal(false)
+
+  function setText(v: string) {
+    setTextSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
+  function setFind(v: string) {
+    setFindSignal(v)
+    setParams({ f: urlText(v) }, { replace: true })
+  }
+  function setReplace(v: string) {
+    setReplaceSignal(v)
+    setParams({ r: urlText(v) }, { replace: true })
+  }
 
   const processed = createMemo(() =>
     findReplace(text(), find(), replace(), {

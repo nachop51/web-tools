@@ -30,11 +30,15 @@ function fmt(n: number): string {
 
 export default function AreaConverter() {
   setToolPageMeta('units', 'area')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom = params.from && areaUnits[params.from] ? params.from : 'm2'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
@@ -48,7 +52,7 @@ export default function AreaConverter() {
   function handleFromChange(opt: UnitOption | null) {
     if (!opt) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -68,6 +72,7 @@ export default function AreaConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

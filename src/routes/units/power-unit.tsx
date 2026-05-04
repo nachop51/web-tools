@@ -30,11 +30,15 @@ function fmt(n: number): string {
 
 export default function PowerConverter() {
   setToolPageMeta('units', 'power-unit')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom = params.from && powerUnits[params.from] ? params.from : 'w'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
@@ -48,7 +52,7 @@ export default function PowerConverter() {
   function handleFromChange(opt: UnitOption | null) {
     if (!opt) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -68,6 +72,7 @@ export default function PowerConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

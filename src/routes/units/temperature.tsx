@@ -33,11 +33,15 @@ function isValidTempUnit(v: string | undefined): v is TempUnit {
 
 export default function TemperatureConverter() {
   setToolPageMeta('units', 'temperature')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom: TempUnit = isValidTempUnit(params.from) ? params.from : 'c'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
   const [fromUnit, setFromUnit] = createSignal<TempUnit>(initialFrom)
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
@@ -52,7 +56,7 @@ export default function TemperatureConverter() {
     if (!opt) return
     if (!isValidTempUnit(opt.value)) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -72,6 +76,7 @@ export default function TemperatureConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

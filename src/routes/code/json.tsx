@@ -1,3 +1,4 @@
+import { useSearchParams } from '@solidjs/router'
 import { createMemo, createSignal, For, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -5,13 +6,32 @@ import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { cn } from '~/lib/utils'
 import { processJson } from '~/lib/utils/code/json'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
-type IndentMode = 2 | 4 | 0
+type Mode = '2' | '4' | 'min'
+
+const MODE_TO_INDENT: Record<Mode, 0 | 2 | 4> = { '2': 2, '4': 4, min: 0 }
 
 export default function JsonTool() {
   setToolPageMeta('code', 'json')
-  const [input, setInput] = createSignal('')
-  const [indent, setIndent] = createSignal<IndentMode>(2)
+  const [params, setParams] = useSearchParams<{ mode?: string; t?: string }>()
+
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
+  const mode = createMemo<Mode>(() => {
+    const p = params.mode
+    return p === '4' || p === 'min' ? p : '2'
+  })
+
+  function setMode(m: Mode) {
+    setParams({ mode: m === '2' ? undefined : m }, { replace: true })
+  }
+
+  const indent = createMemo(() => MODE_TO_INDENT[mode()])
 
   const result = createMemo(() => processJson(input(), indent()))
 
@@ -38,12 +58,6 @@ export default function JsonTool() {
     return r.ok ? null : r
   })
 
-  const indentOptions: { label: string; value: IndentMode }[] = [
-    { label: '2 spaces', value: 2 },
-    { label: '4 spaces', value: 4 },
-    { label: 'Minify', value: 0 },
-  ]
-
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -53,34 +67,9 @@ export default function JsonTool() {
       />
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
-        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
-          <div class="mb-4 flex items-center gap-2">
-            <span aria-hidden class="size-2 rounded-full bg-violet" />
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Mode</h2>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <For each={indentOptions}>
-              {(opt) => (
-                <button
-                  type="button"
-                  onClick={() => setIndent(opt.value)}
-                  class={cn(
-                    'rounded-md border px-3 py-1.5 text-sm font-medium transition-colors duration-150 cursor-pointer',
-                    indent() === opt.value
-                      ? 'border-violet bg-violet text-white'
-                      : 'border-border bg-background text-foreground hover:border-violet/60 hover:bg-violet/5'
-                  )}
-                >
-                  {opt.label}
-                </button>
-              )}
-            </For>
-          </div>
-        </section>
-
         <div class="grid gap-6 lg:grid-cols-2">
           <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
-            <div class="mb-4 flex items-center gap-2">
+            <div class="mb-4 flex h-8 items-center gap-2">
               <span aria-hidden class="size-2 rounded-full bg-violet" />
               <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
             </div>
@@ -108,9 +97,41 @@ export default function JsonTool() {
           </section>
 
           <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
-            <div class="mb-4 flex items-center gap-2">
-              <span aria-hidden class="size-2 rounded-full bg-violet" />
-              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+            <div class="mb-4 flex h-8 items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Output</h2>
+              </div>
+              <div
+                role="radiogroup"
+                aria-label="Format"
+                class="ml-auto inline-flex rounded-md border border-border bg-background p-0.5"
+              >
+                <For
+                  each={[
+                    { value: '2', label: '2 spaces' },
+                    { value: '4', label: '4 spaces' },
+                    { value: 'min', label: 'Minify' },
+                  ] satisfies { value: Mode; label: string }[]}
+                >
+                  {(opt) => (
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={mode() === opt.value}
+                      onClick={() => setMode(opt.value)}
+                      class={cn(
+                        'px-3 py-1 text-sm transition-colors cursor-pointer',
+                        mode() === opt.value
+                          ? 'bg-violet text-white shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-violet/5'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  )}
+                </For>
+              </div>
             </div>
             <div class="relative">
               <Show

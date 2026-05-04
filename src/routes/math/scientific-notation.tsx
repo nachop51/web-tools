@@ -23,12 +23,21 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function ScientificNotation() {
   setToolPageMeta('math', 'scientific-notation')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{
+    mode?: string
+    n?: string
+    coeff?: string
+    exp?: string
+  }>()
   const mode = createMemo<Mode>(() => (params.mode === 'fromSci' ? 'fromSci' : 'toSci'))
 
-  const [standard, setStandard] = createSignal('299792458')
-  const [coeff, setCoeff] = createSignal('2.99792458')
-  const [exp, setExp] = createSignal('8')
+  const [standard, setStandardSignal] = createSignal(params.n ?? '299792458')
+  const [coeff, setCoeffSignal] = createSignal(params.coeff ?? '2.99792458')
+  const [exp, setExpSignal] = createSignal(params.exp ?? '8')
+
+  function setStandard(v: string) { setStandardSignal(v); setParams({ n: v || undefined }, { replace: true }) }
+  function setCoeff(v: string) { setCoeffSignal(v); setParams({ coeff: v || undefined }, { replace: true }) }
+  function setExp(v: string) { setExpSignal(v); setParams({ exp: v || undefined }, { replace: true }) }
 
   const sciResult = createMemo(() => {
     const v = parseFloat(standard())
@@ -56,7 +65,7 @@ export default function ScientificNotation() {
           <ToolbarSegmented
             label="Mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>

@@ -7,14 +7,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { caseDefs, caseConverters, type CaseKey } from '~/lib/utils/strings/case'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type CaseDef = (typeof caseDefs)[number]
 
 export default function CaseConverter() {
   setToolPageMeta('strings', 'case')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const mode = createMemo<CaseKey>(() => {
     const p = params.mode
@@ -42,7 +48,7 @@ export default function CaseConverter() {
             optionValue="key"
             optionTextValue="label"
             value={selectedDef()}
-            onChange={(v) => v && setParams({ mode: v.key })}
+            onChange={(v) => v && setParams({ mode: v.key }, { replace: true })}
             itemComponent={(itemProps) => (
               <SelectItem item={itemProps.item}>
                 <span class="flex flex-col">

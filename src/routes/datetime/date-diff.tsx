@@ -32,17 +32,17 @@ export default function DateDiffTool() {
 
   function handleFrom(v: string) {
     setFrom(v)
-    setParams({ from: v })
+    setParams({ from: v }, { replace: true })
   }
 
   function handleTo(v: string) {
     setTo(v)
-    setParams({ to: v })
+    setParams({ to: v }, { replace: true })
   }
 
   function handleMode(m: Mode) {
     setMode(m)
-    setParams({ mode: m })
+    setParams({ mode: m }, { replace: true })
   }
 
   function useToday() {

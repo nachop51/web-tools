@@ -40,7 +40,7 @@ export default function UrlParserTool() {
 
   function handleInput(val: string) {
     setInput(val)
-    setParams({ url: val ? encodeToBase64(val) : undefined })
+    setParams({ url: val ? encodeToBase64(val) : undefined }, { replace: true })
   }
 
   const parsed = createMemo<ParsedUrl | null>(() => {

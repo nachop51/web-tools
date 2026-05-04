@@ -1,5 +1,5 @@
 import type { ValidComponent } from 'solid-js'
-import { mergeProps, splitProps } from 'solid-js'
+import { mergeProps, onMount, splitProps } from 'solid-js'
 
 import type { PolymorphicProps } from '@kobalte/core'
 import * as TextFieldPrimitive from '@kobalte/core/text-field'
@@ -66,8 +66,18 @@ const TextFieldTextArea = <T extends ValidComponent = 'textarea'>(
   props: PolymorphicProps<T, TextFieldTextAreaProps<T>>
 ) => {
   const [local, others] = splitProps(props as TextFieldTextAreaProps, ['class'])
+  let el: HTMLTextAreaElement | undefined
+  // Kobalte+Polymorphic sets `value` as an attribute, which a textarea ignores —
+  // only the inner text controls displayed content. Sync the attribute to `.value`
+  // on mount so initial values from URL params actually show.
+  onMount(() => {
+    if (!el) return
+    const attr = el.getAttribute('value')
+    if (attr && el.value !== attr) el.value = attr
+  })
   return (
     <TextFieldPrimitive.TextArea
+      ref={el}
       class={cn(
         'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
         local.class

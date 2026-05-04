@@ -1,4 +1,5 @@
 import { createEffect, createResource, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar } from '~/components/tool-toolbar'
@@ -6,11 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { hashAlgorithms, hashText, type HashAlgorithm } from '~/lib/utils/encoding/hash'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 export default function HashTool() {
   setToolPageMeta('encoding', 'hash')
-  const [inputValue, setInputValue] = createSignal('')
-  const [algorithm, setAlgorithm] = createSignal<HashAlgorithm>('SHA-256')
+  const [params, setParams] = useSearchParams<{ algo?: string; t?: string }>()
+  const initialAlgo: HashAlgorithm = (hashAlgorithms as readonly string[]).includes(params.algo ?? '')
+    ? (params.algo as HashAlgorithm)
+    : 'SHA-256'
+  const [inputValue, setInputValueSignal] = createSignal(params.t ?? '')
+  const [algorithm, setAlgorithmSignal] = createSignal<HashAlgorithm>(initialAlgo)
+
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
+  function setAlgorithm(v: HashAlgorithm) {
+    setAlgorithmSignal(v)
+    setParams({ algo: v }, { replace: true })
+  }
   const [source, setSource] = createSignal<[string, HashAlgorithm]>(['', 'SHA-256'])
 
   const [hash] = createResource(source, ([text, algo]) => (text ? hashText(text, algo) : Promise.resolve('')))

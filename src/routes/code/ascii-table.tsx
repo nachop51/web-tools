@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
 import { buildAsciiTable } from '~/lib/utils/code/ascii'
@@ -8,8 +9,14 @@ const TABLE = buildAsciiTable()
 
 export default function AsciiTableTool() {
   setToolPageMeta('code', 'ascii-table')
-  const [search, setSearch] = createSignal('')
+  const [params, setParams] = useSearchParams<{ q?: string }>()
+  const [search, setSearchSignal] = createSignal(params.q ?? '')
   const [copied, setCopied] = createSignal<string | null>(null)
+
+  function setSearch(v: string) {
+    setSearchSignal(v)
+    setParams({ q: v || undefined }, { replace: true })
+  }
 
   const filtered = createMemo(() => {
     const q = search().toLowerCase().trim()
@@ -84,11 +91,11 @@ export default function AsciiTableTool() {
                       entry.description,
                     ]
                     return (
-                      <tr class="border-t border-border/50 transition-colors hover:bg-violet/5">
+                      <tr class="border-t border-border/50 transition-colors duration-300 hover:bg-violet/5 hover:duration-25">
                         <For each={cells}>
                           {(cell) => (
                             <td
-                              class="cursor-pointer px-3 py-1.5 font-mono transition-colors hover:bg-violet/10 hover:text-violet"
+                              class="cursor-pointer px-3 py-1.5 font-mono transition-colors duration-300 hover:bg-violet/10 hover:text-violet hover:duration-25"
                               title={copied() === cell ? 'Copied!' : 'Click to copy'}
                               onClick={() => copyCell(cell)}
                             >

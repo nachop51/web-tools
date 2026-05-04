@@ -1,4 +1,5 @@
 import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldErrorMessage, TextFieldInput } from '~/components/ui/text-field'
@@ -7,7 +8,13 @@ import { setToolPageMeta } from '~/lib/seo'
 
 export default function ToWords() {
   setToolPageMeta('numbers', 'to-words')
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ n?: string }>()
+  const [input, setInputSignal] = createSignal(params.n ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ n: v || undefined }, { replace: true })
+  }
 
   const result = createMemo((): { output: string; error: string } => {
     const trimmed = input().trim()

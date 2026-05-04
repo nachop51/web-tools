@@ -1,3 +1,4 @@
+import { useSearchParams } from '@solidjs/router'
 import { createSignal, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -15,8 +16,9 @@ import { setToolPageMeta } from '~/lib/seo'
 
 export default function UuidTool() {
   setToolPageMeta('code', 'uuid')
+  const [params, setParams] = useSearchParams<{ count?: string }>()
   const [single, setSingle] = createSignal('')
-  const [count, setCount] = createSignal(10)
+  const [count, setCountSignal] = createSignal(params.count ?? '')
   const [list, setList] = createSignal<string[]>([])
 
   onMount(() => {
@@ -27,8 +29,14 @@ export default function UuidTool() {
     setSingle(generateUuid())
   }
 
+  function setCount(v: string) {
+    setCountSignal(v)
+    setParams({ count: v || undefined }, { replace: true })
+  }
+
   function generateList() {
-    const n = Math.max(1, Math.min(count(), 1000))
+    const parsed = Number.parseInt(count(), 10)
+    const n = Math.max(1, Math.min(Number.isFinite(parsed) ? parsed : 100, 1000))
     setList(Array.from({ length: n }, () => generateUuid()))
   }
 
@@ -48,7 +56,7 @@ export default function UuidTool() {
           </div>
 
           <div class="relative">
-            <div class="anim-fade-up min-h-[3.5rem] rounded-md border border-violet/30 bg-violet/5 px-4 py-4 pr-14 font-mono text-sm leading-relaxed break-words flex items-center">
+            <div class="anim-fade-up min-h-14 rounded-md border border-violet/30 bg-violet/5 px-4 py-4 pr-14 font-mono text-sm leading-relaxed wrap-break-word flex items-center">
               {single()}
             </div>
             <CopyButton value={() => single()} class="absolute right-2 top-2" />
@@ -67,15 +75,15 @@ export default function UuidTool() {
 
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <NumberField
-              rawValue={count()}
-              onRawValueChange={(v) => setCount(Number.isFinite(v) ? v : 10)}
+              value={count()}
+              onChange={setCount}
               minValue={1}
               maxValue={1000}
               format={false}
               class="w-32"
             >
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" />
+                <NumberFieldInput autofocus class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
@@ -89,7 +97,7 @@ export default function UuidTool() {
               <TextFieldTextArea
                 readOnly
                 value={list().join('\n')}
-                class="min-h-[16rem] font-mono text-sm resize-y"
+                class="min-h-64 font-mono text-sm resize-y"
                 placeholder="Generated UUIDs will appear here…"
               />
             </TextField>

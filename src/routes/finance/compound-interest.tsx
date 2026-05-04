@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import { ToolToolbar } from '~/components/tool-toolbar'
@@ -26,11 +27,27 @@ const INITIAL_SHOW = 10
 
 export default function CompoundInterestCalculator() {
   setToolPageMeta('finance', 'compound-interest')
-  const [principal, setPrincipal] = createSignal('')
-  const [rate, setRate] = createSignal('')
-  const [years, setYears] = createSignal('')
-  const [compoundingId, setCompoundingId] = createSignal<CompoundingId>('monthly')
+  const [params, setParams] = useSearchParams<{
+    p?: string
+    r?: string
+    t?: string
+    freq?: string
+  }>()
+  const validFreq: CompoundingId[] = compoundingOptions.map((o) => o.id)
+  const initialFreq: CompoundingId = validFreq.includes(params.freq as CompoundingId)
+    ? (params.freq as CompoundingId)
+    : 'monthly'
+
+  const [principal, setPrincipalSignal] = createSignal(params.p ?? '')
+  const [rate, setRateSignal] = createSignal(params.r ?? '')
+  const [years, setYearsSignal] = createSignal(params.t ?? '')
+  const [compoundingId, setCompoundingIdSignal] = createSignal<CompoundingId>(initialFreq)
   const [showAll, setShowAll] = createSignal(false)
+
+  function setPrincipal(v: string) { setPrincipalSignal(v); setParams({ p: v || undefined }, { replace: true }) }
+  function setRate(v: string) { setRateSignal(v); setParams({ r: v || undefined }, { replace: true }) }
+  function setYears(v: string) { setYearsSignal(v); setParams({ t: v || undefined }, { replace: true }) }
+  function setCompoundingId(v: CompoundingId) { setCompoundingIdSignal(v); setParams({ freq: v }, { replace: true }) }
 
   const selectedCompounding = createMemo(
     () => compoundingOptions.find((o) => o.id === compoundingId()) ?? compoundingOptions[0]
@@ -103,7 +120,7 @@ export default function CompoundInterestCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-3">
-            <NumberField onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={principal()} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Principal ($)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="e.g. 5000.00" class="h-12 font-mono text-base" />
@@ -112,7 +129,7 @@ export default function CompoundInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={rate()} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Annual rate (%)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 7" class="h-12 font-mono text-base" />
@@ -121,7 +138,7 @@ export default function CompoundInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField onChange={setYears} minValue={1} step={1} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={years()} onChange={setYears} minValue={1} step={1} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Years</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 10" class="h-12 font-mono text-base" />

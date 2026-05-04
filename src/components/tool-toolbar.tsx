@@ -40,7 +40,7 @@ export function ToolbarSegmented<T extends string>(props: ToolbarSegmentedProps<
               aria-checked={props.value === opt.value}
               onClick={() => props.onChange(opt.value)}
               class={cn(
-                'rounded-[5px] px-3 py-1 text-sm transition-colors cursor-pointer',
+                'px-3 py-1 text-sm transition-colors cursor-pointer',
                 props.value === opt.value
                   ? 'bg-violet text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-violet/5'
@@ -65,7 +65,7 @@ export function ToolbarChip(props: ToolbarChipProps) {
   return (
     <label
       class={cn(
-        'anim-fade-in group inline-flex cursor-pointer select-none items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+        'anim-fade-in group inline-flex cursor-pointer select-none items-center gap-2 border px-2.5 py-1 text-xs font-medium transition-colors',
         props.checked
           ? 'border-violet bg-violet/5 text-violet'
           : 'border-input bg-background text-foreground/80 hover:border-violet/60 hover:text-foreground hover:bg-violet/5'
@@ -80,7 +80,7 @@ export function ToolbarChip(props: ToolbarChipProps) {
       <span
         aria-hidden
         class={cn(
-          'flex size-3.5 items-center justify-center rounded-[3px] border transition-colors',
+          'flex size-3.5 items-center justify-center border transition-colors',
           props.checked
             ? 'border-violet bg-violet text-white'
             : 'border-foreground/30 bg-background group-hover:border-violet/60'

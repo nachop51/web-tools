@@ -1,7 +1,9 @@
 import { createMemo, createSignal, For } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { ToolHeader } from '~/components/tool-header'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 import {
   countBytes,
   countChars,
@@ -24,7 +26,13 @@ const statDefs = [
 
 export default function CharacterCount() {
   setToolPageMeta('strings', 'count')
-  const [text, setText] = createSignal('')
+  const [params, setParams] = useSearchParams<{ t?: string }>()
+  const [text, setTextSignal] = createSignal(params.t ?? '')
+
+  function setText(v: string) {
+    setTextSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const stats = createMemo(() => ({
     chars: countChars(text()),

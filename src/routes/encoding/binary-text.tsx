@@ -5,6 +5,7 @@ import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 import {
   type BinaryMode,
   textToBinary,
@@ -42,14 +43,19 @@ function decode(s: string, mode: BinaryMode): string {
 
 export default function BinaryTextTool() {
   setToolPageMeta('encoding', 'binary-text')
-  const [params, setParams] = useSearchParams<{ mode?: string; dir?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; dir?: string; t?: string }>()
 
   const initialMode = (['binary', 'hex', 'decimal'] as BinaryMode[]).includes(params.mode as BinaryMode)
     ? (params.mode as BinaryMode)
     : 'binary'
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [binaryMode, setBinaryMode] = createSignal<BinaryMode>(initialMode)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
   const [dir, setDir] = createSignal<Dir>(params.dir === 'decode' ? 'decode' : 'encode')
   const [error, setError] = createSignal<string | null>(null)
 
@@ -77,12 +83,12 @@ export default function BinaryTextTool() {
 
   function handleMode(m: BinaryMode) {
     setBinaryMode(m)
-    setParams({ mode: m })
+    setParams({ mode: m }, { replace: true })
   }
 
   function handleDir(d: Dir) {
     setDir(d)
-    setParams({ dir: d })
+    setParams({ dir: d }, { replace: true })
   }
 
   return (

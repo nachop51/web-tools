@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { decodeBase58, encodeBase58 } from '~/lib/utils/encoding/base58'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Mode = 'encode' | 'decode'
 
@@ -16,9 +17,14 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function Base58Tool() {
   setToolPageMeta('encoding', 'base58')
-  const [params, setParams] = useSearchParams<{ dir?: string }>()
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ dir?: string; t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [mode, setMode] = createSignal<Mode>(params.dir === 'decode' ? 'decode' : 'encode')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
   const [error, setError] = createSignal<string | null>(null)
 
   const output = createMemo(() => {
@@ -45,7 +51,7 @@ export default function Base58Tool() {
 
   function handleMode(m: Mode) {
     setMode(m)
-    setParams({ dir: m })
+    setParams({ dir: m }, { replace: true })
   }
 
   return (

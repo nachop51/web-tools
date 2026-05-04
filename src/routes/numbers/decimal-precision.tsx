@@ -11,6 +11,7 @@ import {
   NumberFieldInput,
   NumberFieldLabel,
 } from '~/components/ui/number-field'
+import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
 import { ceilTo, floorTo, roundTo, toSigFigs, truncateTo } from '~/lib/utils/numbers/precision'
 import { setToolPageMeta } from '~/lib/seo'
 
@@ -29,9 +30,15 @@ export default function DecimalPrecision() {
   const [params, setParams] = useSearchParams<{
     mode?: string
     places?: string
+    n?: string
   }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.n ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ n: v || undefined }, { replace: true })
+  }
 
   const mode = createMemo<PrecisionMode>(() => {
     const p = params.mode
@@ -75,7 +82,7 @@ export default function DecimalPrecision() {
           <ToolbarSegmented
             label="Mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>
@@ -88,18 +95,14 @@ export default function DecimalPrecision() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-            <NumberField onChange={setInput} format={false} class="flex flex-col gap-1.5">
-              <NumberFieldLabel>Number</NumberFieldLabel>
-              <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 3.14159" class="h-12 font-mono text-base" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-            </NumberField>
+            <TextField value={input()} onChange={setInput} class="flex flex-col gap-1.5">
+              <TextFieldLabel>Number</TextFieldLabel>
+              <TextFieldInput autofocus type="text" inputmode="decimal" placeholder="e.g. 3.14159" class="h-12 font-mono text-base" />
+            </TextField>
 
             <NumberField
               value={String(places())}
-              onChange={(v) => setParams({ places: v })}
+              onChange={(v) => setParams({ places: v }, { replace: true })}
               minValue={0}
               maxValue={20}
               format={false}

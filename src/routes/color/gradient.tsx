@@ -77,7 +77,7 @@ export default function GradientBuilder() {
       space: space(),
       type: type(),
       angle: String(angle()),
-    })
+    }, { replace: true })
   }
 
   function setStop(i: number, value: string) {

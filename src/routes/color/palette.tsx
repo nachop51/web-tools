@@ -50,7 +50,7 @@ export default function PaletteGenerator() {
 
   function applyMode(m: PaletteMode) {
     setMode(m)
-    setParams({ c: hexInput().replace('#', ''), mode: m })
+    setParams({ c: hexInput().replace('#', ''), mode: m }, { replace: true })
   }
 
   return (
@@ -93,14 +93,14 @@ export default function PaletteGenerator() {
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', ''), mode: mode() })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', ''), mode: mode() }, { replace: true })
               }}
             />
             <TextField
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', ''), mode: mode() })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', ''), mode: mode() }, { replace: true })
               }}
               validationState={isInvalidShown() ? 'invalid' : 'valid'}
               class="flex-1"

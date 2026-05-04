@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import {
@@ -14,8 +15,12 @@ import { setToolPageMeta } from '~/lib/seo'
 
 export default function ModuloCalculator() {
   setToolPageMeta('math', 'modulo')
-  const [a, setA] = createSignal('17')
-  const [m, setM] = createSignal('5')
+  const [params, setParams] = useSearchParams<{ a?: string; m?: string }>()
+  const [a, setASignal] = createSignal(params.a ?? '17')
+  const [m, setMSignal] = createSignal(params.m ?? '5')
+
+  function setA(v: string) { setASignal(v); setParams({ a: v || undefined }, { replace: true }) }
+  function setM(v: string) { setMSignal(v); setParams({ m: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const na = parseFloat(a()),

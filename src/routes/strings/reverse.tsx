@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { reverseChars, reverseLines, reverseWords } from '~/lib/utils/strings/reverse'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Mode = 'chars' | 'words' | 'lines'
 
@@ -17,8 +18,13 @@ const modes: { value: Mode; label: string }[] = [
 
 export default function ReverseText() {
   setToolPageMeta('strings', 'reverse')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ mode?: string; t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const mode = createMemo<Mode>(() => {
     const p = params.mode
@@ -44,7 +50,7 @@ export default function ReverseText() {
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
         <ToolToolbar>
-          <ToolbarSegmented label="Reverse" value={mode()} onChange={(v) => setParams({ mode: v })} options={modes} />
+          <ToolbarSegmented label="Reverse" value={mode()} onChange={(v) => setParams({ mode: v }, { replace: true })} options={modes} />
         </ToolToolbar>
 
         <div class="grid gap-6 md:grid-cols-2">

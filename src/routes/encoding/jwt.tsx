@@ -1,15 +1,23 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { decodeJwt, formatJwtDate } from '~/lib/utils/encoding/jwt'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 const DATE_FIELDS = new Set(['iat', 'exp', 'nbf'])
 
 export default function JwtTool() {
   setToolPageMeta('encoding', 'jwt')
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const result = createMemo(() => {
     const token = input().trim()

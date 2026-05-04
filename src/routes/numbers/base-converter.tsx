@@ -59,22 +59,29 @@ function parseValueParam(param: string | undefined, fallback: number): number {
   return parsed
 }
 
+function parseModeParam(param: string | undefined): NumberMode {
+  const values = Object.values(NumberMode) as NumberMode[]
+  return values.includes(param as NumberMode) ? (param as NumberMode) : NumberMode.INT
+}
+
 export default function BaseConverter() {
   setToolPageMeta('numbers', 'base-converter')
 
-  const [searchParams] = useSearchParams<{
+  const [searchParams, setParams] = useSearchParams<{
+    value?: string
+    mode?: string
     valueBase?: string
     targetBase?: string
   }>()
 
-  const [value, setValue] = createSignal('')
+  const [value, setValue] = createSignal(searchParams.value ?? '')
   const [inputError, setInputError] = createSignal<string | null>(null)
 
   const [selectedValueBase, setSelectedValueBase] = createSignal(parseSelectedParam(searchParams.valueBase, '10'))
   const [selectedTargetBase, setSelectedTargetBase] = createSignal(parseSelectedParam(searchParams.targetBase, '2'))
   const [valueBase, setValueBase] = createSignal(parseValueParam(searchParams.valueBase, 10))
   const [targetBase, setTargetBase] = createSignal(parseValueParam(searchParams.targetBase, 2))
-  const [selectedMode, setSelectedMode] = createSignal<NumberMode>(NumberMode.INT)
+  const [selectedMode, setSelectedMode] = createSignal<NumberMode>(parseModeParam(searchParams.mode))
 
   const outputNumber = createMemo(() => computeOutputNumber(value(), valueBase(), targetBase(), selectedMode()))
 
@@ -93,6 +100,21 @@ export default function BaseConverter() {
   createEffect(() => {
     const sel = selectedTargetBase()
     if (sel !== 'custom') setTargetBase(parseInt(sel, 10))
+  })
+
+  // Keep editable state in URL for shareable links and reload persistence.
+  createEffect(() => {
+    const valueBaseParam = selectedValueBase() === 'custom' ? String(valueBase()) : selectedValueBase()
+    const targetBaseParam = selectedTargetBase() === 'custom' ? String(targetBase()) : selectedTargetBase()
+    setParams(
+      {
+        value: value() || undefined,
+        mode: selectedMode() === NumberMode.INT ? undefined : selectedMode(),
+        valueBase: valueBaseParam === '10' ? undefined : valueBaseParam,
+        targetBase: targetBaseParam === '2' ? undefined : targetBaseParam,
+      },
+      { replace: true }
+    )
   })
 
   // If both bases collide on a non-custom value, pick a different target.
@@ -240,7 +262,7 @@ export default function BaseConverter() {
                 onClick={swapBases}
                 aria-label="Swap input and target bases"
                 class={cn(
-                  'group inline-flex size-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground',
+                  'group inline-flex size-10 items-center justify-center border border-border bg-background text-muted-foreground',
                   'transition-[transform,border-color,color,background-color] duration-200 ease-out cursor-pointer',
                   'hover:rotate-180 hover:border-violet hover:text-violet hover:bg-violet/5',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'

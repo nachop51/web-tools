@@ -1,17 +1,29 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
 import { TbOutlineTextWrap } from 'solid-icons/tb'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { Button } from '~/components/ui/button'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { cn } from '~/lib/utils'
 import { computeDiff } from '~/lib/utils/strings/diff'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 export default function TextDiff() {
   setToolPageMeta('strings', 'diff')
-  const [original, setOriginal] = createSignal('')
-  const [modified, setModified] = createSignal('')
+  const [params, setParams] = useSearchParams<{ a?: string; b?: string }>()
+  const [original, setOriginalSignal] = createSignal(params.a ?? '')
+  const [modified, setModifiedSignal] = createSignal(params.b ?? '')
   const [wrapLines, setWrapLines] = createSignal(false)
+
+  function setOriginal(v: string) {
+    setOriginalSignal(v)
+    setParams({ a: urlText(v) }, { replace: true })
+  }
+  function setModified(v: string) {
+    setModifiedSignal(v)
+    setParams({ b: urlText(v) }, { replace: true })
+  }
 
   const diff = createMemo(() => {
     if (!original() && !modified()) return null

@@ -28,12 +28,16 @@ function fmt(n: number): string {
 
 export default function RatioSolver() {
   setToolPageMeta('math', 'ratio')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; a?: string; b?: string; c?: string }>()
   const mode = createMemo<Mode>(() => (params.mode === 'solve' ? 'solve' : 'simplify'))
 
-  const [a, setA] = createSignal('6')
-  const [b, setB] = createSignal('4')
-  const [c, setC] = createSignal('9')
+  const [a, setASignal] = createSignal(params.a ?? '6')
+  const [b, setBSignal] = createSignal(params.b ?? '4')
+  const [c, setCSignal] = createSignal(params.c ?? '9')
+
+  function setA(v: string) { setASignal(v); setParams({ a: v || undefined }, { replace: true }) }
+  function setB(v: string) { setBSignal(v); setParams({ b: v || undefined }, { replace: true }) }
+  function setC(v: string) { setCSignal(v); setParams({ c: v || undefined }, { replace: true }) }
 
   const simplified = createMemo(() => {
     const na = parseFloat(a()),
@@ -70,7 +74,7 @@ export default function RatioSolver() {
           <ToolbarSegmented
             label="Mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>

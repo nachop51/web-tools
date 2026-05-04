@@ -95,7 +95,7 @@ export default function AmpsWattsVolts() {
           <ToolbarSegmented
             label="Solve for"
             value={solve()}
-            onChange={(v) => setSearchParams({ solve: v, a: '', b: '' })}
+            onChange={(v) => setSearchParams({ solve: v, a: '', b: '' }, { replace: true })}
             options={segmentedOptions}
           />
         </ToolToolbar>
@@ -114,7 +114,7 @@ export default function AmpsWattsVolts() {
                 value={aRaw()}
                 onChange={(v) => {
                   setARaw(v)
-                  setSearchParams({ a: v })
+                  setSearchParams({ a: v }, { replace: true })
                 }}
               >
                 <TextFieldInput
@@ -133,7 +133,7 @@ export default function AmpsWattsVolts() {
                 value={bRaw()}
                 onChange={(v) => {
                   setBRaw(v)
-                  setSearchParams({ b: v })
+                  setSearchParams({ b: v }, { replace: true })
                 }}
               >
                 <TextFieldInput

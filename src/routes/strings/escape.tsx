@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { escapeString, unescapeString, type EscapeMode } from '~/lib/utils/strings/escape'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Dir = 'escape' | 'unescape'
 
@@ -27,10 +28,15 @@ const dirs: { value: Dir; label: string }[] = [
 
 export default function EscapeTool() {
   setToolPageMeta('strings', 'escape')
-  const [params, setParams] = useSearchParams<{ mode?: string; dir?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; dir?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [error, setError] = createSignal<string | null>(null)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const mode = createMemo<EscapeMode>(() => {
     const p = params.mode
@@ -78,7 +84,7 @@ export default function EscapeTool() {
           <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Format</span>
           <Select<EscapeMode>
             value={mode()}
-            onChange={(v) => v && setParams({ mode: v })}
+            onChange={(v) => v && setParams({ mode: v }, { replace: true })}
             options={formatValues}
             itemComponent={(props) => <SelectItem item={props.item}>{formatLabels[props.item.rawValue]}</SelectItem>}
           >
@@ -88,7 +94,7 @@ export default function EscapeTool() {
             <SelectContent />
           </Select>
           <div class="ml-auto" />
-          <ToolbarSegmented label="Direction" value={dir()} onChange={(v) => setParams({ dir: v })} options={dirs} />
+          <ToolbarSegmented label="Direction" value={dir()} onChange={(v) => setParams({ dir: v }, { replace: true })} options={dirs} />
         </ToolToolbar>
 
         <div class="grid gap-6 md:grid-cols-2">

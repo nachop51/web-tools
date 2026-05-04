@@ -75,12 +75,12 @@ export default function CronPreview() {
             value={expr()}
             onChange={(v) => {
               setExpr(v)
-              setParams({ expr: v })
+              setParams({ expr: v || undefined }, { replace: true })
             }}
             validationState={parsed().error ? 'invalid' : 'valid'}
             class="flex flex-col gap-2"
           >
-            <TextFieldInput autofocus type="text" class="h-12 font-mono text-base" placeholder="0 * * * *" />
+            <TextFieldInput autofocus type="text" class="h-12 font-mono text-base" placeholder="e.g. 0 * * * *" />
             <TextFieldErrorMessage>{parsed().error}</TextFieldErrorMessage>
           </TextField>
 

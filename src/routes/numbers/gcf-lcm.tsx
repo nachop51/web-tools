@@ -26,9 +26,8 @@ export default function GcfLcm() {
   setToolPageMeta('numbers', 'gcf-lcm')
   const [params, setParams] = useSearchParams<{ nums?: string }>()
 
-  const initialNums = params.nums ? parseNums(params.nums) : [12, 8]
-
-  const [nums, setNums] = createSignal<string[]>(initialNums.map(String))
+  const initialNums = params.nums ? parseNums(params.nums).map(String) : ['']
+  const [nums, setNums] = createSignal<string[]>(initialNums.length > 0 ? initialNums : [''])
   const [showSteps, setShowSteps] = createSignal(false)
 
   const parsedNums = createMemo(() =>
@@ -59,7 +58,7 @@ export default function GcfLcm() {
     const updated = nums().map((n, idx) => (idx === i ? val : n))
     setNums(updated)
     const valid = updated.map((s) => parseInt(s, 10)).filter((n) => !isNaN(n) && n !== 0)
-    setParams({ nums: valid.join(',') })
+    setParams({ nums: valid.length > 0 ? valid.join(',') : undefined }, { replace: true })
   }
 
   function addNum() {
@@ -71,7 +70,7 @@ export default function GcfLcm() {
     const updated = nums().filter((_, idx) => idx !== i)
     setNums(updated)
     const valid = updated.map((s) => parseInt(s, 10)).filter((n) => !isNaN(n) && n !== 0)
-    setParams({ nums: valid.join(',') })
+    setParams({ nums: valid.length > 0 ? valid.join(',') : undefined }, { replace: true })
   }
 
   return (

@@ -1,4 +1,5 @@
-import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -23,13 +24,14 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function UnixTool() {
   setToolPageMeta('datetime', 'unix')
-  const [mode, setMode] = createSignal<Mode>('toDate')
-  const [tsInput, setTsInput] = createSignal('')
-  const [isoInput, setIsoInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ mode?: string; ts?: string; iso?: string }>()
+  const [mode, setModeSignal] = createSignal<Mode>(params.mode === 'toTimestamp' ? 'toTimestamp' : 'toDate')
+  const [tsInput, setTsInputSignal] = createSignal(params.ts ?? '')
+  const [isoInput, setIsoInputSignal] = createSignal(params.iso ?? '')
 
-  onMount(() => {
-    setTsInput(String(Math.floor(Date.now() / 1000)))
-  })
+  function setMode(v: Mode) { setModeSignal(v); setParams({ mode: v }, { replace: true }) }
+  function setTsInput(v: string) { setTsInputSignal(v); setParams({ ts: v || undefined }, { replace: true }) }
+  function setIsoInput(v: string) { setIsoInputSignal(v); setParams({ iso: v || undefined }, { replace: true }) }
 
   const tsInfo = createMemo(() => {
     const raw = tsInput().trim()

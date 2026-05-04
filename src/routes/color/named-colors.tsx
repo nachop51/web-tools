@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
 import { CSS_NAMED_COLORS } from '~/lib/utils/color/named'
@@ -6,8 +7,14 @@ import { setToolPageMeta } from '~/lib/seo'
 
 export default function NamedColors() {
   setToolPageMeta('color', 'named-colors')
-  const [search, setSearch] = createSignal('')
+  const [params, setParams] = useSearchParams<{ q?: string }>()
+  const [search, setSearchSignal] = createSignal(params.q ?? '')
   const [copied, setCopied] = createSignal<string | null>(null)
+
+  function setSearch(v: string) {
+    setSearchSignal(v)
+    setParams({ q: v || undefined }, { replace: true })
+  }
 
   const filtered = createMemo(() => {
     const q = search().trim().toLowerCase()

@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { slugify, type SlugifyOptions } from '~/lib/utils/strings/slugify'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Separator = '-' | '_' | '.'
 type CaseOpt = 'lower' | 'preserve'
@@ -23,9 +24,14 @@ const caseOptions: { value: CaseOpt; label: string }[] = [
 
 export default function SlugifyTool() {
   setToolPageMeta('strings', 'slugify')
-  const [params, setParams] = useSearchParams<{ sep?: string; lc?: string }>()
+  const [params, setParams] = useSearchParams<{ sep?: string; lc?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const separator = createMemo<Separator>(() => {
     const s = params.sep
@@ -53,13 +59,13 @@ export default function SlugifyTool() {
           <ToolbarSegmented
             label="Separator"
             value={separator()}
-            onChange={(v) => setParams({ sep: v })}
+            onChange={(v) => setParams({ sep: v }, { replace: true })}
             options={separatorOptions}
           />
           <ToolbarSegmented
             label="Case"
             value={caseValue()}
-            onChange={(v) => setParams({ lc: v === 'lower' ? '1' : '0' })}
+            onChange={(v) => setParams({ lc: v === 'lower' ? '1' : '0' }, { replace: true })}
             options={caseOptions}
           />
         </ToolToolbar>

@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldErrorMessage, TextFieldInput } from '~/components/ui/text-field'
@@ -7,7 +8,13 @@ import { setToolPageMeta } from '~/lib/seo'
 
 export default function DurationTool() {
   setToolPageMeta('datetime', 'duration')
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ d?: string }>()
+  const [input, setInputSignal] = createSignal(params.d ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ d: v || undefined }, { replace: true })
+  }
 
   const result = createMemo<DurationParts | null>(() => {
     const raw = input().trim()

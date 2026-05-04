@@ -28,12 +28,15 @@ function fmt(n: number): string {
 
 export default function DiscountCalculator() {
   setToolPageMeta('finance', 'discount')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; price?: string; pct?: string }>()
 
   const mode = createMemo<Mode>(() => (params.mode === 'tax' ? 'tax' : 'discount'))
 
-  const [price, setPrice] = createSignal('')
-  const [pct, setPct] = createSignal('')
+  const [price, setPriceSignal] = createSignal(params.price ?? '')
+  const [pct, setPctSignal] = createSignal(params.pct ?? '')
+
+  function setPrice(v: string) { setPriceSignal(v); setParams({ price: v || undefined }, { replace: true }) }
+  function setPct(v: string) { setPctSignal(v); setParams({ pct: v || undefined }, { replace: true }) }
 
   const discountResult = createMemo(() => {
     if (mode() !== 'discount') return null
@@ -54,9 +57,9 @@ export default function DiscountCalculator() {
   const hasResult = createMemo(() => discountResult() !== null || taxResult() !== null)
 
   function handleModeChange(m: Mode) {
-    setParams({ mode: m })
-    setPrice('')
-    setPct('')
+    setPriceSignal('')
+    setPctSignal('')
+    setParams({ mode: m, price: undefined, pct: undefined }, { replace: true })
   }
 
   return (
@@ -80,7 +83,7 @@ export default function DiscountCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField onChange={setPrice} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={price()} onChange={setPrice} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{mode() === 'discount' ? 'Original price ($)' : 'Pre-tax price ($)'}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="e.g. 100.00" class="h-12 font-mono text-base" />
@@ -90,6 +93,7 @@ export default function DiscountCalculator() {
             </NumberField>
 
             <NumberField
+              value={pct()}
               onChange={setPct}
               minValue={0}
               maxValue={100}

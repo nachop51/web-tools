@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { MORSE_MAP, textToMorse, morseToText } from '~/lib/utils/encoding/morse'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 const MORSE_LETTERS = Object.entries(MORSE_MAP).filter(([k]) => /^[A-Z]$/.test(k))
 const MORSE_DIGITS = Object.entries(MORSE_MAP).filter(([k]) => /^[0-9]$/.test(k))
@@ -20,9 +21,14 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function MorseTool() {
   setToolPageMeta('encoding', 'morse')
-  const [params, setParams] = useSearchParams<{ dir?: string }>()
-  const [input, setInput] = createSignal('')
+  const [params, setParams] = useSearchParams<{ dir?: string; t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [mode, setMode] = createSignal<Mode>(params.dir === 'decode' ? 'decode' : 'encode')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
   const [error, setError] = createSignal<string | null>(null)
 
   const output = createMemo(() => {
@@ -49,7 +55,7 @@ export default function MorseTool() {
 
   function handleMode(m: Mode) {
     setMode(m)
-    setParams({ dir: m })
+    setParams({ dir: m }, { replace: true })
   }
 
   return (

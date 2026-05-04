@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -27,9 +28,17 @@ function today(): string {
 
 export default function DateAdd() {
   setToolPageMeta('datetime', 'date-add')
-  const [date, setDate] = createSignal(today())
-  const [amount, setAmount] = createSignal('7')
-  const [unit, setUnit] = createSignal<DateUnit>('days')
+  const [params, setParams] = useSearchParams<{ date?: string; amount?: string; unit?: string }>()
+  const validUnits: DateUnit[] = ['days', 'weeks', 'months', 'years']
+  const initialUnit: DateUnit = validUnits.includes(params.unit as DateUnit) ? (params.unit as DateUnit) : 'days'
+
+  const [date, setDateSignal] = createSignal(params.date ?? today())
+  const [amount, setAmountSignal] = createSignal(params.amount ?? '7')
+  const [unit, setUnitSignal] = createSignal<DateUnit>(initialUnit)
+
+  function setDate(v: string) { setDateSignal(v); setParams({ date: v || undefined }, { replace: true }) }
+  function setAmount(v: string) { setAmountSignal(v); setParams({ amount: v || undefined }, { replace: true }) }
+  function setUnit(v: DateUnit) { setUnitSignal(v); setParams({ unit: v }, { replace: true }) }
 
   const result = createMemo(() => {
     const d = date()

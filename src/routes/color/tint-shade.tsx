@@ -1,5 +1,6 @@
 import { useSearchParams } from '@solidjs/router'
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { TbOutlineCheck } from 'solid-icons/tb'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import { TextField, TextFieldInput, TextFieldErrorMessage } from '~/components/ui/text-field'
@@ -19,6 +20,20 @@ export default function TintShade() {
   const initial = HEX_RE.test(params.c ?? '') ? normalizeHex(params.c!) : '#3B82F6'
 
   const [hexInput, setHexInput] = createSignal(initial)
+  const [copied, setCopied] = createSignal<{ step: number; tick: number } | null>(null)
+  let copyTick = 0
+
+  async function copyStop(step: number, hex: string) {
+    try {
+      await navigator.clipboard.writeText(hex)
+      copyTick += 1
+      const tick = copyTick
+      setCopied({ step, tick })
+      setTimeout(() => setCopied((c) => (c?.tick === tick ? null : c)), 1100)
+    } catch {
+      // clipboard unavailable in non-secure contexts
+    }
+  }
 
   const isValid = createMemo(() => HEX_RE.test(hexInput()))
   const isInvalidShown = createMemo(() => hexInput().length > 0 && !isValid())
@@ -59,19 +74,27 @@ export default function TintShade() {
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') }, { replace: true })
               }}
             />
             <TextField
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') }, { replace: true })
               }}
               validationState={isInvalidShown() ? 'invalid' : 'valid'}
               class="flex-1"
             >
-              <TextFieldInput autofocus type="text" placeholder="#3B82F6" class="h-12 font-mono text-base uppercase" />
+              <div class="relative">
+                <TextFieldInput
+                  autofocus
+                  type="text"
+                  placeholder="#3B82F6"
+                  class="h-12 pr-20 font-mono text-base uppercase"
+                />
+                <CopyButton value={() => hexInput()} class="absolute right-1.5 top-1/2 -translate-y-1/2" />
+              </div>
               <Show when={isInvalidShown()}>
                 <TextFieldErrorMessage>Enter a valid 6-digit hex color</TextFieldErrorMessage>
               </Show>
@@ -89,16 +112,38 @@ export default function TintShade() {
 
             <div class="anim-stagger grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-11">
               <For each={scale()}>
-                {(stop) => (
-                  <div class="flex flex-col gap-1.5">
-                    <div
-                      class="h-20 rounded-md border border-border shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:scale-[1.03]"
-                      style={{ 'background-color': stop.hex }}
-                    />
-                    <div class="text-center font-mono text-xs font-semibold">{stop.step}</div>
-                    <div class="text-center font-mono text-[10px] text-muted-foreground">{stop.hex}</div>
-                  </div>
-                )}
+                {(stop) => {
+                  const isCopied = () => copied()?.step === stop.step
+                  return (
+                    <div class="group flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => copyStop(stop.step, stop.hex)}
+                        aria-label={`Copy ${stop.hex}`}
+                        class="relative h-20 cursor-pointer overflow-visible rounded-md border border-border shadow-sm transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        style={{ 'background-color': stop.hex }}
+                      >
+                        <Show when={isCopied()} keyed>
+                          <span class="anim-color-copied pointer-events-none absolute left-1/2 top-1/2 z-10 inline-flex items-center gap-1 rounded-full bg-violet px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-violet-foreground shadow-lg">
+                            <TbOutlineCheck size={11} /> Copied
+                          </span>
+                        </Show>
+                      </button>
+                      <div class="text-center font-mono text-xs font-semibold transition-colors group-hover:text-violet">
+                        {stop.step}
+                      </div>
+                      <div
+                        class="text-center font-mono text-[10px] transition-colors group-hover:text-violet"
+                        classList={{
+                          'text-violet': isCopied(),
+                          'text-muted-foreground': !isCopied(),
+                        }}
+                      >
+                        {stop.hex}
+                      </div>
+                    </div>
+                  )
+                }}
               </For>
             </div>
           </section>

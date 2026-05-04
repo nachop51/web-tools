@@ -1,4 +1,5 @@
 import { createMemo, createSignal, For, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import {
@@ -22,9 +23,14 @@ function fmt(n: number): string {
 
 export default function TipCalculator() {
   setToolPageMeta('finance', 'tip')
-  const [bill, setBill] = createSignal('')
-  const [tipPct, setTipPct] = createSignal('18')
-  const [people, setPeople] = createSignal('1')
+  const [params, setParams] = useSearchParams<{ bill?: string; pct?: string; people?: string }>()
+  const [bill, setBillSignal] = createSignal(params.bill ?? '')
+  const [tipPct, setTipPctSignal] = createSignal(params.pct ?? '18')
+  const [people, setPeopleSignal] = createSignal(params.people ?? '1')
+
+  function setBill(v: string) { setBillSignal(v); setParams({ bill: v || undefined }, { replace: true }) }
+  function setTipPct(v: string) { setTipPctSignal(v); setParams({ pct: v || undefined }, { replace: true }) }
+  function setPeople(v: string) { setPeopleSignal(v); setParams({ people: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const b = parseFloat(bill())
@@ -64,7 +70,7 @@ export default function TipCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField onChange={setBill} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={bill()} onChange={setBill} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Bill amount ($)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="e.g. 85.00" class="h-12 font-mono text-base" />
@@ -104,7 +110,7 @@ export default function TipCalculator() {
                       aria-pressed={isActive()}
                       onClick={() => setTipPct(String(pct))}
                       class={cn(
-                        'rounded-full border px-3 py-1.5 text-sm font-medium cursor-pointer',
+                        'border px-3 py-1.5 text-sm font-medium cursor-pointer',
                         'transition-[border-color,background-color,color] duration-150 ease-out',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                         isActive()

@@ -39,13 +39,18 @@ function fmtFun(n: number): string {
 
 export default function LengthConverter() {
   setToolPageMeta('units', 'length')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom = params.from && lengthUnits[params.from] ? params.from : 'km'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
   const [showFun, setShowFun] = createSignal(false)
+
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
 
@@ -58,7 +63,7 @@ export default function LengthConverter() {
   function handleFromChange(opt: UnitOption | null) {
     if (!opt) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -78,6 +83,7 @@ export default function LengthConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

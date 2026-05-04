@@ -1,4 +1,5 @@
 import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import {
@@ -24,9 +25,14 @@ function fmtPct(n: number): string {
 
 export default function SimpleInterestCalculator() {
   setToolPageMeta('finance', 'simple-interest')
-  const [principal, setPrincipal] = createSignal('')
-  const [rate, setRate] = createSignal('')
-  const [years, setYears] = createSignal('')
+  const [params, setParams] = useSearchParams<{ p?: string; r?: string; t?: string }>()
+  const [principal, setPrincipalSignal] = createSignal(params.p ?? '')
+  const [rate, setRateSignal] = createSignal(params.r ?? '')
+  const [years, setYearsSignal] = createSignal(params.t ?? '')
+
+  function setPrincipal(v: string) { setPrincipalSignal(v); setParams({ p: v || undefined }, { replace: true }) }
+  function setRate(v: string) { setRateSignal(v); setParams({ r: v || undefined }, { replace: true }) }
+  function setYears(v: string) { setYearsSignal(v); setParams({ t: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const p = parseFloat(principal())
@@ -64,7 +70,7 @@ export default function SimpleInterestCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-3">
-            <NumberField onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={principal()} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Principal ($)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder="e.g. 1000.00" class="h-12 font-mono text-base" />
@@ -73,7 +79,7 @@ export default function SimpleInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={rate()} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Annual rate (%)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 5" class="h-12 font-mono text-base" />
@@ -82,7 +88,7 @@ export default function SimpleInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField onChange={setYears} minValue={0} step={0.5} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={years()} onChange={setYears} minValue={0} step={0.5} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Time (years)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 3" class="h-12 font-mono text-base" />

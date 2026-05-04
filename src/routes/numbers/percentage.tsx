@@ -30,13 +30,23 @@ function fmtResult(n: number): string {
 
 export default function PercentageCalculator() {
   setToolPageMeta('numbers', 'percentage')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; a?: string; b?: string }>()
 
   const initialMode = (['of', 'what', 'change', 'error'].includes(params.mode ?? '') ? params.mode : 'of') as Mode
 
   const [mode, setMode] = createSignal<Mode>(initialMode)
-  const [a, setA] = createSignal('')
-  const [b, setB] = createSignal('')
+  const [a, setASignal] = createSignal(params.a ?? '')
+  const [b, setBSignal] = createSignal(params.b ?? '')
+
+  function setA(v: string) {
+    setASignal(v)
+    setParams({ a: v || undefined }, { replace: true })
+  }
+
+  function setB(v: string) {
+    setBSignal(v)
+    setParams({ b: v || undefined }, { replace: true })
+  }
 
   const numA = createMemo(() => parseFloat(a()))
   const numB = createMemo(() => parseFloat(b()))
@@ -73,9 +83,9 @@ export default function PercentageCalculator() {
 
   function handleModeChange(m: Mode) {
     setMode(m)
-    setParams({ mode: m })
-    setA('')
-    setB('')
+    setASignal('')
+    setBSignal('')
+    setParams({ mode: m, a: undefined, b: undefined }, { replace: true })
   }
 
   return (
@@ -99,7 +109,7 @@ export default function PercentageCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{labels().a}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput autofocus placeholder={labels().aPlaceholder} class="h-12 font-mono text-base" />
@@ -108,7 +118,7 @@ export default function PercentageCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField onChange={setB} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{labels().b}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder={labels().bPlaceholder} class="h-12 font-mono text-base" />

@@ -14,6 +14,7 @@ import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { cn } from '~/lib/utils'
 import { caesarShift } from '~/lib/utils/encoding/caesar'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Mode = 'encode' | 'decode'
 
@@ -30,18 +31,30 @@ function clampShift(n: number): number {
   return i
 }
 
+function parseShiftParam(param: string | undefined): number {
+  const parsed = param == null ? 3 : Number.parseInt(param, 10)
+  if (!Number.isFinite(parsed)) return 3
+  return clampShift(parsed)
+}
+
 export default function CaesarTool() {
   setToolPageMeta('encoding', 'caesar')
   const [params, setParams] = useSearchParams<{
     dir?: string
     shift?: string
+    t?: string
   }>()
 
-  const initialShift = clampShift(Number.parseInt(params.shift ?? '3', 10) || 0)
+  const initialShift = parseShiftParam(params.shift)
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [mode, setMode] = createSignal<Mode>(params.dir === 'decode' ? 'decode' : 'encode')
   const [shift, setShift] = createSignal<number>(initialShift)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const output = createMemo(() => caesarShift(input(), shift(), mode()))
 
@@ -55,13 +68,13 @@ export default function CaesarTool() {
 
   function handleMode(m: Mode) {
     setMode(m)
-    setParams({ dir: m })
+    setParams({ dir: m }, { replace: true })
   }
 
   function handleShift(n: number) {
     const v = clampShift(n)
     setShift(v)
-    setParams({ shift: String(v) })
+    setParams({ shift: String(v) }, { replace: true })
   }
 
   return (

@@ -190,7 +190,7 @@ export default function PythagoreanTheorem() {
           <ToolbarSegmented
             label="Solve for"
             value={solve()}
-            onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' })}
+            onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' }, { replace: true })}
             options={segmentedOptions}
           />
           <div class="ml-auto" />
@@ -207,7 +207,7 @@ export default function PythagoreanTheorem() {
           <div class="grid gap-4 sm:grid-cols-2">
             <NumberField
               value={v1Raw()}
-              onChange={(v) => setSearchParams({ v1: v })}
+              onChange={(v) => setSearchParams({ v1: v }, { replace: true })}
               minValue={0}
               format={false}
               class="flex flex-col gap-1.5"
@@ -222,7 +222,7 @@ export default function PythagoreanTheorem() {
 
             <NumberField
               value={v2Raw()}
-              onChange={(v) => setSearchParams({ v2: v })}
+              onChange={(v) => setSearchParams({ v2: v }, { replace: true })}
               minValue={0}
               format={false}
               class="flex flex-col gap-1.5"

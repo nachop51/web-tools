@@ -24,12 +24,23 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function RandomNumberTool() {
   setToolPageMeta('numbers', 'random-number')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{
+    mode?: string
+    min?: string
+    max?: string
+    count?: string
+    decimals?: string
+  }>()
 
-  const [min, setMin] = createSignal('-100')
-  const [max, setMax] = createSignal('100')
-  const [count, setCount] = createSignal('10')
-  const [decimals, setDecimals] = createSignal('2')
+  const [min, setMinSignal] = createSignal(params.min ?? '')
+  const [max, setMaxSignal] = createSignal(params.max ?? '')
+  const [count, setCountSignal] = createSignal(params.count ?? '')
+  const [decimals, setDecimalsSignal] = createSignal(params.decimals ?? '')
+
+  function setMin(v: string) { setMinSignal(v); setParams({ min: v || undefined }, { replace: true }) }
+  function setMax(v: string) { setMaxSignal(v); setParams({ max: v || undefined }, { replace: true }) }
+  function setCount(v: string) { setCountSignal(v); setParams({ count: v || undefined }, { replace: true }) }
+  function setDecimals(v: string) { setDecimalsSignal(v); setParams({ decimals: v || undefined }, { replace: true }) }
   const [results, setResults] = createSignal<number[]>([])
   const [animKey, setAnimKey] = createSignal(0)
 
@@ -62,8 +73,6 @@ export default function RandomNumberTool() {
   }
 
   onMount(() => {
-    generate()
-
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         const target = e.target as HTMLElement | null
@@ -89,7 +98,7 @@ export default function RandomNumberTool() {
           <ToolbarSegmented
             label="Number mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>
@@ -107,7 +116,7 @@ export default function RandomNumberTool() {
               <NumberField value={min()} onChange={setMin} format={false} class="flex flex-col gap-1.5">
                 <NumberFieldLabel>Min</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput placeholder="-100" class="h-11 font-mono text-sm" />
+                  <NumberFieldInput autofocus placeholder="-100" class="h-11 font-mono text-sm" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>

@@ -30,14 +30,14 @@ export default function RegexTester() {
       const next = new Set(prev)
       if (next.has(f)) next.delete(f)
       else next.add(f)
-      setParams({ flags: [...next].join('') })
+      setParams({ flags: [...next].join('') }, { replace: true })
       return next
     })
   }
 
   function handlePatternChange(val: string) {
     setPattern(val)
-    setParams({ p: val })
+    setParams({ p: val }, { replace: true })
   }
 
   const flagStr = createMemo(() => [...flags()].join(''))
@@ -118,7 +118,7 @@ export default function RegexTester() {
             <span aria-hidden class="size-2 rounded-full bg-violet" />
             <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Matches</h2>
             <Show when={result().matches.length > 0}>
-              <span class="ml-auto rounded-full bg-violet/15 px-2.5 py-0.5 text-xs font-semibold text-violet">
+              <span class="ml-auto bg-violet/15 px-2.5 py-0.5 text-xs font-semibold text-violet">
                 {result().matches.length}
               </span>
             </Show>

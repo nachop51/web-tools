@@ -336,11 +336,6 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/color/apca</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
     <loc>https://tools.nachop.dev/color/mixer</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>

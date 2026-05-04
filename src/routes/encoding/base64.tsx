@@ -1,10 +1,12 @@
 import { createEffect, createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { decodeBase64, encodeBase64 } from '~/lib/utils/encoding/base64'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Mode = 'encode' | 'decode'
 
@@ -15,9 +17,19 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function Base64Tool() {
   setToolPageMeta('encoding', 'base64')
-  const [input, setInput] = createSignal('')
-  const [mode, setMode] = createSignal<Mode>('encode')
+  const [params, setParams] = useSearchParams<{ dir?: string; t?: string }>()
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+  const [mode, setModeSignal] = createSignal<Mode>(params.dir === 'decode' ? 'decode' : 'encode')
   const [error, setError] = createSignal<string | null>(null)
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
+  function setMode(v: Mode) {
+    setModeSignal(v)
+    setParams({ dir: v }, { replace: true })
+  }
 
   const output = createMemo(() => {
     if (!input()) return ''

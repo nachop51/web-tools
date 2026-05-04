@@ -30,11 +30,15 @@ function fmt(n: number): string {
 
 export default function VolumeConverter() {
   setToolPageMeta('units', 'volume')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom = params.from && volumeUnits[params.from] ? params.from : 'l'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
@@ -48,7 +52,7 @@ export default function VolumeConverter() {
   function handleFromChange(opt: UnitOption | null) {
     if (!opt) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -68,6 +72,7 @@ export default function VolumeConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

@@ -56,7 +56,7 @@ export default function ColorPicker() {
   function applyHex(v: string) {
     const norm = normalizeHex(v)
     setHexValue(norm)
-    setParams({ c: norm.replace('#', '') })
+    setParams({ c: norm.replace('#', '') }, { replace: true })
   }
 
   return (
@@ -87,7 +87,7 @@ export default function ColorPicker() {
                 value={hexValue()}
                 onChange={(v) => {
                   setHexValue(v)
-                  if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') })
+                  if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') }, { replace: true })
                 }}
                 validationState={hexValue().length > 0 && !isValid() ? 'invalid' : 'valid'}
                 class="flex flex-col gap-1.5"

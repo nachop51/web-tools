@@ -54,7 +54,7 @@ export default function ColorMixer() {
       b: colorB().replace('#', ''),
       r: String(ratio()),
       space: space(),
-    })
+    }, { replace: true })
   }
 
   const aValid = createMemo(() => isValid(colorA()))

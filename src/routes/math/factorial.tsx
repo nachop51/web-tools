@@ -24,15 +24,18 @@ const modeOptions: { value: Mode; label: string }[] = [
 
 export default function FactorialCalculator() {
   setToolPageMeta('math', 'factorial')
-  const [params, setParams] = useSearchParams<{ mode?: string }>()
+  const [params, setParams] = useSearchParams<{ mode?: string; n?: string; r?: string }>()
   const mode = createMemo<Mode>(() => {
     const p = params.mode
     if (p === 'permutation' || p === 'combination') return p
     return 'factorial'
   })
 
-  const [n, setN] = createSignal('5')
-  const [r, setR] = createSignal('2')
+  const [n, setNSignal] = createSignal(params.n ?? '5')
+  const [r, setRSignal] = createSignal(params.r ?? '2')
+
+  function setN(v: string) { setNSignal(v); setParams({ n: v || undefined }, { replace: true }) }
+  function setR(v: string) { setRSignal(v); setParams({ r: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const nv = parseInt(n())
@@ -61,7 +64,7 @@ export default function FactorialCalculator() {
           <ToolbarSegmented
             label="Mode"
             value={mode()}
-            onChange={(v) => setParams({ mode: v })}
+            onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>

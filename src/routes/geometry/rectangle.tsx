@@ -76,7 +76,7 @@ export default function RectangleCalculator() {
           <div class="grid gap-4 sm:grid-cols-2">
             <NumberField
               value={wRaw()}
-              onChange={(v) => setSearchParams({ w: v })}
+              onChange={(v) => setSearchParams({ w: v }, { replace: true })}
               minValue={0}
               format={false}
               class="flex flex-col gap-1.5"
@@ -91,7 +91,7 @@ export default function RectangleCalculator() {
 
             <NumberField
               value={hRaw()}
-              onChange={(v) => setSearchParams({ h: v })}
+              onChange={(v) => setSearchParams({ h: v }, { replace: true })}
               minValue={0}
               format={false}
               class="flex flex-col gap-1.5"

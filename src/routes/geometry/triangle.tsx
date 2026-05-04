@@ -180,14 +180,14 @@ export default function TriangleCalculator() {
           <ToolbarSegmented
             label="Type"
             value={tab()}
-            onChange={(v) => setSearchParams({ tab: v, v1: '', v2: '', a: '', b: '', c: '' })}
+            onChange={(v) => setSearchParams({ tab: v, v1: '', v2: '', a: '', b: '', c: '' }, { replace: true })}
             options={tabOptions}
           />
           <Show when={tab() === 'right'}>
             <ToolbarSegmented
               label="Solve for"
               value={solve()}
-              onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' })}
+              onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' }, { replace: true })}
               options={solveSegmentedOptions}
             />
           </Show>
@@ -206,7 +206,7 @@ export default function TriangleCalculator() {
                 value={v1Raw()}
                 onChange={(v) => {
                   setV1Raw(v)
-                  setSearchParams({ v1: v })
+                  setSearchParams({ v1: v }, { replace: true })
                 }}
                 minValue={0}
                 format={false}
@@ -224,7 +224,7 @@ export default function TriangleCalculator() {
                 value={v2Raw()}
                 onChange={(v) => {
                   setV2Raw(v)
-                  setSearchParams({ v2: v })
+                  setSearchParams({ v2: v }, { replace: true })
                 }}
                 minValue={0}
                 format={false}
@@ -246,7 +246,7 @@ export default function TriangleCalculator() {
                 value={aRaw()}
                 onChange={(v) => {
                   setARaw(v)
-                  setSearchParams({ a: v })
+                  setSearchParams({ a: v }, { replace: true })
                 }}
                 minValue={0}
                 format={false}
@@ -264,7 +264,7 @@ export default function TriangleCalculator() {
                 value={bRaw()}
                 onChange={(v) => {
                   setBRaw(v)
-                  setSearchParams({ b: v })
+                  setSearchParams({ b: v }, { replace: true })
                 }}
                 minValue={0}
                 format={false}
@@ -282,7 +282,7 @@ export default function TriangleCalculator() {
                 value={cRaw()}
                 onChange={(v) => {
                   setCRaw(v)
-                  setSearchParams({ c: v })
+                  setSearchParams({ c: v }, { replace: true })
                 }}
                 minValue={0}
                 format={false}

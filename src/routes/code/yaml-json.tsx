@@ -6,6 +6,7 @@ import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { cn } from '~/lib/utils'
 import { jsonToYaml, yamlToJson } from '~/lib/utils/code/yaml'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 
 type Dir = 'json-to-yaml' | 'yaml-to-json'
 
@@ -22,9 +23,14 @@ const INDENT_OPTS: { label: string; value: number }[] = [
 
 export default function YamlJsonTool() {
   setToolPageMeta('code', 'yaml-json')
-  const [params, setParams] = useSearchParams<{ dir?: string }>()
+  const [params, setParams] = useSearchParams<{ dir?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
+
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
 
   const dir = createMemo<Dir>(() => {
     const p = params.dir
@@ -70,7 +76,7 @@ export default function YamlJsonTool() {
                 {(d) => (
                   <button
                     type="button"
-                    onClick={() => setParams({ dir: d.key })}
+                    onClick={() => setParams({ dir: d.key }, { replace: true })}
                     class={cn(
                       'rounded-md border px-3 py-1.5 text-sm font-medium transition-colors duration-150 cursor-pointer',
                       dir() === d.key

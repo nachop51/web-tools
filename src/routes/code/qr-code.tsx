@@ -57,33 +57,33 @@ export default function QrCodeTool() {
 
   function handleText(v: string) {
     setText(v)
-    setParams({ text: v })
+    setParams({ text: v }, { replace: true })
   }
 
   function handleSize(v: number) {
     setSize(v)
-    setParams({ size: String(v) })
+    setParams({ size: String(v) }, { replace: true })
   }
 
   function handleEcl(v: ECL) {
     if (logoDataUrl()) return
     setEcl(v)
-    setParams({ ecl: v })
+    setParams({ ecl: v }, { replace: true })
   }
 
   function handleFgColor(v: string) {
     setFgColor(v)
-    setParams({ fg: v })
+    setParams({ fg: v }, { replace: true })
   }
 
   function handleBgColor(v: string) {
     setBgColor(v)
-    setParams({ bg: v })
+    setParams({ bg: v }, { replace: true })
   }
 
   function handleRoundness(v: number) {
     setRoundness(v)
-    setParams({ round: String(v) })
+    setParams({ round: String(v) }, { replace: true })
   }
 
   function handleLogoUpload(e: Event) {

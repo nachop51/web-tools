@@ -39,11 +39,15 @@ function fmt(n: number): string {
 
 export default function DataConverter() {
   setToolPageMeta('units', 'data')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string }>()
+  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
 
   const initialFrom = params.from && dataUnits[params.from] ? params.from : 'MB'
 
-  const [inputValue, setInputValue] = createSignal('')
+  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
+  function setInputValue(v: string) {
+    setInputValueSignal(v)
+    setParams({ v: v || undefined }, { replace: true })
+  }
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
@@ -57,7 +61,7 @@ export default function DataConverter() {
   function handleFromChange(opt: UnitOption | null) {
     if (!opt) return
     setFromUnit(opt.value)
-    setParams({ from: opt.value })
+    setParams({ from: opt.value }, { replace: true })
   }
 
   return (
@@ -77,6 +81,7 @@ export default function DataConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
+              value={inputValue()}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}

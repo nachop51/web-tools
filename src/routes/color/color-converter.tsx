@@ -22,10 +22,13 @@ import {
   hsvToRgb,
   rgbToOklch,
   oklchToRgb,
+  rgbToCmyk,
+  cmykToRgb,
   type RGB,
   type HSL,
   type HSV,
   type OKLCH,
+  type CMYK,
 } from '~/lib/utils/color/convert'
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/
@@ -46,6 +49,9 @@ export default function ColorConverter() {
   const initialHex = isValidHex(params.hex ?? '') ? normalizeHex(params.hex!) : '#3B82F6'
 
   const [hexInput, setHexInput] = createSignal(initialHex)
+
+  type Space = 'hex' | 'rgb' | 'hsl' | 'hsv' | 'oklch' | 'cmyk'
+  const [lastEdited, setLastEdited] = createSignal<Space>('hex')
 
   const isValid = createMemo(() => isValidHex(hexInput()))
   const isInvalidShown = createMemo(() => hexInput().length > 0 && !isValid())
@@ -72,6 +78,11 @@ export default function ColorConverter() {
     return r ? rgbToOklch(r) : null
   })
 
+  const cmyk = createMemo((): CMYK | null => {
+    const r = rgb()
+    return r ? rgbToCmyk(r) : null
+  })
+
   // RGB edit signals
   const [rInput, setRInput] = createSignal('')
   const [gInput, setGInput] = createSignal('')
@@ -92,10 +103,19 @@ export default function ColorConverter() {
   const [oklchC, setOklchC] = createSignal('')
   const [oklchH, setOklchH] = createSignal('')
 
-  // Sync display fields when hex changes externally
+  // CMYK edit signals
+  const [cmykC, setCmykC] = createSignal('')
+  const [cmykM, setCmykM] = createSignal('')
+  const [cmykY, setCmykY] = createSignal('')
+  const [cmykK, setCmykK] = createSignal('')
+
+  // Sync each space's display fields from the canonical hex, but skip the
+  // space the user is currently editing — otherwise rounding (e.g. 180.5 → 180.4)
+  // overwrites their in-progress keystrokes.
   createEffect(() => {
     const r = rgb()
-    if (!r) return
+    const skip = lastEdited() === 'rgb'
+    if (!r || skip) return
     setRInput(String(r.r))
     setGInput(String(r.g))
     setBInput(String(r.b))
@@ -103,7 +123,8 @@ export default function ColorConverter() {
 
   createEffect(() => {
     const h = hsl()
-    if (!h) return
+    const skip = lastEdited() === 'hsl'
+    if (!h || skip) return
     setHslH(String(h.h))
     setHslS(String(h.s))
     setHslL(String(h.l))
@@ -111,7 +132,8 @@ export default function ColorConverter() {
 
   createEffect(() => {
     const h = hsv()
-    if (!h) return
+    const skip = lastEdited() === 'hsv'
+    if (!h || skip) return
     setHsvH(String(h.h))
     setHsvS(String(h.s))
     setHsvV(String(h.v))
@@ -119,51 +141,83 @@ export default function ColorConverter() {
 
   createEffect(() => {
     const ok = oklch()
-    if (!ok) return
+    const skip = lastEdited() === 'oklch'
+    if (!ok || skip) return
     setOklchL(String(ok.l))
     setOklchC(String(ok.c))
     setOklchH(String(ok.h))
   })
 
+  createEffect(() => {
+    const cm = cmyk()
+    const skip = lastEdited() === 'cmyk'
+    if (!cm || skip) return
+    setCmykC(String(cm.c))
+    setCmykM(String(cm.m))
+    setCmykY(String(cm.y))
+    setCmykK(String(cm.k))
+  })
+
   function applyHex(h: string) {
+    setLastEdited('hex')
     setHexInput(h)
-    setParams({ hex: h.replace(/^#/, '') })
+    setParams({ hex: h.replace(/^#/, '') }, { replace: true })
   }
 
   function applyRgb() {
+    setLastEdited('rgb')
     const r = parseInt(rInput(), 10)
     const g = parseInt(gInput(), 10)
     const b = parseInt(bInput(), 10)
     if ([r, g, b].some(isNaN)) return
     const hex = rgbToHex({ r, g, b })
-    applyHex(hex)
+    setHexInput(hex)
+    setParams({ hex: hex.replace(/^#/, '') }, { replace: true })
   }
 
   function applyHsl() {
+    setLastEdited('hsl')
     const h = parseFloat(hslH())
     const s = parseFloat(hslS())
     const l = parseFloat(hslL())
     if ([h, s, l].some(isNaN)) return
     const hex = rgbToHex(hslToRgb({ h, s, l }))
-    applyHex(hex)
+    setHexInput(hex)
+    setParams({ hex: hex.replace(/^#/, '') }, { replace: true })
   }
 
   function applyHsv() {
+    setLastEdited('hsv')
     const h = parseFloat(hsvH())
     const s = parseFloat(hsvS())
     const v = parseFloat(hsvV())
     if ([h, s, v].some(isNaN)) return
     const hex = rgbToHex(hsvToRgb({ h, s, v }))
-    applyHex(hex)
+    setHexInput(hex)
+    setParams({ hex: hex.replace(/^#/, '') }, { replace: true })
   }
 
   function applyOklch() {
+    setLastEdited('oklch')
     const l = parseFloat(oklchL())
     const c = parseFloat(oklchC())
     const h = parseFloat(oklchH())
     if ([l, c, h].some(isNaN)) return
     const hex = rgbToHex(oklchToRgb({ l, c, h }))
-    applyHex(hex)
+    setHexInput(hex)
+    setParams({ hex: hex.replace(/^#/, '') }, { replace: true })
+  }
+
+  function applyCmyk() {
+    setLastEdited('cmyk')
+    const c = parseFloat(cmykC())
+    const m = parseFloat(cmykM())
+    const y = parseFloat(cmykY())
+    const k = parseFloat(cmykK())
+    if ([c, m, y, k].some(isNaN)) return
+    const hex = rgbToHex(cmykToRgb({ c, m, y, k }))
+    setHexInput(hex)
+    setParams({ hex: hex.replace(/^#/, '') }, { replace: true })
   }
 
   const rgbStr = createMemo(() => {
@@ -186,12 +240,17 @@ export default function ColorConverter() {
     return ok ? `oklch(${ok.l} ${ok.c} ${ok.h})` : ''
   })
 
+  const cmykStr = createMemo(() => {
+    const cm = cmyk()
+    return cm ? `cmyk(${cm.c}%, ${cm.m}%, ${cm.y}%, ${cm.k}%)` : ''
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
         category="color"
         name="Color converter"
-        description="Convert a color between HEX, RGB, HSL, HSV, and OKLCH formats with a live preview."
+        description="Convert a color between HEX, RGB, HSL, HSV, OKLCH, and CMYK formats with a live preview."
       />
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
@@ -207,9 +266,10 @@ export default function ColorConverter() {
             <TextField
               value={hexInput()}
               onChange={(v) => {
+                setLastEdited('hex')
                 setHexInput(v)
                 if (isValidHex(v)) {
-                  setParams({ hex: normalizeHex(v).replace(/^#/, '') })
+                  setParams({ hex: normalizeHex(v).replace(/^#/, '') }, { replace: true })
                 }
               }}
               validationState={isInvalidShown() ? 'invalid' : 'valid'}
@@ -244,7 +304,10 @@ export default function ColorConverter() {
           <div class="grid grid-cols-3 gap-3">
             <NumberField
               value={rInput()}
-              onChange={setRInput}
+              onChange={(v) => {
+                setRInput(v)
+                applyRgb()
+              }}
               minValue={0}
               maxValue={255}
               step={1}
@@ -255,14 +318,17 @@ export default function ColorConverter() {
                 R (0–255)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyRgb} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={gInput()}
-              onChange={setGInput}
+              onChange={(v) => {
+                setGInput(v)
+                applyRgb()
+              }}
               minValue={0}
               maxValue={255}
               step={1}
@@ -273,14 +339,17 @@ export default function ColorConverter() {
                 G (0–255)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyRgb} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={bInput()}
-              onChange={setBInput}
+              onChange={(v) => {
+                setBInput(v)
+                applyRgb()
+              }}
               minValue={0}
               maxValue={255}
               step={1}
@@ -291,7 +360,7 @@ export default function ColorConverter() {
                 B (0–255)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyRgb} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
@@ -312,7 +381,10 @@ export default function ColorConverter() {
           <div class="grid grid-cols-3 gap-3">
             <NumberField
               value={hslH()}
-              onChange={setHslH}
+              onChange={(v) => {
+                setHslH(v)
+                applyHsl()
+              }}
               minValue={0}
               maxValue={360}
               step={0.1}
@@ -323,14 +395,17 @@ export default function ColorConverter() {
                 H (0–360)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsl} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={hslS()}
-              onChange={setHslS}
+              onChange={(v) => {
+                setHslS(v)
+                applyHsl()
+              }}
               minValue={0}
               maxValue={100}
               step={0.1}
@@ -341,14 +416,17 @@ export default function ColorConverter() {
                 S (0–100)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsl} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={hslL()}
-              onChange={setHslL}
+              onChange={(v) => {
+                setHslL(v)
+                applyHsl()
+              }}
               minValue={0}
               maxValue={100}
               step={0.1}
@@ -359,7 +437,7 @@ export default function ColorConverter() {
                 L (0–100)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsl} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
@@ -380,7 +458,10 @@ export default function ColorConverter() {
           <div class="grid grid-cols-3 gap-3">
             <NumberField
               value={hsvH()}
-              onChange={setHsvH}
+              onChange={(v) => {
+                setHsvH(v)
+                applyHsv()
+              }}
               minValue={0}
               maxValue={360}
               step={0.1}
@@ -391,14 +472,17 @@ export default function ColorConverter() {
                 H (0–360)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsv} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={hsvS()}
-              onChange={setHsvS}
+              onChange={(v) => {
+                setHsvS(v)
+                applyHsv()
+              }}
               minValue={0}
               maxValue={100}
               step={0.1}
@@ -409,14 +493,17 @@ export default function ColorConverter() {
                 S (0–100)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsv} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={hsvV()}
-              onChange={setHsvV}
+              onChange={(v) => {
+                setHsvV(v)
+                applyHsv()
+              }}
               minValue={0}
               maxValue={100}
               step={0.1}
@@ -427,7 +514,7 @@ export default function ColorConverter() {
                 V (0–100)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyHsv} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
@@ -448,7 +535,10 @@ export default function ColorConverter() {
           <div class="grid grid-cols-3 gap-3">
             <NumberField
               value={oklchL()}
-              onChange={setOklchL}
+              onChange={(v) => {
+                setOklchL(v)
+                applyOklch()
+              }}
               minValue={0}
               maxValue={1}
               step={0.001}
@@ -459,14 +549,17 @@ export default function ColorConverter() {
                 L (0–1)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyOklch} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={oklchC()}
-              onChange={setOklchC}
+              onChange={(v) => {
+                setOklchC(v)
+                applyOklch()
+              }}
               minValue={0}
               maxValue={0.4}
               step={0.001}
@@ -477,14 +570,17 @@ export default function ColorConverter() {
                 C (0–0.4)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyOklch} />
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
               value={oklchH()}
-              onChange={setOklchH}
+              onChange={(v) => {
+                setOklchH(v)
+                applyOklch()
+              }}
               minValue={0}
               maxValue={360}
               step={0.1}
@@ -495,7 +591,109 @@ export default function ColorConverter() {
                 H (0–360)
               </NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput class="font-mono" onBlur={applyOklch} />
+                <NumberFieldInput class="font-mono" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+          </div>
+        </section>
+
+        {/* CMYK */}
+        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+          <div class="mb-4 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span aria-hidden class="size-2 rounded-full bg-violet" />
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">CMYK</h2>
+            </div>
+            <CopyButton value={cmykStr} />
+          </div>
+
+          <p class="mb-4 text-xs text-muted-foreground">
+            Screen-preview approximation. Accurate print output requires an ICC profile.
+          </p>
+
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <NumberField
+              value={cmykC()}
+              onChange={(v) => {
+                setCmykC(v)
+                applyCmyk()
+              }}
+              minValue={0}
+              maxValue={100}
+              step={0.1}
+              format={false}
+              class="flex flex-col gap-1.5"
+            >
+              <NumberFieldLabel class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                C (0–100)
+              </NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput class="font-mono" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+            <NumberField
+              value={cmykM()}
+              onChange={(v) => {
+                setCmykM(v)
+                applyCmyk()
+              }}
+              minValue={0}
+              maxValue={100}
+              step={0.1}
+              format={false}
+              class="flex flex-col gap-1.5"
+            >
+              <NumberFieldLabel class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                M (0–100)
+              </NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput class="font-mono" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+            <NumberField
+              value={cmykY()}
+              onChange={(v) => {
+                setCmykY(v)
+                applyCmyk()
+              }}
+              minValue={0}
+              maxValue={100}
+              step={0.1}
+              format={false}
+              class="flex flex-col gap-1.5"
+            >
+              <NumberFieldLabel class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Y (0–100)
+              </NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput class="font-mono" />
+                <NumberFieldIncrementTrigger />
+                <NumberFieldDecrementTrigger />
+              </NumberFieldGroup>
+            </NumberField>
+            <NumberField
+              value={cmykK()}
+              onChange={(v) => {
+                setCmykK(v)
+                applyCmyk()
+              }}
+              minValue={0}
+              maxValue={100}
+              step={0.1}
+              format={false}
+              class="flex flex-col gap-1.5"
+            >
+              <NumberFieldLabel class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                K (0–100)
+              </NumberFieldLabel>
+              <NumberFieldGroup>
+                <NumberFieldInput class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>

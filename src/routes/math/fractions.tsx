@@ -1,4 +1,5 @@
 import { createMemo, createSignal, Show } from 'solid-js'
+import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -27,11 +28,27 @@ function fmt(n: number): string {
 
 export default function FractionCalculator() {
   setToolPageMeta('math', 'fractions')
-  const [op, setOp] = createSignal<FractionOp>('add')
-  const [aN, setAN] = createSignal('1')
-  const [aD, setAD] = createSignal('2')
-  const [bN, setBN] = createSignal('1')
-  const [bD, setBD] = createSignal('3')
+  const [params, setParams] = useSearchParams<{
+    op?: string
+    aN?: string
+    aD?: string
+    bN?: string
+    bD?: string
+  }>()
+  const validOps: FractionOp[] = ['add', 'subtract', 'multiply', 'divide']
+  const initialOp: FractionOp = validOps.includes(params.op as FractionOp) ? (params.op as FractionOp) : 'add'
+
+  const [op, setOpSignal] = createSignal<FractionOp>(initialOp)
+  const [aN, setANSignal] = createSignal(params.aN ?? '1')
+  const [aD, setADSignal] = createSignal(params.aD ?? '2')
+  const [bN, setBNSignal] = createSignal(params.bN ?? '1')
+  const [bD, setBDSignal] = createSignal(params.bD ?? '3')
+
+  function setOp(v: FractionOp) { setOpSignal(v); setParams({ op: v }, { replace: true }) }
+  function setAN(v: string) { setANSignal(v); setParams({ aN: v || undefined }, { replace: true }) }
+  function setAD(v: string) { setADSignal(v); setParams({ aD: v || undefined }, { replace: true }) }
+  function setBN(v: string) { setBNSignal(v); setParams({ bN: v || undefined }, { replace: true }) }
+  function setBD(v: string) { setBDSignal(v); setParams({ bD: v || undefined }, { replace: true }) }
 
   const result = createMemo(() => {
     const an = parseInt(aN()),

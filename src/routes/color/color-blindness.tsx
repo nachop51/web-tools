@@ -53,14 +53,14 @@ export default function ColorBlindness() {
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') }, { replace: true })
               }}
             />
             <TextField
               value={hexInput()}
               onChange={(v) => {
                 setHexInput(v)
-                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') })
+                if (HEX_RE.test(v)) setParams({ c: normalizeHex(v).replace('#', '') }, { replace: true })
               }}
               validationState={isInvalidShown() ? 'invalid' : 'valid'}
               class="flex-1"

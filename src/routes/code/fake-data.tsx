@@ -1,4 +1,4 @@
-import { createSignal, For, Match, Show, Switch } from 'solid-js'
+import { createEffect, createSignal, For, Match, Show, Switch } from 'solid-js'
 import { createStore, produce, reconcile, unwrap } from 'solid-js/store'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
@@ -16,6 +16,7 @@ import {
 } from '~/components/ui/number-field'
 import { cn } from '~/lib/utils'
 import { setToolPageMeta } from '~/lib/seo'
+import { urlText } from '~/lib/utils/url-state'
 import {
   generateRows,
   parseSchema,
@@ -81,8 +82,30 @@ export default function FakeDataTool() {
   setToolPageMeta('code', 'fake-data')
   const [params, setParams] = useSearchParams()
 
-  const [fields, setFields] = createStore<FieldDef[]>(DEFAULT_FIELDS.map((f) => ({ ...f })))
-  const [schemaText, setSchemaText] = createSignal(serializeSchema(DEFAULT_FIELDS))
+  const initialFields: FieldDef[] = (() => {
+    if (typeof params.schema === 'string' && params.schema) {
+      try {
+        const parsed = parseSchema(params.schema)
+        if (parsed.length) return parsed
+      } catch {
+        /* fall through to defaults */
+      }
+    }
+    return DEFAULT_FIELDS.map((f) => ({ ...f }))
+  })()
+
+  const [fields, setFields] = createStore<FieldDef[]>(initialFields)
+  const [schemaText, setSchemaText] = createSignal(serializeSchema(initialFields))
+
+  let skipFirstSchemaSync = !params.schema
+  createEffect(() => {
+    const text = serializeSchema(unwrap(fields))
+    if (skipFirstSchemaSync) {
+      skipFirstSchemaSync = false
+      return
+    }
+    setParams({ schema: urlText(text) }, { replace: true })
+  })
   const [schemaError, setSchemaError] = createSignal('')
   const [count, setCount] = createSignal(10)
   const [format, setFormat] = createSignal<Format>((params.format as Format) || 'json')
@@ -97,7 +120,7 @@ export default function FakeDataTool() {
       setSchemaError('')
     }
     setActiveTab(tab)
-    setParams({ tab })
+    setParams({ tab }, { replace: true })
   }
 
   function handleSchemaChange(text: string) {
@@ -380,7 +403,7 @@ export default function FakeDataTool() {
                       aria-checked={format() === opt.value}
                       onClick={() => {
                         setFormat(opt.value)
-                        setParams({ format: opt.value })
+                        setParams({ format: opt.value }, { replace: true })
                       }}
                       class={cn(
                         segmentBtn,

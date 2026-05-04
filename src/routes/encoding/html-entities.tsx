@@ -6,6 +6,7 @@ import { ToolToolbar, ToolbarSegmented, ToolbarChip } from '~/components/tool-to
 import { TextField, TextFieldErrorMessage, TextFieldTextArea } from '~/components/ui/text-field'
 import { setToolPageMeta } from '~/lib/seo'
 import { decodeHTMLEntities, encodeHTMLEntities } from '~/lib/utils/encoding/html-entities'
+import { urlText } from '~/lib/utils/url-state'
 
 const COMMON_ENTITIES = [
   { char: '&', entity: '&amp;' },
@@ -19,15 +20,20 @@ type Direction = 'encode' | 'decode'
 
 export default function HTMLEntitiesTool() {
   setToolPageMeta('encoding', 'html-entities')
-  const [params, setParams] = useSearchParams<{ dir?: string }>()
+  const [params, setParams] = useSearchParams<{ dir?: string; t?: string }>()
 
-  const [input, setInput] = createSignal('')
+  const [input, setInputSignal] = createSignal(params.t ?? '')
   const [direction, setDirectionSignal] = createSignal<Direction>(params.dir === 'decode' ? 'decode' : 'encode')
   const [extended, setExtended] = createSignal(false)
 
+  function setInput(v: string) {
+    setInputSignal(v)
+    setParams({ t: urlText(v) }, { replace: true })
+  }
+
   function setDirection(d: Direction) {
     setDirectionSignal(d)
-    setParams({ dir: d })
+    setParams({ dir: d }, { replace: true })
   }
 
   const result = createMemo<{ value: string; error: string | null }>(() => {
