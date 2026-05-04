@@ -29,9 +29,18 @@ export default function UnixTool() {
   const [tsInput, setTsInputSignal] = createSignal(params.ts ?? '')
   const [isoInput, setIsoInputSignal] = createSignal(params.iso ?? '')
 
-  function setMode(v: Mode) { setModeSignal(v); setParams({ mode: v }, { replace: true }) }
-  function setTsInput(v: string) { setTsInputSignal(v); setParams({ ts: v || undefined }, { replace: true }) }
-  function setIsoInput(v: string) { setIsoInputSignal(v); setParams({ iso: v || undefined }, { replace: true }) }
+  function setMode(v: Mode) {
+    setModeSignal(v)
+    setParams({ mode: v }, { replace: true })
+  }
+  function setTsInput(v: string) {
+    setTsInputSignal(v)
+    setParams({ ts: v || undefined }, { replace: true })
+  }
+  function setIsoInput(v: string) {
+    setIsoInputSignal(v)
+    setParams({ iso: v || undefined }, { replace: true })
+  }
 
   const tsInfo = createMemo(() => {
     const raw = tsInput().trim()
