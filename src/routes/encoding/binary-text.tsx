@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, Show } from 'solid-js'
+import { createEffect, createMemo, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -91,6 +91,12 @@ export default function BinaryTextTool() {
     setParams({ dir: d }, { replace: true })
   }
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -120,7 +126,7 @@ export default function BinaryTextTool() {
               class="flex flex-col gap-2"
             >
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 class="min-h-[10rem] font-mono text-sm resize-y"
                 placeholder={
                   dir() === 'encode' ? 'Enter text to encode…' : `Enter space-separated ${binaryMode()} values…`

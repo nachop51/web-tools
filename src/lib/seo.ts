@@ -5,12 +5,14 @@ import type { Tool, Category, CategoryId } from '~/lib/tools/registry'
 import { tools } from '~/lib/tools/registry'
 
 const DOMAIN = 'https://tools.nachop.dev'
+const OG_IMAGE = `${DOMAIN}/og-image.png`
 
 export type MetaProps = {
   title: string
   description: string
   canonical?: string
   schema?: Record<string, unknown>
+  image?: string
 }
 
 type HeadTag = {
@@ -34,6 +36,7 @@ function head(t: HeadTag) {
 
 export function setPageMeta(props: MetaProps) {
   const canonical = props.canonical || `${DOMAIN}/`
+  const image = props.image || OG_IMAGE
 
   head({ tag: 'title', props: { children: props.title }, close: true })
   head({ tag: 'meta', props: { name: 'description', content: props.description }, name: 'description' })
@@ -41,9 +44,14 @@ export function setPageMeta(props: MetaProps) {
   head({ tag: 'meta', props: { property: 'og:description', content: props.description }, name: 'og:description' })
   head({ tag: 'meta', props: { property: 'og:url', content: canonical }, name: 'og:url' })
   head({ tag: 'meta', props: { property: 'og:type', content: 'website' }, name: 'og:type' })
+  head({ tag: 'meta', props: { property: 'og:image', content: image }, name: 'og:image' })
+  head({ tag: 'meta', props: { property: 'og:image:width', content: '1200' }, name: 'og:image:width' })
+  head({ tag: 'meta', props: { property: 'og:image:height', content: '630' }, name: 'og:image:height' })
+  head({ tag: 'meta', props: { property: 'og:image:alt', content: props.title }, name: 'og:image:alt' })
   head({ tag: 'meta', props: { name: 'twitter:card', content: 'summary_large_image' }, name: 'twitter:card' })
   head({ tag: 'meta', props: { name: 'twitter:title', content: props.title }, name: 'twitter:title' })
   head({ tag: 'meta', props: { name: 'twitter:description', content: props.description }, name: 'twitter:description' })
+  head({ tag: 'meta', props: { name: 'twitter:image', content: image }, name: 'twitter:image' })
   head({ tag: 'link', props: { rel: 'canonical', href: canonical } })
 
   // JSON-LD schema: useHead does not handle script tag content reliably.

@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
@@ -59,6 +59,12 @@ export default function YamlJsonTool() {
   })
 
   const showIndent = createMemo(() => dir() === 'yaml-to-json')
+
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   return (
     <main class="w-full py-10">
@@ -124,7 +130,7 @@ export default function YamlJsonTool() {
             </div>
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 class="min-h-[24rem] font-mono text-sm resize-y"
                 placeholder={dir() === 'json-to-yaml' ? '{"key": "value"}' : 'key: value'}
               />

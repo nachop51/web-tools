@@ -6,6 +6,10 @@ describe('calculatePercentage', () => {
     expect(calculatePercentage('of', 25, 200)).toBe(50)
   })
 
+  it('what: 50 is 25% of 200', () => {
+    expect(calculatePercentage('what', 200, 50)).toBe(25)
+  })
+
   it('change: change from 80 to 100 = 25%', () => {
     expect(calculatePercentage('change', 80, 100)).toBe(25)
   })

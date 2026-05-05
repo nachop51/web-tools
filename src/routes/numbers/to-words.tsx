@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -35,6 +35,12 @@ export default function ToWords() {
   const output = createMemo(() => result().output)
   const error = createMemo(() => result().error)
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -58,8 +64,8 @@ export default function ToWords() {
             class="flex flex-col gap-2"
           >
             <TextFieldInput
+              ref={inputRef}
               type="text"
-              autofocus
               inputMode="numeric"
               placeholder="Enter an integer, e.g. 42 or -1000"
               class="h-12 font-mono text-base"

@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
@@ -37,6 +37,12 @@ export default function AsciiTableTool() {
     })
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -52,7 +58,7 @@ export default function AsciiTableTool() {
             <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Search</h2>
           </div>
           <TextField value={search()} onChange={setSearch}>
-            <TextFieldInput autofocus placeholder="char, description, dec, hex…" class="h-12 font-mono text-base" />
+            <TextFieldInput ref={inputRef} placeholder="char, description, dec, hex…" class="h-12 font-mono text-base" />
           </TextField>
         </section>
 

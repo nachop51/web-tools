@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -52,6 +52,12 @@ export default function ScientificNotation() {
     return fromScientific(c, e)
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -64,7 +70,7 @@ export default function ScientificNotation() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Mode"
-            value={mode()}
+            value={mode() || undefined}
             onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
@@ -77,10 +83,10 @@ export default function ScientificNotation() {
                 <span aria-hidden class="size-2 rounded-full bg-violet" />
                 <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Standard number</h2>
               </div>
-              <NumberField value={standard()} onChange={setStandard} format={false} class="flex flex-col gap-2">
+              <NumberField value={standard() || undefined} onChange={setStandard} format={false} class="flex flex-col gap-2">
                 <NumberFieldLabel>Value</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput autofocus placeholder="299792458" class="h-12 font-mono text-base" />
+                  <NumberFieldInput ref={inputRef} placeholder="299792458" class="h-12 font-mono text-base" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>
@@ -143,16 +149,16 @@ export default function ScientificNotation() {
                 </h2>
               </div>
               <div class="flex flex-wrap items-end gap-3">
-                <NumberField value={coeff()} onChange={setCoeff} format={false} class="flex flex-col gap-2">
+                <NumberField value={coeff() || undefined} onChange={setCoeff} format={false} class="flex flex-col gap-2">
                   <NumberFieldLabel>Coefficient</NumberFieldLabel>
                   <NumberFieldGroup>
-                    <NumberFieldInput autofocus placeholder="2.998" class="h-12 w-32 font-mono text-base" />
+                    <NumberFieldInput ref={inputRef} placeholder="2.998" class="h-12 w-32 font-mono text-base" />
                     <NumberFieldIncrementTrigger />
                     <NumberFieldDecrementTrigger />
                   </NumberFieldGroup>
                 </NumberField>
                 <span class="pb-3 font-mono text-base text-muted-foreground">× 10^</span>
-                <NumberField value={exp()} onChange={setExp} format={false} class="flex flex-col gap-2">
+                <NumberField value={exp() || undefined} onChange={setExp} format={false} class="flex flex-col gap-2">
                   <NumberFieldLabel>Exponent</NumberFieldLabel>
                   <NumberFieldGroup>
                     <NumberFieldInput placeholder="8" class="h-12 w-20 font-mono text-base" />

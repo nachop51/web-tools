@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show, Switch, Match } from 'solid-js'
+import { createMemo, createSignal, Show, Switch, Match, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -68,6 +68,8 @@ export default function PercentageCalculator() {
     return mode() === 'of' ? r : `${r}%`
   })
 
+  let inputRef: HTMLInputElement | undefined
+
   const labels = createMemo<{ a: string; b: string; aPlaceholder: string; bPlaceholder: string }>(() => {
     switch (mode()) {
       case 'of':
@@ -88,6 +90,10 @@ export default function PercentageCalculator() {
     setParams({ mode: m, a: undefined, b: undefined }, { replace: true })
   }
 
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -98,7 +104,7 @@ export default function PercentageCalculator() {
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
         <ToolToolbar>
-          <ToolbarSegmented label="Mode" value={mode()} onChange={handleModeChange} options={modeOptions} />
+          <ToolbarSegmented label="Mode" value={mode() || undefined} onChange={handleModeChange} options={modeOptions} />
         </ToolToolbar>
 
         {/* Inputs */}
@@ -109,16 +115,16 @@ export default function PercentageCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{labels().a}</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder={labels().aPlaceholder} class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder={labels().aPlaceholder} class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={b() || undefined} onChange={setB} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{labels().b}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder={labels().bPlaceholder} class="h-12 font-mono text-base" />

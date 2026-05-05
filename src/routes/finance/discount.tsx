@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -62,6 +62,12 @@ export default function DiscountCalculator() {
     setParams({ mode: m, price: undefined, pct: undefined }, { replace: true })
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -72,7 +78,7 @@ export default function DiscountCalculator() {
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
         <ToolToolbar>
-          <ToolbarSegmented label="Mode" value={mode()} onChange={handleModeChange} options={modeOptions} />
+          <ToolbarSegmented label="Mode" value={mode() || undefined} onChange={handleModeChange} options={modeOptions} />
         </ToolToolbar>
 
         {/* Inputs */}
@@ -83,17 +89,17 @@ export default function DiscountCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={price()} onChange={setPrice} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={price() || undefined} onChange={setPrice} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{mode() === 'discount' ? 'Original price ($)' : 'Pre-tax price ($)'}</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 100.00" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="e.g. 100.00" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
             <NumberField
-              value={pct()}
+              value={pct() || undefined}
               onChange={setPct}
               minValue={0}
               maxValue={100}

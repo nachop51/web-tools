@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -52,6 +52,12 @@ export default function SalaryConverter() {
     return convertSalary(a, periodId(), h)
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -67,7 +73,7 @@ export default function SalaryConverter() {
             options={salaryPeriods}
             optionValue="id"
             optionTextValue="label"
-            value={selectedPeriod()}
+            value={selectedPeriod() || undefined}
             onChange={(opt) => opt && setPeriodId(opt.id)}
             itemComponent={(itemProps) => (
               <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
@@ -88,17 +94,17 @@ export default function SalaryConverter() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={amount()} onChange={setAmount} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={amount() || undefined} onChange={setAmount} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Amount ($)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 75000" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="e.g. 75000" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
             <NumberField
-              value={hoursPerWeek()}
+              value={hoursPerWeek() || undefined}
               onChange={setHoursPerWeek}
               minValue={1}
               maxValue={168}
@@ -135,7 +141,7 @@ export default function SalaryConverter() {
               <For each={salaryPeriods}>
                 {(p) => {
                   const value = createMemo(() => fmtCurrency(result()![p.id]))
-                  return <ResultRow label={p.label} value={value()} prefix="$" />
+                  return <ResultRow label={p.label} value={value() || undefined} prefix="$" />
                 }}
               </For>
             </div>

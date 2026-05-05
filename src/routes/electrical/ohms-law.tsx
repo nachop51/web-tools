@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -92,6 +92,12 @@ export default function OhmsLaw() {
 
   const option = createMemo(() => solveOptions.find((o) => o.value === solve())!)
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -133,9 +139,9 @@ export default function OhmsLaw() {
                 }}
               >
                 <TextFieldInput
+                  ref={inputRef}
                   type="text"
                   inputMode="decimal"
-                  autofocus
                   placeholder="Enter value"
                   class="h-12 font-mono text-base"
                 />

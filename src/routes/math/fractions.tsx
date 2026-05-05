@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -66,6 +66,12 @@ export default function FractionCalculator() {
 
   const activeSymbol = createMemo(() => opSymbols[op()])
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -76,7 +82,7 @@ export default function FractionCalculator() {
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
         <ToolToolbar>
-          <ToolbarSegmented label="Operation" value={op()} onChange={setOp} options={opOptions} />
+          <ToolbarSegmented label="Operation" value={op() || undefined} onChange={setOp} options={opOptions} />
         </ToolToolbar>
 
         {/* Fractions input */}
@@ -89,13 +95,13 @@ export default function FractionCalculator() {
           <div class="flex flex-wrap items-center justify-center gap-6 py-2">
             {/* Fraction A */}
             <div class="flex flex-col items-center gap-1.5">
-              <NumberField value={aN()} onChange={setAN} format={false} class="flex flex-col">
+              <NumberField value={aN() || undefined} onChange={setAN} format={false} class="flex flex-col">
                 <NumberFieldGroup>
-                  <NumberFieldInput autofocus class="h-12 w-24 text-center font-mono text-base" placeholder="1" />
+                  <NumberFieldInput ref={inputRef} class="h-12 w-24 text-center font-mono text-base" placeholder="1" />
                 </NumberFieldGroup>
               </NumberField>
               <div class="h-px w-24 bg-foreground" />
-              <NumberField value={aD()} onChange={setAD} format={false} class="flex flex-col">
+              <NumberField value={aD() || undefined} onChange={setAD} format={false} class="flex flex-col">
                 <NumberFieldGroup>
                   <NumberFieldInput class="h-12 w-24 text-center font-mono text-base" placeholder="2" />
                 </NumberFieldGroup>
@@ -106,13 +112,13 @@ export default function FractionCalculator() {
 
             {/* Fraction B */}
             <div class="flex flex-col items-center gap-1.5">
-              <NumberField value={bN()} onChange={setBN} format={false} class="flex flex-col">
+              <NumberField value={bN() || undefined} onChange={setBN} format={false} class="flex flex-col">
                 <NumberFieldGroup>
                   <NumberFieldInput class="h-12 w-24 text-center font-mono text-base" placeholder="1" />
                 </NumberFieldGroup>
               </NumberField>
               <div class="h-px w-24 bg-foreground" />
-              <NumberField value={bD()} onChange={setBD} format={false} class="flex flex-col">
+              <NumberField value={bD() || undefined} onChange={setBD} format={false} class="flex flex-col">
                 <NumberFieldGroup>
                   <NumberFieldInput class="h-12 w-24 text-center font-mono text-base" placeholder="3" />
                 </NumberFieldGroup>

@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar } from '~/components/tool-toolbar'
@@ -31,6 +31,12 @@ export default function CaseConverter() {
   const selectedDef = createMemo<CaseDef>(() => caseDefs.find((d) => d.key === mode()) ?? caseDefs[0])
 
   const output = createMemo(() => caseConverters[mode()](input()))
+
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   return (
     <main class="w-full py-10">
@@ -75,7 +81,7 @@ export default function CaseConverter() {
 
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 placeholder="Paste text here…"
                 class="min-h-[10rem] resize-y font-mono text-sm"
               />

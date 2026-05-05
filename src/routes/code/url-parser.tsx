@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
@@ -70,6 +70,12 @@ export default function UrlParserTool() {
     return Object.entries(p.params)
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -86,7 +92,7 @@ export default function UrlParserTool() {
           </div>
           <TextField value={input()} onChange={handleInput}>
             <TextFieldInput
-              autofocus
+              ref={inputRef}
               placeholder="https://user:pass@example.com:8080/path?key=val#hash"
               class="h-12 font-mono text-base"
             />

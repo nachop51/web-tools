@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -66,6 +66,12 @@ export default function QuadraticFormula() {
     return 'Two complex conjugate roots (Δ < 0)'
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -87,15 +93,15 @@ export default function QuadraticFormula() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-3">
-            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>a (x²)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="1" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="1" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
-            <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={b() || undefined} onChange={setB} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>b (x)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="-5" class="h-12 font-mono text-base" />
@@ -103,7 +109,7 @@ export default function QuadraticFormula() {
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
-            <NumberField value={c()} onChange={setC} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={c() || undefined} onChange={setC} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>c (constant)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="6" class="h-12 font-mono text-base" />

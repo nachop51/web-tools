@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldErrorMessage, TextFieldInput } from '~/components/ui/text-field'
 import { describeCron, nextRuns, parseCron } from '~/lib/utils/datetime/cron'
@@ -55,6 +55,12 @@ export default function CronPreview() {
     timeZone: 'UTC',
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -80,7 +86,7 @@ export default function CronPreview() {
             validationState={parsed().error ? 'invalid' : 'valid'}
             class="flex flex-col gap-2"
           >
-            <TextFieldInput autofocus type="text" class="h-12 font-mono text-base" placeholder="e.g. 0 * * * *" />
+            <TextFieldInput ref={inputRef} type="text" class="h-12 font-mono text-base" placeholder="e.g. 0 * * * *" />
             <TextFieldErrorMessage>{parsed().error}</TextFieldErrorMessage>
           </TextField>
 

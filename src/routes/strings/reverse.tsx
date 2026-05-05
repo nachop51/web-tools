@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -44,6 +44,12 @@ export default function ReverseText() {
     }
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader category="strings" name="Reverse text" description="Reverse text by characters, words, or lines." />
@@ -63,7 +69,7 @@ export default function ReverseText() {
 
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 placeholder="Paste text here…"
                 class="min-h-[10rem] resize-y font-mono text-sm"
               />

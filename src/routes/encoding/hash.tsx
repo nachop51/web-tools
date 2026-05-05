@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, Show } from 'solid-js'
+import { createEffect, createResource, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -34,6 +34,14 @@ export default function HashTool() {
     setSource([inputValue(), algorithm()])
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    // Defer past Suspense settling — createResource above causes Suspense to
+    // re-flush focus on this route, so a synchronous focus() in onMount loses out.
+    setTimeout(() => inputRef?.focus(), 0)
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -67,7 +75,7 @@ export default function HashTool() {
             </div>
             <TextField value={inputValue()} onChange={setInputValue}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 class="min-h-[10rem] font-mono text-sm resize-y"
                 placeholder="Enter text to hash…"
               />

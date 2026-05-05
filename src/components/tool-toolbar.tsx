@@ -40,7 +40,9 @@ export function ToolbarSegmented<T extends string>(props: ToolbarSegmentedProps<
               aria-checked={props.value === opt.value}
               onClick={() => props.onChange(opt.value)}
               class={cn(
-                'px-3 py-1 text-sm transition-colors cursor-pointer',
+                'px-3 py-1 text-sm cursor-pointer',
+                'transition-[background-color,color,box-shadow,transform] duration-150 ease-out',
+                'active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-1 focus-visible:ring-offset-background',
                 props.value === opt.value
                   ? 'bg-violet text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-violet/5'

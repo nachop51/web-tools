@@ -32,10 +32,10 @@ export default function RandomNumberTool() {
     decimals?: string
   }>()
 
-  const [min, setMinSignal] = createSignal(params.min ?? '')
-  const [max, setMaxSignal] = createSignal(params.max ?? '')
-  const [count, setCountSignal] = createSignal(params.count ?? '')
-  const [decimals, setDecimalsSignal] = createSignal(params.decimals ?? '')
+  const [min, setMinSignal] = createSignal(params.min ?? '0')
+  const [max, setMaxSignal] = createSignal(params.max ?? '10')
+  const [count, setCountSignal] = createSignal(params.count ?? '5')
+  const [decimals, setDecimalsSignal] = createSignal(params.decimals ?? '2')
 
   function setMin(v: string) { setMinSignal(v); setParams({ min: v || undefined }, { replace: true }) }
   function setMax(v: string) { setMaxSignal(v); setParams({ max: v || undefined }, { replace: true }) }
@@ -72,6 +72,8 @@ export default function RandomNumberTool() {
     setAnimKey((k) => k + 1)
   }
 
+  let inputRef: HTMLInputElement | undefined
+
   onMount(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -83,6 +85,10 @@ export default function RandomNumberTool() {
     }
     document.addEventListener('keydown', handler)
     onCleanup(() => document.removeEventListener('keydown', handler))
+  })
+
+  onMount(() => {
+    inputRef?.focus()
   })
 
   return (
@@ -97,13 +103,13 @@ export default function RandomNumberTool() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Number mode"
-            value={mode()}
+            value={mode() || undefined}
             onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
         </ToolToolbar>
 
-        <div class="grid gap-6 lg:grid-cols-[22rem_1fr]">
+        <div class="grid items-start gap-6 lg:grid-cols-[22rem_1fr]">
           {/* Controls */}
           <section class="relative flex flex-col rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
             <div class="mb-4 flex items-center gap-2">
@@ -113,16 +119,16 @@ export default function RandomNumberTool() {
 
             {/* Min / Max */}
             <div class="grid grid-cols-2 gap-3">
-              <NumberField value={min()} onChange={setMin} format={false} class="flex flex-col gap-1.5">
+              <NumberField value={min() || undefined} onChange={setMin} format={false} class="flex flex-col gap-1.5">
                 <NumberFieldLabel>Min</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput autofocus placeholder="-100" class="h-11 font-mono text-sm" />
+                  <NumberFieldInput ref={inputRef} placeholder="-100" class="h-11 font-mono text-sm" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>
               </NumberField>
 
-              <NumberField value={max()} onChange={setMax} format={false} class="flex flex-col gap-1.5">
+              <NumberField value={max() || undefined} onChange={setMax} format={false} class="flex flex-col gap-1.5">
                 <NumberFieldLabel>Max</NumberFieldLabel>
                 <NumberFieldGroup>
                   <NumberFieldInput placeholder="100" class="h-11 font-mono text-sm" />
@@ -135,7 +141,7 @@ export default function RandomNumberTool() {
             {/* Count / Decimals */}
             <div class="mt-3 grid grid-cols-2 gap-3">
               <NumberField
-                value={count()}
+                value={count() || undefined}
                 onChange={setCount}
                 minValue={1}
                 maxValue={100}
@@ -152,7 +158,7 @@ export default function RandomNumberTool() {
 
               <Show when={mode() === 'float'} fallback={<div aria-hidden />}>
                 <NumberField
-                  value={decimals()}
+                  value={decimals() || undefined}
                   onChange={setDecimals}
                   minValue={0}
                   maxValue={20}
@@ -169,7 +175,7 @@ export default function RandomNumberTool() {
               </Show>
             </div>
 
-            <div class="mt-auto pt-6">
+            <div class="mt-6">
               <hr class="mb-6 border-border" />
               <Show when={isInvalid()}>
                 <p class="mb-3 text-xs text-destructive">Min must be a number less than or equal to max.</p>
@@ -197,44 +203,47 @@ export default function RandomNumberTool() {
                   </span>
                 </Show>
               </div>
-              <Show when={results().length > 1}>
-                <CopyButton value={outputText} />
-              </Show>
+              <CopyButton value={outputText} disabled={results().length === 0} />
             </div>
 
-            <Show
-              when={results().length > 0}
-              fallback={
-                <div class="flex min-h-[20rem] flex-1 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-                  Click Generate or press Enter
-                </div>
-              }
-            >
+            <div class="flex min-h-[20rem] flex-1 flex-col">
               <Show
-                when={results().length === 1}
+                when={results().length > 0}
                 fallback={
-                  <div class="anim-fade-up grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-5" data-key={animKey()}>
-                    <For each={results()}>
-                      {(n) => (
-                        <div class="rounded-md border border-border bg-muted/40 px-3 py-2 text-center font-mono text-sm">
-                          {n}
-                        </div>
-                      )}
-                    </For>
+                  <div class="flex flex-1 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                    Click Generate or press Enter
                   </div>
                 }
               >
-                <div
-                  class="anim-fade-up flex min-h-[20rem] flex-1 flex-col items-center justify-center gap-6"
-                  data-key={animKey()}
+                <Show
+                  when={results().length === 1}
+                  fallback={
+                    <div
+                      class="anim-fade-up grid auto-rows-min grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-5"
+                      data-key={animKey()}
+                    >
+                      <For each={results()}>
+                        {(n) => (
+                          <div class="rounded-md border border-border bg-muted/40 px-3 py-2 text-center font-mono text-sm">
+                            {n}
+                          </div>
+                        )}
+                      </For>
+                    </div>
+                  }
                 >
-                  <div class="break-all text-center font-mono text-7xl font-bold tracking-tight sm:text-8xl">
-                    {results()[0]}
+                  <div
+                    class="anim-fade-up flex flex-1 flex-col items-center justify-center gap-6"
+                    data-key={animKey()}
+                  >
+                    <div class="break-all text-center font-mono text-7xl font-bold tracking-tight sm:text-8xl">
+                      {results()[0]}
+                    </div>
+                    <CopyButton value={outputText} />
                   </div>
-                  <CopyButton value={outputText} />
-                </div>
+                </Show>
               </Show>
-            </Show>
+            </div>
           </section>
         </div>
       </div>

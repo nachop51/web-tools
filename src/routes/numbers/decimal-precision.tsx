@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -51,6 +51,12 @@ export default function DecimalPrecision() {
     return isNaN(p) ? 2 : Math.min(20, Math.max(0, p))
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   const result = createMemo(() => {
     const n = parseFloat(input())
     if (input() === '' || isNaN(n)) return ''
@@ -97,7 +103,7 @@ export default function DecimalPrecision() {
           <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
             <TextField value={input()} onChange={setInput} class="flex flex-col gap-1.5">
               <TextFieldLabel>Number</TextFieldLabel>
-              <TextFieldInput autofocus type="text" inputmode="decimal" placeholder="e.g. 3.14159" class="h-12 font-mono text-base" />
+              <TextFieldInput ref={inputRef} type="text" inputmode="decimal" placeholder="e.g. 3.14159" class="h-12 font-mono text-base" />
             </TextField>
 
             <NumberField

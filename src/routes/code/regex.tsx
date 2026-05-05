@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldInput, TextFieldTextArea } from '~/components/ui/text-field'
 import { cn } from '~/lib/utils'
@@ -44,6 +44,12 @@ export default function RegexTester() {
 
   const result = createMemo(() => testRegex(pattern(), flagStr(), input()))
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -63,7 +69,7 @@ export default function RegexTester() {
             <div class="flex-1 min-w-[16rem]">
               <TextField value={pattern()} onChange={handlePatternChange}>
                 <TextFieldInput
-                  autofocus
+                  ref={inputRef}
                   placeholder="e.g. \d+"
                   class={cn('h-12 font-mono text-base', result().error && 'border-destructive')}
                 />

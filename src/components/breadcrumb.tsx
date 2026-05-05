@@ -33,7 +33,10 @@ export function Breadcrumb() {
   const location = useLocation()
 
   return (
-    <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-1.5 text-xs text-muted-foreground">
+    <nav
+      aria-label="Breadcrumb"
+      class="anim-fade-in mb-6 flex items-center gap-1.5 text-xs text-muted-foreground"
+    >
       <For each={buildCrumbs(location.pathname)}>
         {(crumb, i) => (
           <>

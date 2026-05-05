@@ -7,7 +7,7 @@ type: project
 Animation utilities live in `src/app.css` under `@layer utilities`:
 - `.anim-fade-up` — 200ms entrance (opacity + 6px translateY); use on result reveals, header mounts.
 - `.anim-fade-in` — 160ms simple opacity fade.
-- `.anim-stagger` — combine with `.anim-fade-up` and inline `style={{ "--stagger": String(i()) }}` to delay grid items by `i * 35ms`.
+- `.anim-stagger` — combine with `.anim-fade-up` and inline `style={{ "--stagger": String(i()) }}` to delay grid items by `60ms + i * 40ms`. The 60ms base offset lets the page header lead the cascade so the title doesn't animate alone.
 - `.anim-copy-pulse` — 380ms violet ring pulse; toggled on the CopyButton when `copied()` is true.
 - `.accent-underline` — background-size grow from 0% to 100% used for tab/link underlines (transitions).
 

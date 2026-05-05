@@ -1,4 +1,4 @@
-import { createMemo, For, Show } from 'solid-js'
+import { createMemo, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -177,6 +177,12 @@ export default function PythagoreanTheorem() {
 
   const option = createMemo(() => solveOptions.find((o) => o.value === solve())!)
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -189,7 +195,7 @@ export default function PythagoreanTheorem() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Solve for"
-            value={solve()}
+            value={solve() || undefined}
             onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' }, { replace: true })}
             options={segmentedOptions}
           />
@@ -206,7 +212,7 @@ export default function PythagoreanTheorem() {
 
           <div class="grid gap-4 sm:grid-cols-2">
             <NumberField
-              value={v1Raw()}
+              value={v1Raw() || undefined}
               onChange={(v) => setSearchParams({ v1: v }, { replace: true })}
               minValue={0}
               format={false}
@@ -214,14 +220,14 @@ export default function PythagoreanTheorem() {
             >
               <NumberFieldLabel>{option().label1}</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder={option().placeholder1} class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder={option().placeholder1} class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
             <NumberField
-              value={v2Raw()}
+              value={v2Raw() || undefined}
               onChange={(v) => setSearchParams({ v2: v }, { replace: true })}
               minValue={0}
               format={false}

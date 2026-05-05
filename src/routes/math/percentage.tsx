@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar } from '~/components/tool-toolbar'
@@ -50,6 +50,12 @@ export default function PercentageCalculator() {
     }
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -65,7 +71,7 @@ export default function PercentageCalculator() {
             options={percentageModes}
             optionValue="id"
             optionTextValue="label"
-            value={config()}
+            value={config() || undefined}
             onChange={(opt) => {
               if (!opt) return
               setASignal('')
@@ -90,15 +96,15 @@ export default function PercentageCalculator() {
             <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{config().inputA}</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="0" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="0" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
-            <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={b() || undefined} onChange={setB} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>{config().inputB}</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="0" class="h-12 font-mono text-base" />

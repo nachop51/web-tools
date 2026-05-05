@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -43,6 +43,12 @@ export default function FindReplacePage() {
   const matchCount = createMemo(() => processed().count)
   const hasMatches = createMemo(() => find() !== '' && text() !== '')
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -63,7 +69,7 @@ export default function FindReplacePage() {
             <TextField value={find()} onChange={setFind} class="flex flex-col gap-1.5">
               <TextFieldLabel>Find</TextFieldLabel>
               <TextFieldInput
-                autofocus
+                ref={inputRef}
                 type="text"
                 placeholder={useRegex() ? 'regex pattern' : 'search text'}
                 class="h-12 font-mono text-base"

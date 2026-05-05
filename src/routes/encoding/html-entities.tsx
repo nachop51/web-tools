@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented, ToolbarChip } from '~/components/tool-toolbar'
@@ -50,6 +50,12 @@ export default function HTMLEntitiesTool() {
     }
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -93,7 +99,7 @@ export default function HTMLEntitiesTool() {
               class="flex flex-col gap-2"
             >
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 rows={8}
                 class="min-h-[12rem] font-mono text-sm resize-y"
                 placeholder={direction() === 'encode' ? 'Type raw HTML or text…' : 'Type or paste HTML entities…'}

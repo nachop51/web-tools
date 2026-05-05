@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -167,6 +167,12 @@ export default function TriangleCalculator() {
 
   const option = createMemo(() => solveOptions.find((o) => o.value === solve())!)
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -179,14 +185,14 @@ export default function TriangleCalculator() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Type"
-            value={tab()}
+            value={tab() || undefined}
             onChange={(v) => setSearchParams({ tab: v, v1: '', v2: '', a: '', b: '', c: '' }, { replace: true })}
             options={tabOptions}
           />
           <Show when={tab() === 'right'}>
             <ToolbarSegmented
               label="Solve for"
-              value={solve()}
+              value={solve() || undefined}
               onChange={(v) => setSearchParams({ solve: v, v1: '', v2: '' }, { replace: true })}
               options={solveSegmentedOptions}
             />
@@ -203,7 +209,7 @@ export default function TriangleCalculator() {
           <Show when={tab() === 'right'}>
             <div class="grid gap-4 sm:grid-cols-2">
               <NumberField
-                value={v1Raw()}
+                value={v1Raw() || undefined}
                 onChange={(v) => {
                   setV1Raw(v)
                   setSearchParams({ v1: v }, { replace: true })
@@ -214,14 +220,14 @@ export default function TriangleCalculator() {
               >
                 <NumberFieldLabel>{option().label1}</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput autofocus placeholder="Enter value" class="h-12 font-mono text-base" />
+                  <NumberFieldInput ref={inputRef} placeholder="Enter value" class="h-12 font-mono text-base" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>
               </NumberField>
 
               <NumberField
-                value={v2Raw()}
+                value={v2Raw() || undefined}
                 onChange={(v) => {
                   setV2Raw(v)
                   setSearchParams({ v2: v }, { replace: true })
@@ -243,7 +249,7 @@ export default function TriangleCalculator() {
           <Show when={tab() === 'sss'}>
             <div class="grid gap-4 sm:grid-cols-3">
               <NumberField
-                value={aRaw()}
+                value={aRaw() || undefined}
                 onChange={(v) => {
                   setARaw(v)
                   setSearchParams({ a: v }, { replace: true })
@@ -254,14 +260,14 @@ export default function TriangleCalculator() {
               >
                 <NumberFieldLabel>Side a</NumberFieldLabel>
                 <NumberFieldGroup>
-                  <NumberFieldInput autofocus placeholder="Enter side a" class="h-12 font-mono text-base" />
+                  <NumberFieldInput ref={inputRef} placeholder="Enter side a" class="h-12 font-mono text-base" />
                   <NumberFieldIncrementTrigger />
                   <NumberFieldDecrementTrigger />
                 </NumberFieldGroup>
               </NumberField>
 
               <NumberField
-                value={bRaw()}
+                value={bRaw() || undefined}
                 onChange={(v) => {
                   setBRaw(v)
                   setSearchParams({ b: v }, { replace: true })
@@ -279,7 +285,7 @@ export default function TriangleCalculator() {
               </NumberField>
 
               <NumberField
-                value={cRaw()}
+                value={cRaw() || undefined}
                 onChange={(v) => {
                   setCRaw(v)
                   setSearchParams({ c: v }, { replace: true })

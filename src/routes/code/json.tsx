@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
@@ -58,6 +58,12 @@ export default function JsonTool() {
     return r.ok ? null : r
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -75,7 +81,7 @@ export default function JsonTool() {
             </div>
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 class="min-h-[24rem] font-mono text-sm resize-y"
                 placeholder='{"key": "value"}'
               />

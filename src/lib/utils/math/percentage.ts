@@ -1,4 +1,4 @@
-export type PercentageMode = 'of' | 'change' | 'increase' | 'decrease' | 'error' | 'reverse'
+export type PercentageMode = 'of' | 'what' | 'change' | 'increase' | 'decrease' | 'error' | 'reverse'
 
 export interface PercentageModeConfig {
   id: PercentageMode
@@ -10,6 +10,7 @@ export interface PercentageModeConfig {
 
 export const percentageModes: PercentageModeConfig[] = [
   { id: 'of', label: '% of a number', inputA: 'Percentage (%)', inputB: 'Number', formula: '(A ÷ 100) × B' },
+  { id: 'what', label: 'What % of X is Y', inputA: 'Whole (X)', inputB: 'Part (Y)', formula: '(B ÷ A) × 100' },
   { id: 'change', label: '% change', inputA: 'Original value', inputB: 'New value', formula: '((B − A) ÷ A) × 100' },
   {
     id: 'increase',
@@ -45,6 +46,8 @@ export function calculatePercentage(mode: PercentageMode, a: number, b: number):
   switch (mode) {
     case 'of':
       return (a / 100) * b
+    case 'what':
+      return (b / a) * 100
     case 'change':
       return ((b - a) / Math.abs(a)) * 100
     case 'increase':

@@ -65,7 +65,7 @@ type TextFieldTextAreaProps<T extends ValidComponent = 'textarea'> = TextFieldPr
 const TextFieldTextArea = <T extends ValidComponent = 'textarea'>(
   props: PolymorphicProps<T, TextFieldTextAreaProps<T>>
 ) => {
-  const [local, others] = splitProps(props as TextFieldTextAreaProps, ['class'])
+  const [local, others] = splitProps(props as TextFieldTextAreaProps & { ref?: HTMLTextAreaElement | ((el: HTMLTextAreaElement) => void) }, ['class', 'ref'])
   let el: HTMLTextAreaElement | undefined
   // Kobalte+Polymorphic sets `value` as an attribute, which a textarea ignores —
   // only the inner text controls displayed content. Sync the attribute to `.value`
@@ -77,12 +77,16 @@ const TextFieldTextArea = <T extends ValidComponent = 'textarea'>(
   })
   return (
     <TextFieldPrimitive.TextArea
-      ref={el}
+      {...others}
       class={cn(
         'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
         local.class
       )}
-      {...others}
+      ref={(element: HTMLTextAreaElement) => {
+        el = element
+        const userRef = local.ref
+        if (typeof userRef === 'function') (userRef as (el: HTMLTextAreaElement) => void)(element)
+      }}
     />
   )
 }

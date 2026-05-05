@@ -51,7 +51,7 @@ const SliderThumb = <T extends ValidComponent = 'span'>(props: PolymorphicProps<
   return (
     <SliderPrimitive.Thumb
       class={cn(
-        'top-[-6px] block size-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        'top-[-6px] block size-5 cursor-pointer rounded-full border-2 border-primary bg-background ring-offset-background transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out hover:scale-110 hover:shadow-[0_0_0_6px_color-mix(in_oklch,var(--color-primary)_18%,transparent)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[dragging]:scale-110 data-[dragging]:shadow-[0_0_0_8px_color-mix(in_oklch,var(--color-primary)_22%,transparent)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:hover:scale-100',
         local.class
       )}
       {...others}

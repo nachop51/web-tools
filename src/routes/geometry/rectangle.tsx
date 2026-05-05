@@ -1,4 +1,4 @@
-import { createMemo, For, Show } from 'solid-js'
+import { createMemo, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -43,6 +43,11 @@ export default function RectangleCalculator() {
   })
 
   const hasResult = createMemo(() => result() !== null)
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   const rows: ResultRow[] = [
     { label: 'Area', formula: 'A = w × h', value: () => fmt(result()?.area ?? NaN) },
@@ -75,7 +80,7 @@ export default function RectangleCalculator() {
 
           <div class="grid gap-4 sm:grid-cols-2">
             <NumberField
-              value={wRaw()}
+              value={wRaw() || undefined}
               onChange={(v) => setSearchParams({ w: v }, { replace: true })}
               minValue={0}
               format={false}
@@ -83,14 +88,14 @@ export default function RectangleCalculator() {
             >
               <NumberFieldLabel>Width</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="Enter width" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="Enter width" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
             <NumberField
-              value={hRaw()}
+              value={hRaw() || undefined}
               onChange={(v) => setSearchParams({ h: v }, { replace: true })}
               minValue={0}
               format={false}

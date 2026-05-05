@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
@@ -40,6 +40,11 @@ export default function PressureConverter() {
     setParams({ v: v || undefined }, { replace: true })
   }
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   const numericValue = createMemo(() => parseFloat(inputValue()))
 
@@ -72,14 +77,14 @@ export default function PressureConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
-              value={inputValue()}
+              value={inputValue() || undefined}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}
               class="flex flex-col gap-2"
             >
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="Enter a value..." class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="Enter a value..." class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>

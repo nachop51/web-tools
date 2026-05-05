@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -43,6 +43,11 @@ export default function CompoundInterestCalculator() {
   const [years, setYearsSignal] = createSignal(params.t ?? '')
   const [compoundingId, setCompoundingIdSignal] = createSignal<CompoundingId>(initialFreq)
   const [showAll, setShowAll] = createSignal(false)
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   function setPrincipal(v: string) { setPrincipalSignal(v); setParams({ p: v || undefined }, { replace: true }) }
   function setRate(v: string) { setRateSignal(v); setParams({ r: v || undefined }, { replace: true }) }
@@ -99,7 +104,7 @@ export default function CompoundInterestCalculator() {
             options={[...compoundingOptions]}
             optionValue="id"
             optionTextValue="label"
-            value={selectedCompounding()}
+            value={selectedCompounding() || undefined}
             onChange={(opt) => opt && setCompoundingId(opt.id)}
             itemComponent={(itemProps) => (
               <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
@@ -120,16 +125,16 @@ export default function CompoundInterestCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-3">
-            <NumberField value={principal()} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={principal() || undefined} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Principal ($)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 5000.00" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="e.g. 5000.00" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField value={rate()} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={rate() || undefined} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Annual rate (%)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 7" class="h-12 font-mono text-base" />
@@ -138,7 +143,7 @@ export default function CompoundInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField value={years()} onChange={setYears} minValue={1} step={1} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={years() || undefined} onChange={setYears} minValue={1} step={1} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Years</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 10" class="h-12 font-mono text-base" />
@@ -165,9 +170,9 @@ export default function CompoundInterestCalculator() {
             }
           >
             <div class="overflow-hidden rounded-md border border-border">
-              <ResultRow label="Final balance" value={finalBalanceStr()} prefix="$" />
-              <ResultRow label="Total interest" value={totalInterestStr()} prefix="$" />
-              <ResultRow label="Total gain" value={gainPctStr()} suffix="%" />
+              <ResultRow label="Final balance" value={finalBalanceStr() || undefined} prefix="$" />
+              <ResultRow label="Total interest" value={totalInterestStr() || undefined} prefix="$" />
+              <ResultRow label="Total gain" value={gainPctStr() || undefined} suffix="%" />
             </div>
           </Show>
         </section>

@@ -1,9 +1,10 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
-import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
+import { DateField } from '~/components/date-field'
+import { Label } from '~/components/ui/label'
 import {
   NumberField,
   NumberFieldGroup,
@@ -63,6 +64,12 @@ export default function DateAdd() {
     ]
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -84,10 +91,15 @@ export default function DateAdd() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <TextField value={date()} onChange={setDate} class="flex flex-col gap-1.5">
-              <TextFieldLabel>Base date</TextFieldLabel>
-              <TextFieldInput autofocus type="date" class="h-12 font-mono text-base" />
-            </TextField>
+            <div class="flex flex-col gap-1.5">
+              <Label>Base date</Label>
+              <DateField
+                value={date()}
+                onChange={setDate}
+                inputRef={(el) => (inputRef = el)}
+                inputClass="h-12 font-mono text-base"
+              />
+            </div>
 
             <NumberField value={amount()} onChange={setAmount} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Amount (negative to subtract)</NumberFieldLabel>

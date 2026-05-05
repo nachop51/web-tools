@@ -40,6 +40,12 @@ export default function UuidTool() {
     setList(Array.from({ length: n }, () => generateUuid()))
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -75,7 +81,7 @@ export default function UuidTool() {
 
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <NumberField
-              value={count()}
+              value={count() || undefined}
               onChange={setCount}
               minValue={1}
               maxValue={1000}
@@ -83,7 +89,7 @@ export default function UuidTool() {
               class="w-32"
             >
               <NumberFieldGroup>
-                <NumberFieldInput autofocus class="font-mono" />
+                <NumberFieldInput ref={inputRef} class="font-mono" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>

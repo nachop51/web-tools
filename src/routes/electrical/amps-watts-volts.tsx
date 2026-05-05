@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -82,6 +82,12 @@ export default function AmpsWattsVolts() {
 
   const formula = createMemo(() => result()?.formula ?? '')
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -118,9 +124,9 @@ export default function AmpsWattsVolts() {
                 }}
               >
                 <TextFieldInput
+                  ref={inputRef}
                   type="text"
                   inputMode="decimal"
-                  autofocus
                   placeholder="Enter value"
                   class="h-12 font-mono text-base"
                 />

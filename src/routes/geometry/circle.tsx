@@ -1,4 +1,4 @@
-import { createMemo, For, Show } from 'solid-js'
+import { createMemo, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -54,6 +54,11 @@ export default function CircleCalculator() {
   })
 
   const inputLabel = createMemo(() => circleInputs.find((c) => c.id === mode())!)
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   const rows: ResultRow[] = [
     { label: 'Radius', formula: 'r', value: () => fmt(result()?.radius ?? NaN) },
@@ -74,7 +79,7 @@ export default function CircleCalculator() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Known value"
-            value={mode()}
+            value={mode() || undefined}
             onChange={(v) => setSearchParams({ mode: v, v: '' }, { replace: true })}
             options={modeOptions}
           />
@@ -88,7 +93,7 @@ export default function CircleCalculator() {
           </div>
 
           <NumberField
-            value={raw()}
+            value={raw() || undefined}
             onChange={(v) => setSearchParams({ v }, { replace: true })}
             minValue={0}
             format={false}
@@ -96,7 +101,7 @@ export default function CircleCalculator() {
           >
             <NumberFieldLabel>{inputLabel().label}</NumberFieldLabel>
             <NumberFieldGroup>
-              <NumberFieldInput autofocus placeholder="Enter value" class="h-12 font-mono text-base" />
+              <NumberFieldInput ref={inputRef} placeholder="Enter value" class="h-12 font-mono text-base" />
               <NumberFieldIncrementTrigger />
               <NumberFieldDecrementTrigger />
             </NumberFieldGroup>

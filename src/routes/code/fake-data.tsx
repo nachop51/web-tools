@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Match, Show, Switch } from 'solid-js'
+import { createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js'
 import { createStore, produce, reconcile, unwrap } from 'solid-js/store'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
@@ -162,6 +162,12 @@ export default function FakeDataTool() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   return (
     <main class="w-full py-10">
@@ -359,7 +365,7 @@ export default function FakeDataTool() {
               Edit the JSON schema directly. Valid changes sync to the visual table.
             </p>
             <TextField value={schemaText()} onChange={handleSchemaChange}>
-              <TextFieldTextArea autofocus class="min-h-[16rem] font-mono text-sm resize-y" placeholder="[]" />
+              <TextFieldTextArea ref={inputRef} class="min-h-[16rem] font-mono text-sm resize-y" placeholder="[]" />
             </TextField>
             <Show when={schemaError()}>
               <p class="mt-2 text-xs text-destructive">{schemaError()}</p>

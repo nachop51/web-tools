@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { TbOutlineChevronDown, TbOutlineRocket } from 'solid-icons/tb'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -46,6 +46,11 @@ export default function LengthConverter() {
   const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
   const [fromUnit, setFromUnit] = createSignal(initialFrom)
   const [showFun, setShowFun] = createSignal(false)
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   function setInputValue(v: string) {
     setInputValueSignal(v)
@@ -83,14 +88,14 @@ export default function LengthConverter() {
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
             <NumberField
-              value={inputValue()}
+              value={inputValue() || undefined}
               onChange={setInputValue}
               format={false}
               validationState={isInvalid() ? 'invalid' : 'valid'}
               class="flex flex-col gap-2"
             >
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="Enter a value..." class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="Enter a value..." class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>

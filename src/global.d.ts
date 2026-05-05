@@ -1,5 +1,8 @@
 /// <reference types="@solidjs/start/env" />
 
+declare const __BUILD_SHA__: string
+declare const __BUILD_DATE__: string
+
 declare module 'culori' {
   export type Color = {
     mode: string

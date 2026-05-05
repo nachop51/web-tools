@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For } from 'solid-js'
+import { createMemo, createSignal, For, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { ToolHeader } from '~/components/tool-header'
@@ -44,6 +44,12 @@ export default function CharacterCount() {
     paragraphs: countParagraphs(text()),
   }))
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -62,7 +68,7 @@ export default function CharacterCount() {
 
           <TextField value={text()} onChange={setText}>
             <TextFieldTextArea
-              autofocus
+              ref={inputRef}
               placeholder="Paste text here…"
               class="min-h-[10rem] w-full resize-y font-mono text-sm"
             />

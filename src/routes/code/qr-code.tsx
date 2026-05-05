@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, For, on, Show } from 'solid-js'
+import { createEffect, createMemo, createSignal, For, on, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { Button } from '~/components/ui/button'
@@ -135,6 +135,12 @@ export default function QrCodeTool() {
     a.click()
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -155,7 +161,7 @@ export default function QrCodeTool() {
               <TextField value={text()} onChange={handleText}>
                 <TextFieldLabel>Text / URL</TextFieldLabel>
                 <TextFieldInput
-                  autofocus
+                  ref={inputRef}
                   type="text"
                   placeholder="Enter text or URL to encode…"
                   class="h-12 font-mono text-base"

@@ -2,6 +2,11 @@
 @import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
 
+/* Wire Tailwind v4's `dark:` variant to the `.dark` class flip used in this
+   app (the same selector that toggles theme tokens), instead of v4's default
+   of `prefers-color-scheme`. Also covers Kobalte's `[data-kb-theme='dark']`. */
+@custom-variant dark (&:where(.dark, .dark *, [data-kb-theme='dark'], [data-kb-theme='dark'] *));
+
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
@@ -204,9 +209,10 @@
     animation: fade-in 160ms ease-out both;
   }
 
-  /* Per-card stagger for grids: combine with .anim-fade-up; pass --stagger via inline style */
+  /* Per-card stagger for grids: combine with .anim-fade-up; pass --stagger via inline style.
+     Base 60ms offset lets the page header finish leading the cascade before cards arrive. */
   .anim-stagger {
-    animation-delay: calc(var(--stagger, 0) * 35ms);
+    animation-delay: calc(60ms + var(--stagger, 0) * 40ms);
   }
 
   /* Used by CopyButton for a subtle violet pulse on success. */
@@ -297,6 +303,61 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* highlight.js token-based theme — adapts to light/dark via CSS variables. */
+.hljs {
+  color: oklch(var(--foreground));
+  background: transparent;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-section,
+.hljs-doctag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: oklch(var(--violet));
+}
+.hljs-string,
+.hljs-attr,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: oklch(var(--success-foreground));
+}
+.hljs-number,
+.hljs-literal,
+.hljs-regexp,
+.hljs-link {
+  color: oklch(var(--warning-foreground));
+}
+.hljs-title,
+.hljs-class .hljs-title,
+.hljs-type,
+.hljs-meta,
+.hljs-meta-keyword {
+  color: oklch(var(--info-foreground));
+}
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion {
+  color: oklch(var(--muted-foreground));
+  font-style: italic;
+}
+.hljs-variable,
+.hljs-property,
+.hljs-params,
+.hljs-attribute {
+  color: oklch(var(--foreground));
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 600;
 }
 
 ::-webkit-scrollbar {

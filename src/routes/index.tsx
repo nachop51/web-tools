@@ -110,11 +110,6 @@ export default function Home() {
           }}
         </For>
       </div>
-
-      <footer class="mt-14 flex items-center gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
-        <span class="size-1.5 rounded-full bg-violet/70" />
-        Open source · client-side only · no tracking
-      </footer>
     </main>
   )
 }

@@ -9,16 +9,21 @@ type ToolCardProps = {
   tool: Tool
   icon: Component<{ size?: number; class?: string }>
   class?: string
+  index?: number
 }
 
 export function ToolCard(props: ToolCardProps) {
   return (
-    <A href={props.tool.href} class={cn('group block', props.class)}>
+    <A
+      href={props.tool.href}
+      class={cn('anim-fade-up anim-stagger group block', props.class)}
+      style={{ '--stagger': String(props.index ?? 0) }}
+    >
       <div
         class={cn(
           'relative flex items-center gap-4 overflow-hidden rounded-md border border-border bg-card p-4',
-          'transition-[border-color,background-color,transform] duration-150 ease-out',
-          'hover:border-violet/50 hover:bg-violet-muted/40'
+          'transition-[border-color,background-color,transform,box-shadow] duration-150 ease-out',
+          'hover:border-violet/50 hover:bg-violet-muted/40 hover:shadow-sm'
         )}
       >
         {/* Left rail accent */}

@@ -1,4 +1,4 @@
-import { For, createMemo, createSignal, Show } from 'solid-js'
+import { For, createMemo, createSignal, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -62,6 +62,12 @@ export default function Roman() {
   const error = createMemo(() => result().error)
   const direction = createMemo(() => (isLikelyRoman(input().trim()) ? 'Roman → Arabic' : 'Arabic → Roman'))
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -95,8 +101,8 @@ export default function Roman() {
                 class="flex flex-col gap-2"
               >
                 <TextFieldInput
+                  ref={inputRef}
                   type="text"
-                  autofocus
                   placeholder="Enter a number or Roman numeral"
                   class="h-12 font-mono text-lg tracking-wide"
                 />

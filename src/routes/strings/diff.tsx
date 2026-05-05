@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { TbOutlineTextWrap } from 'solid-icons/tb'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
@@ -30,6 +30,12 @@ export default function TextDiff() {
     return computeDiff(original(), modified())
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -49,7 +55,7 @@ export default function TextDiff() {
 
             <TextField value={original()} onChange={setOriginal}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 placeholder="Paste original text here…"
                 class="min-h-[10rem] resize-y font-mono text-sm"
               />

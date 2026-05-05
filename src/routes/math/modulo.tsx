@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -44,6 +44,12 @@ export default function ModuloCalculator() {
     ]
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -60,16 +66,16 @@ export default function ModuloCalculator() {
             <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Dividend (a)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="17" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="17" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <NumberField
-              value={m()}
+              value={m() || undefined}
               onChange={setM}
               format={false}
               validationState={m() === '0' ? 'invalid' : 'valid'}

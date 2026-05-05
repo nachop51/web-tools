@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -76,6 +76,12 @@ export default function CaesarTool() {
     setShift(v)
     setParams({ shift: String(v) }, { replace: true })
   }
+
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
 
   return (
     <main class="w-full py-10">
@@ -156,7 +162,7 @@ export default function CaesarTool() {
             </div>
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 class="min-h-[10rem] font-mono text-sm resize-y"
                 placeholder={mode() === 'encode' ? 'Enter plaintext to encrypt…' : 'Enter ciphertext to decrypt…'}
               />

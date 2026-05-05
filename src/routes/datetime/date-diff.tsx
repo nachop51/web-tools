@@ -1,9 +1,10 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
-import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
+import { DateField } from '~/components/date-field'
+import { Label } from '~/components/ui/label'
 import { dateDiff, ageFrom, type DateDiffResult } from '~/lib/utils/datetime/date-diff'
 import { setToolPageMeta } from '~/lib/seo'
 
@@ -98,6 +99,12 @@ export default function DateDiffTool() {
     return parts.join(', ')
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -119,16 +126,23 @@ export default function DateDiffTool() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <TextField value={from()} onChange={handleFrom} class="flex flex-col gap-1.5">
-              <TextFieldLabel>{mode() === 'age' ? 'Birthdate' : 'From'}</TextFieldLabel>
-              <TextFieldInput autofocus type="date" class="h-12 font-mono text-base" />
-            </TextField>
+            <div class="flex flex-col gap-1.5">
+              <Label>{mode() === 'age' ? 'Birthdate' : 'From'}</Label>
+              <DateField
+                value={from()}
+                onChange={handleFrom}
+                inputRef={(el) => (inputRef = el)}
+                inputClass="h-12 font-mono text-base"
+              />
+            </div>
 
             <div class="flex flex-col gap-1.5">
-              <TextField value={to()} onChange={handleTo} class="flex flex-col gap-1.5">
-                <TextFieldLabel>To</TextFieldLabel>
-                <TextFieldInput type="date" class="h-12 font-mono text-base" />
-              </TextField>
+              <Label>To</Label>
+              <DateField
+                value={to()}
+                onChange={handleTo}
+                inputClass="h-12 font-mono text-base"
+              />
               <button
                 type="button"
                 onClick={useToday}

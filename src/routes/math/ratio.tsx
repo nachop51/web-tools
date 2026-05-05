@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -61,6 +61,12 @@ export default function RatioSolver() {
     return solveRatio(na, nb, nc)
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -73,7 +79,7 @@ export default function RatioSolver() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Mode"
-            value={mode()}
+            value={mode() || undefined}
             onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
@@ -88,16 +94,16 @@ export default function RatioSolver() {
 
             <Show when={mode() === 'simplify'}>
               <div class="flex items-end gap-3">
-                <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-2">
+                <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-2">
                   <NumberFieldLabel>A</NumberFieldLabel>
                   <NumberFieldGroup>
-                    <NumberFieldInput autofocus class="h-12 w-24 font-mono text-base" placeholder="6" />
+                    <NumberFieldInput ref={inputRef} class="h-12 w-24 font-mono text-base" placeholder="6" />
                     <NumberFieldIncrementTrigger />
                     <NumberFieldDecrementTrigger />
                   </NumberFieldGroup>
                 </NumberField>
                 <span class="pb-3 text-xl font-bold text-muted-foreground">:</span>
-                <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-2">
+                <NumberField value={b() || undefined} onChange={setB} format={false} class="flex flex-col gap-2">
                   <NumberFieldLabel>B</NumberFieldLabel>
                   <NumberFieldGroup>
                     <NumberFieldInput class="h-12 w-24 font-mono text-base" placeholder="4" />
@@ -112,16 +118,16 @@ export default function RatioSolver() {
               <div class="space-y-3">
                 <p class="text-sm text-muted-foreground">A : B = C : ?</p>
                 <div class="flex flex-wrap items-end gap-3">
-                  <NumberField value={a()} onChange={setA} format={false} class="flex flex-col gap-2">
+                  <NumberField value={a() || undefined} onChange={setA} format={false} class="flex flex-col gap-2">
                     <NumberFieldLabel>A</NumberFieldLabel>
                     <NumberFieldGroup>
-                      <NumberFieldInput autofocus class="h-12 w-20 font-mono text-base" placeholder="2" />
+                      <NumberFieldInput ref={inputRef} class="h-12 w-20 font-mono text-base" placeholder="2" />
                       <NumberFieldIncrementTrigger />
                       <NumberFieldDecrementTrigger />
                     </NumberFieldGroup>
                   </NumberField>
                   <span class="pb-3 text-lg font-bold text-muted-foreground">:</span>
-                  <NumberField value={b()} onChange={setB} format={false} class="flex flex-col gap-2">
+                  <NumberField value={b() || undefined} onChange={setB} format={false} class="flex flex-col gap-2">
                     <NumberFieldLabel>B</NumberFieldLabel>
                     <NumberFieldGroup>
                       <NumberFieldInput class="h-12 w-20 font-mono text-base" placeholder="3" />
@@ -130,7 +136,7 @@ export default function RatioSolver() {
                     </NumberFieldGroup>
                   </NumberField>
                   <span class="pb-3 text-lg font-bold text-muted-foreground">=</span>
-                  <NumberField value={c()} onChange={setC} format={false} class="flex flex-col gap-2">
+                  <NumberField value={c() || undefined} onChange={setC} format={false} class="flex flex-col gap-2">
                     <NumberFieldLabel>C</NumberFieldLabel>
                     <NumberFieldGroup>
                       <NumberFieldInput class="h-12 w-20 font-mono text-base" placeholder="4" />

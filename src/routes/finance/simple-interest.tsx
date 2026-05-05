@@ -1,4 +1,4 @@
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -48,6 +48,12 @@ export default function SimpleInterestCalculator() {
   const totalStr = createMemo(() => (result() ? fmt(result()!.totalAmount) : ''))
   const rateStr = createMemo(() => (result() ? fmtPct(result()!.effectiveRate) : ''))
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -70,16 +76,16 @@ export default function SimpleInterestCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-3">
-            <NumberField value={principal()} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={principal() || undefined} onChange={setPrincipal} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Principal ($)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 1000.00" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="e.g. 1000.00" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField value={rate()} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={rate() || undefined} onChange={setRate} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Annual rate (%)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 5" class="h-12 font-mono text-base" />
@@ -88,7 +94,7 @@ export default function SimpleInterestCalculator() {
               </NumberFieldGroup>
             </NumberField>
 
-            <NumberField value={years()} onChange={setYears} minValue={0} step={0.5} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={years() || undefined} onChange={setYears} minValue={0} step={0.5} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Time (years)</NumberFieldLabel>
               <NumberFieldGroup>
                 <NumberFieldInput placeholder="e.g. 3" class="h-12 font-mono text-base" />
@@ -115,9 +121,9 @@ export default function SimpleInterestCalculator() {
             }
           >
             <div class="overflow-hidden rounded-md border border-border">
-              <ResultRow label="Interest earned" value={interestStr()} prefix="$" />
-              <ResultRow label="Total amount" value={totalStr()} prefix="$" />
-              <ResultRow label="Effective total rate" value={rateStr()} suffix="%" />
+              <ResultRow label="Interest earned" value={interestStr() || undefined} prefix="$" />
+              <ResultRow label="Total amount" value={totalStr() || undefined} prefix="$" />
+              <ResultRow label="Effective total rate" value={rateStr() || undefined} suffix="%" />
             </div>
           </Show>
         </section>

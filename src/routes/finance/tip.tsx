@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -53,6 +53,12 @@ export default function TipCalculator() {
     return r ? fmt(r.perPerson) : ''
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -70,17 +76,17 @@ export default function TipCalculator() {
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <NumberField value={bill()} onChange={setBill} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
+            <NumberField value={bill() || undefined} onChange={setBill} minValue={0} step={0.01} format={false} class="flex flex-col gap-1.5">
               <NumberFieldLabel>Bill amount ($)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="e.g. 85.00" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="e.g. 85.00" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
 
             <NumberField
-              value={people()}
+              value={people() || undefined}
               onChange={setPeople}
               minValue={1}
               step={1}
@@ -125,7 +131,7 @@ export default function TipCalculator() {
               </For>
             </div>
             <NumberField
-              value={tipPct()}
+              value={tipPct() || undefined}
               onChange={setTipPct}
               minValue={0}
               maxValue={100}
@@ -158,9 +164,9 @@ export default function TipCalculator() {
             }
           >
             <div class="overflow-hidden rounded-md border border-border">
-              <ResultRow label="Tip amount" value={tipAmountStr()} prefix="$" />
-              <ResultRow label="Total amount" value={totalStr()} prefix="$" />
-              <ResultRow label="Per person" value={perPersonStr()} prefix="$" />
+              <ResultRow label="Tip amount" value={tipAmountStr() || undefined} prefix="$" />
+              <ResultRow label="Total amount" value={totalStr() || undefined} prefix="$" />
+              <ResultRow label="Per person" value={perPersonStr() || undefined} prefix="$" />
             </div>
           </Show>
         </section>

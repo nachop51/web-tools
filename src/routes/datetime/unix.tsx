@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -113,6 +113,12 @@ export default function UnixTool() {
     }
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -123,7 +129,7 @@ export default function UnixTool() {
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
         <ToolToolbar>
-          <ToolbarSegmented label="Mode" value={mode()} onChange={setMode} options={modeOptions} />
+          <ToolbarSegmented label="Mode" value={mode() || undefined} onChange={setMode} options={modeOptions} />
         </ToolToolbar>
 
         <Show when={mode() === 'toDate'}>
@@ -146,14 +152,14 @@ export default function UnixTool() {
             </div>
 
             <NumberField
-              value={tsInput()}
+              value={tsInput() || undefined}
               onChange={setTsInput}
               format={false}
               validationState={tsError() ? 'invalid' : 'valid'}
               class="flex flex-col gap-2"
             >
               <NumberFieldGroup>
-                <NumberFieldInput autofocus class="h-12 font-mono text-base" placeholder="e.g. 1705315800" />
+                <NumberFieldInput ref={inputRef} class="h-12 font-mono text-base" placeholder="e.g. 1705315800" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
@@ -208,13 +214,13 @@ export default function UnixTool() {
             </div>
 
             <TextField
-              value={isoInput()}
+              value={isoInput() || undefined}
               onChange={setIsoInput}
               validationState={isoError() ? 'invalid' : 'valid'}
               class="flex flex-col gap-2"
             >
               <TextFieldInput
-                autofocus
+                ref={inputRef}
                 type="text"
                 class="h-12 font-mono text-base"
                 placeholder="e.g. 2024-01-15T10:30:00Z"

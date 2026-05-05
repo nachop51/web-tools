@@ -7,9 +7,11 @@
     "start": "vite start",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "icons": "bun scripts/generate-icons.ts"
   },
   "dependencies": {
+    "@ark-ui/solid": "^5.36.2",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@kobalte/core": "^0.13.11",
@@ -24,7 +26,10 @@
     "cronstrue": "^3.14.0",
     "culori": "^4.0.2",
     "diff": "^9.0.0",
+    "dompurify": "^3.4.2",
+    "highlight.js": "^11.11.1",
     "js-yaml": "^4.1.1",
+    "marked": "^18.0.3",
     "minisearch": "^7.2.0",
     "qrcode": "^1.5.4",
     "solid-icons": "^1.2.0",
@@ -34,10 +39,14 @@
     "vite": "^7.0.0"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.0.7",
     "@types/diff": "^8.0.0",
+    "@types/dompurify": "^3.2.0",
     "@types/js-yaml": "^4.0.9",
     "@types/qrcode": "^1.5.6",
+    "happy-dom": "^20.9.0",
+    "png-to-ico": "^3.0.1",
     "tailwindcss": "^4.0.7",
     "vitest": "^4.1.5"
   },

@@ -6,14 +6,48 @@ import type { PolymorphicProps } from '@kobalte/core/polymorphic'
 
 import { cn } from '~/lib/utils'
 
-const NumberField = NumberFieldPrimitive.Root
+// Workaround for Kobalte's NumberField bug: callsites use the
+// `value={x() || undefined}` pattern so empty state renders the placeholder
+// instead of "0". When the user backspaces the last char, the value prop
+// transitions defined→undefined, which makes Kobalte's createControllableSignal
+// switch to uncontrolled with a stale `_value` (last-controlled value), and
+// the input snaps back to the prior value.
+//
+// Fix: intercept onChange. After the controlled signal updates to empty,
+// force-clear the DOM input on the next microtask, after Kobalte's
+// synchronous "force input.value back in sync" handler has already run.
+const NumberField = <T extends ValidComponent = 'div'>(
+  props: PolymorphicProps<T, NumberFieldPrimitive.NumberFieldRootProps<T>>
+) => {
+  let rootEl: HTMLDivElement | undefined
+  const wrappedOnChange = (v: string) => {
+    ;(props as { onChange?: (v: string) => void }).onChange?.(v)
+    if (v === '' || v === undefined) {
+      queueMicrotask(() => {
+        const input = rootEl?.querySelector('input')
+        if (input && input.value !== '') input.value = ''
+      })
+    }
+  }
+  return (
+    <NumberFieldPrimitive.Root
+      {...(props as object)}
+      ref={(el: HTMLDivElement) => {
+        rootEl = el
+        const r = (props as { ref?: HTMLDivElement | ((el: HTMLDivElement) => void) }).ref
+        if (typeof r === 'function') r(el)
+      }}
+      onChange={wrappedOnChange}
+    />
+  )
+}
 
 const NumberFieldGroup: Component<ComponentProps<'div'>> = (props) => {
   const [local, others] = splitProps(props, ['class'])
   return (
     <div
       class={cn(
-        'relative rounded-md transition-[border-color,box-shadow] duration-150 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+        'relative rounded-md transition-[border-color,box-shadow] duration-150',
         local.class
       )}
       {...others}
@@ -47,7 +81,7 @@ const NumberFieldInput = <T extends ValidComponent = 'input'>(props: Polymorphic
   return (
     <NumberFieldPrimitive.Input
       class={cn(
-        'flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[invalid]:border-error-foreground data-[invalid]:text-error-foreground',
+        'flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[invalid]:border-error-foreground data-[invalid]:text-error-foreground',
         local.class
       )}
       {...others}
@@ -68,7 +102,7 @@ const NumberFieldIncrementTrigger = <T extends ValidComponent = 'button'>(
   return (
     <NumberFieldPrimitive.IncrementTrigger
       class={cn(
-        'absolute right-1 top-1 inline-flex size-4 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus:outline-none disabled:opacity-30',
+        'absolute right-1 top-1 inline-flex size-4 cursor-pointer items-center justify-center rounded text-muted-foreground transition-[color,transform,background-color] duration-150 ease-out hover:scale-125 hover:bg-primary/10 hover:text-primary active:scale-95 focus:outline-none disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 disabled:hover:bg-transparent motion-reduce:transition-none motion-reduce:hover:scale-100',
         local.class
       )}
       {...others}
@@ -109,7 +143,7 @@ const NumberFieldDecrementTrigger = <T extends ValidComponent = 'button'>(
   return (
     <NumberFieldPrimitive.DecrementTrigger
       class={cn(
-        'absolute bottom-1 right-1 inline-flex size-4 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus:outline-none disabled:opacity-30',
+        'absolute bottom-1 right-1 inline-flex size-4 cursor-pointer items-center justify-center rounded text-muted-foreground transition-[color,transform,background-color] duration-150 ease-out hover:scale-125 hover:bg-primary/10 hover:text-primary active:scale-95 focus:outline-none disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 disabled:hover:bg-transparent motion-reduce:transition-none motion-reduce:hover:scale-100',
         local.class
       )}
       {...others}

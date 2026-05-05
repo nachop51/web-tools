@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -51,6 +51,12 @@ export default function FactorialCalculator() {
     }
   })
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -63,7 +69,7 @@ export default function FactorialCalculator() {
         <ToolToolbar>
           <ToolbarSegmented
             label="Mode"
-            value={mode()}
+            value={mode() || undefined}
             onChange={(v) => setParams({ mode: v }, { replace: true })}
             options={modeOptions}
           />
@@ -77,7 +83,7 @@ export default function FactorialCalculator() {
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
             <NumberField
-              value={n()}
+              value={n() || undefined}
               onChange={setN}
               minValue={0}
               maxValue={170}
@@ -86,13 +92,13 @@ export default function FactorialCalculator() {
             >
               <NumberFieldLabel>n (non-negative integer, max 170)</NumberFieldLabel>
               <NumberFieldGroup>
-                <NumberFieldInput autofocus placeholder="5" class="h-12 font-mono text-base" />
+                <NumberFieldInput ref={inputRef} placeholder="5" class="h-12 font-mono text-base" />
                 <NumberFieldIncrementTrigger />
                 <NumberFieldDecrementTrigger />
               </NumberFieldGroup>
             </NumberField>
             <Show when={mode() !== 'factorial'}>
-              <NumberField value={r()} onChange={setR} minValue={0} format={false} class="flex flex-col gap-1.5">
+              <NumberField value={r() || undefined} onChange={setR} minValue={0} format={false} class="flex flex-col gap-1.5">
                 <NumberFieldLabel>r (items chosen)</NumberFieldLabel>
                 <NumberFieldGroup>
                   <NumberFieldInput placeholder="2" class="h-12 font-mono text-base" />

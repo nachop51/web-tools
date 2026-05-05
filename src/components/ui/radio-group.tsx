@@ -25,7 +25,7 @@ const RadioGroupItem = <T extends ValidComponent = 'div'>(props: PolymorphicProp
   return (
     <RadioGroupPrimitive.Item class={cn('flex items-center space-x-2', local.class)} {...others}>
       <RadioGroupPrimitive.ItemInput />
-      <RadioGroupPrimitive.ItemControl class="aspect-square size-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+      <RadioGroupPrimitive.ItemControl class="aspect-square size-4 cursor-pointer rounded-full border border-primary text-primary ring-offset-background transition-[transform,box-shadow,border-color] duration-150 ease-out hover:scale-110 hover:shadow-[0_0_0_4px_color-mix(in_oklch,var(--color-primary)_15%,transparent)] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:hover:scale-100">
         <RadioGroupPrimitive.ItemIndicator class="flex h-full items-center justify-center ">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@ const RadioGroupItemLabel = <T extends ValidComponent = 'label'>(
   return (
     <RadioGroupPrimitive.ItemLabel
       class={cn(
-        'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+        'cursor-pointer text-sm font-medium leading-none transition-colors hover:text-primary peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
         local.class
       )}
       {...others}

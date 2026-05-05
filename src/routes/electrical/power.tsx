@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
@@ -97,6 +97,12 @@ export default function PowerCalculator() {
     { key: 'horsepower', label: 'Horsepower', unit: 'hp', formula: 'hp = W ÷ 745.7', fmt: fmtHP },
   ])
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -138,9 +144,9 @@ export default function PowerCalculator() {
                 }}
               >
                 <TextFieldInput
+                  ref={inputRef}
                   type="text"
                   inputMode="decimal"
-                  autofocus
                   placeholder="Enter value"
                   class="h-12 font-mono text-base"
                 />

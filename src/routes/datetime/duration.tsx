@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -80,6 +80,12 @@ export default function DurationTool() {
     { label: 'Total hours', value: () => totalHours() },
   ])
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -103,7 +109,7 @@ export default function DurationTool() {
             class="flex flex-col gap-2"
           >
             <TextFieldInput
-              autofocus
+              ref={inputRef}
               type="text"
               class="h-12 font-mono text-base"
               placeholder='e.g. "1d 2h 30m", "1:30:00", or "3600"'

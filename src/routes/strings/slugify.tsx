@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, Show } from 'solid-js'
+import { createMemo, createSignal, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -50,6 +50,12 @@ export default function SlugifyTool() {
     return slugify(input(), opts)
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader category="strings" name="Slugify" description="Convert text to a URL-friendly slug." />
@@ -80,7 +86,7 @@ export default function SlugifyTool() {
 
             <TextField value={input()} onChange={setInput}>
               <TextFieldTextArea
-                autofocus
+                ref={inputRef}
                 placeholder="Paste text here…"
                 class="min-h-[10rem] resize-y font-mono text-sm"
               />

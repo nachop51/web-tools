@@ -48,8 +48,12 @@ export default function DatetimeIndex() {
       <Show when={tools.length > 0} fallback={<p class="text-sm text-muted-foreground">Tools coming soon.</p>}>
         <div class="grid gap-2 sm:grid-cols-2">
           <For each={tools}>
-            {(tool) => (
-              <ToolCard tool={tool} icon={toolIcons[tool.slug as keyof typeof toolIcons] ?? TbOutlineCalendar} />
+            {(tool, i) => (
+              <ToolCard
+                tool={tool}
+                index={i()}
+                icon={toolIcons[tool.slug as keyof typeof toolIcons] ?? TbOutlineCalendar}
+              />
             )}
           </For>
         </div>

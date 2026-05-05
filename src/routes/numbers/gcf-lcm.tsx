@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Index, Show } from 'solid-js'
+import { createMemo, createSignal, For, Index, onMount, Show } from 'solid-js'
 import { TbOutlineX } from 'solid-icons/tb'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
@@ -65,6 +65,12 @@ export default function GcfLcm() {
     setNums([...nums(), ''])
   }
 
+  let inputRef: HTMLInputElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   function removeNum(i: number) {
     if (nums().length <= 1) return
     const updated = nums().filter((_, idx) => idx !== i)
@@ -107,7 +113,7 @@ export default function GcfLcm() {
                   >
                     <NumberFieldGroup>
                       <NumberFieldInput
-                        autofocus={i === 0}
+                        ref={(el) => { if (i === 0) inputRef = el }}
                         placeholder={`Number ${i + 1}`}
                         class="h-12 pr-16 font-mono text-base"
                       />

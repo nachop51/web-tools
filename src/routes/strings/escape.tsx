@@ -1,5 +1,5 @@
 import { useSearchParams } from '@solidjs/router'
-import { createEffect, createMemo, createSignal, Show } from 'solid-js'
+import { createEffect, createMemo, createSignal, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented } from '~/components/tool-toolbar'
@@ -71,6 +71,12 @@ export default function EscapeTool() {
     }
   })
 
+  let inputRef: HTMLTextAreaElement | undefined
+
+  onMount(() => {
+    inputRef?.focus()
+  })
+
   return (
     <main class="w-full py-10">
       <ToolHeader
@@ -106,7 +112,7 @@ export default function EscapeTool() {
             </div>
 
             <TextField value={input()} onChange={setInput} validationState={error() ? 'invalid' : 'valid'}>
-              <TextFieldTextArea autofocus placeholder="Enter text…" class="min-h-[10rem] resize-y font-mono text-sm" />
+              <TextFieldTextArea ref={inputRef} placeholder="Enter text…" class="min-h-[10rem] resize-y font-mono text-sm" />
               <TextFieldErrorMessage>{error()}</TextFieldErrorMessage>
             </TextField>
           </section>
