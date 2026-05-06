@@ -19,7 +19,7 @@ import { compoundInterest, compoundingOptions, type CompoundingId } from '~/lib/
 type CompoundingOption = (typeof compoundingOptions)[number]
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return n.toFixed(2)
 }
 

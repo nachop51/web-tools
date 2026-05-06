@@ -26,24 +26,24 @@ Requires Node ≥ 22 (or bun ≥ 1.x).
 
 Eighty-plus tools across eleven categories:
 
-- **Numbers** — base converter, Roman numerals, number-to-words, random number,
+- **Numbers**: base converter, Roman numerals, number-to-words, random number,
   decimal precision, percentage, GCF/LCM
-- **Units** — length, mass, temperature, time, data, speed, volume, area,
+- **Units**: length, mass, temperature, time, data, speed, volume, area,
   energy, pressure, angle, power
-- **Strings** — count, case, slugify, trim, sort lines, find/replace, escape,
+- **Strings**: count, case, slugify, trim, sort lines, find/replace, escape,
   reverse, diff
-- **Encoding** — Base64, Base32, Base58, URL, HTML entities, hash, JWT, binary,
+- **Encoding**: Base64, Base32, Base58, URL, HTML entities, hash, JWT, binary,
   Morse, Caesar
-- **Datetime** — Unix timestamp, duration, cron preview, date diff, date add
-- **Code** — JSON, UUID, fake data, regex, secret/passphrase, ASCII table, URL
+- **Datetime**: Unix timestamp, duration, cron preview, date diff, date add
+- **Code**: JSON, UUID, fake data, regex, secret/passphrase, ASCII table, URL
   parser, YAML ↔ JSON, QR code
-- **Color** — converter, contrast, picker, tint/shade, palette, gradient, color
+- **Color**: converter, contrast, picker, tint/shade, palette, gradient, color
   blindness, APCA, mixer, named colors
-- **Math** — percentage, fractions, ratio, factorial/combinations, quadratic,
+- **Math**: percentage, fractions, ratio, factorial/combinations, quadratic,
   scientific notation, modulo
-- **Finance** — tip, discount, simple interest, compound interest, salary
-- **Geometry** — circle, rectangle, triangle, Pythagorean
-- **Electrical** — Ohm's law, power, amps/watts/volts
+- **Finance**: tip, discount, simple interest, compound interest, salary
+- **Geometry**: circle, rectangle, triangle, Pythagorean
+- **Electrical**: Ohm's law, power, amps/watts/volts
 
 The registry at `src/lib/tools/registry.ts` is the single source of truth.
 

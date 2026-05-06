@@ -413,7 +413,7 @@ export default function MarkdownPreviewTool() {
         <Show when={!sanitize()}>
           <div class="flex items-center gap-2 border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
             <span class="font-semibold uppercase tracking-wider">Warning</span>
-            <span>Sanitization is off — raw HTML in the input will be rendered as-is.</span>
+            <span>Sanitization is off; raw HTML in the input will be rendered as-is.</span>
           </div>
         </Show>
 

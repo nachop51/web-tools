@@ -22,7 +22,7 @@ const modeOptions: { value: Mode; label: string }[] = [
 ]
 
 function fmt(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   return parseFloat(n.toPrecision(10)).toString()
 }
 

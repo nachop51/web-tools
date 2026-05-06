@@ -110,7 +110,7 @@ export default function ColorConverter() {
   const [cmykK, setCmykK] = createSignal('')
 
   // Sync each space's display fields from the canonical hex, but skip the
-  // space the user is currently editing — otherwise rounding (e.g. 180.5 → 180.4)
+  // space the user is currently editing; otherwise rounding (e.g. 180.5 → 180.4)
   // overwrites their in-progress keystrokes.
   createEffect(() => {
     const r = rgb()

@@ -15,7 +15,7 @@ import { circleFrom, circleInputs, type CircleInput } from '~/lib/utils/geometry
 import { setToolPageMeta } from '~/lib/seo'
 
 function fmt(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   return parseFloat(n.toPrecision(10)).toString()
 }
 

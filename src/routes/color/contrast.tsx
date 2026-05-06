@@ -227,7 +227,7 @@ export default function ContrastChecker() {
               class="rounded-md border border-border p-6 transition-colors duration-200 sm:p-8"
               style={previewStyle()}
             >
-              {/* Top bar — small text + icon */}
+              {/* Top bar: small text + icon */}
               <div class="mb-6 flex items-center justify-between border-b border-current/20 pb-3">
                 <div class="flex items-center gap-2">
                   <TbOutlineHexagon size={18} aria-hidden />
@@ -239,13 +239,13 @@ export default function ContrastChecker() {
                 </div>
               </div>
 
-              {/* Large heading — covers "Large text" criteria */}
+              {/* Large heading: covers "Large text" criteria */}
               <div class="mb-3 flex items-start gap-3">
                 <TbOutlineRocket size={28} class="shrink-0 mt-0.5" aria-hidden />
                 <h3 class="text-2xl font-bold leading-tight tracking-tight">Build with confidence.</h3>
               </div>
 
-              {/* Body paragraph — covers "Normal text" criteria */}
+              {/* Body paragraph: covers "Normal text" criteria */}
               <p class="mb-5 text-sm leading-relaxed">
                 Pick any two colors and instantly verify readability using{' '}
                 <span class="font-semibold">{mode() === 'wcag' ? 'WCAG ratio' : 'APCA Lc'}</span> for both normal and
@@ -283,7 +283,7 @@ export default function ContrastChecker() {
                 </a>
               </div>
 
-              {/* Footer — tag + monospace + sample sentence */}
+              {/* Footer: tag + monospace + sample sentence */}
               <div class="flex flex-wrap items-center gap-3 border-t border-current/20 pt-3 text-xs">
                 <span class="inline-flex items-center gap-1 rounded border border-current/40 px-1.5 py-0.5 font-medium uppercase tracking-wider">
                   <TbOutlineTag size={12} aria-hidden />

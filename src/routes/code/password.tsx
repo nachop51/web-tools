@@ -218,7 +218,7 @@ export default function SecretGenerator() {
       <ToolHeader
         category="code"
         name="Secret generator"
-        description="Generate secure passwords, passphrases, or random cryptographic keys — all client-side, with live entropy."
+        description="Generate secure passwords, passphrases, or random cryptographic keys, all client-side, with live entropy."
       />
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>

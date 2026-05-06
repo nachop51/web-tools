@@ -1,6 +1,7 @@
-import { For, Show, type JSX } from 'solid-js'
+import { Show, type JSX } from 'solid-js'
 import { TbOutlineCheck } from 'solid-icons/tb'
 import { cn } from '~/lib/utils'
+import { SegmentedControl } from '~/components/segmented-control'
 
 type ToolToolbarProps = {
   children: JSX.Element
@@ -26,33 +27,14 @@ type ToolbarSegmentedProps<T extends string> = {
 export function ToolbarSegmented<T extends string>(props: ToolbarSegmentedProps<T>) {
   return (
     <Show when={props.options.length >= 2}>
-      <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{props.label}</span>
-      <div
-        role="radiogroup"
-        aria-label={props.label}
-        class="inline-flex rounded-md border border-border bg-background p-0.5"
-      >
-        <For each={props.options}>
-          {(opt) => (
-            <button
-              type="button"
-              role="radio"
-              aria-checked={props.value === opt.value}
-              onClick={() => props.onChange(opt.value)}
-              class={cn(
-                'px-3 py-1 text-sm cursor-pointer',
-                'transition-[background-color,color,box-shadow,transform] duration-150 ease-out',
-                'active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-1 focus-visible:ring-offset-background',
-                props.value === opt.value
-                  ? 'bg-violet text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-violet/5'
-              )}
-            >
-              {opt.label}
-            </button>
-          )}
-        </For>
-      </div>
+      <SegmentedControl<T>
+        label={props.label}
+        labelPosition="side"
+        size="sm"
+        value={props.value}
+        onChange={props.onChange}
+        options={props.options}
+      />
     </Show>
   )
 }

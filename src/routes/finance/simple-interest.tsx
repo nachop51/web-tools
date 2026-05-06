@@ -14,12 +14,12 @@ import { simpleInterest } from '~/lib/utils/finance/simple-interest'
 import { setToolPageMeta } from '~/lib/seo'
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return n.toFixed(2)
 }
 
 function fmtPct(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return n.toFixed(4)
 }
 

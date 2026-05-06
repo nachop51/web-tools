@@ -28,7 +28,7 @@ const socials = [
 
 function ProfileCard() {
   return (
-    <div class="relative w-72 origin-(--kb-popover-content-transform-origin) overflow-hidden rounded-lg border border-border bg-popover/95 shadow-lg shadow-black/30 backdrop-blur-md animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-1 duration-200">
+    <div class="anim-profile-card relative w-72 overflow-hidden rounded-lg border border-border bg-popover/95 shadow-lg shadow-black/30 backdrop-blur-md">
       <div
         aria-hidden
         class="pointer-events-none absolute inset-x-0 top-0 z-0 h-32 bg-gradient-to-b from-violet/20 via-violet/5 to-transparent"
@@ -36,6 +36,10 @@ function ProfileCard() {
         <div class="absolute -top-8 -left-8 size-40 rounded-full bg-[radial-gradient(circle,oklch(var(--violet)/0.35),transparent_70%)] blur-xl" />
         <div class="absolute -top-4 right-0 size-24 rounded-full bg-[radial-gradient(circle,oklch(var(--violet)/0.18),transparent_70%)] blur-lg" />
       </div>
+      <div
+        aria-hidden
+        class="anim-profile-shine pointer-events-none absolute inset-y-0 left-0 z-20 w-1/2 bg-gradient-to-r from-transparent via-violet/25 to-transparent mix-blend-screen"
+      />
       <div class="relative z-10 px-4 pt-4 pb-4">
         <div class="flex items-center gap-3">
           <img
@@ -43,17 +47,23 @@ function ProfileCard() {
             alt="Ignacio Pankowski"
             width={64}
             height={64}
-            class="size-14 shrink-0 rounded-full border-2 border-popover bg-muted shadow-sm shadow-black/20 ring-1 ring-violet/20"
+            class="anim-avatar-pop size-14 shrink-0 rounded-full border-2 border-popover bg-muted shadow-sm shadow-black/20 ring-1 ring-violet/20"
           />
-          <div class="flex flex-col">
+          <div class="anim-row-in flex flex-col" style={{ '--i': 0 }}>
             <span class="text-sm font-semibold text-foreground">Ignacio Pankowski</span>
             <span class="font-mono text-[11px] text-muted-foreground">@{GITHUB_USER}</span>
           </div>
         </div>
-        <p class="mt-3 text-xs leading-relaxed text-muted-foreground">
+        <p
+          class="anim-row-in mt-3 text-xs leading-relaxed text-muted-foreground"
+          style={{ '--i': 1 }}
+        >
           Software engineer building tiny, fast, client-side dev tools. TypeScript, Solid, and the open web.
         </p>
-        <div class="mt-3 flex items-center gap-1 border-t border-border/60 pt-3">
+        <div
+          class="anim-row-in mt-3 flex items-center gap-1 border-t border-border/60 pt-3"
+          style={{ '--i': 2 }}
+        >
           {socials.map(({ href, label, Icon, external }) => (
             <a
               href={href}

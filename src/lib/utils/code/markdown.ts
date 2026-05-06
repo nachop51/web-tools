@@ -142,7 +142,7 @@ A live, sanitized renderer with **GitHub-flavored** extensions.
 - Real syntax highlighting in fenced blocks
 - Strict XSS sanitization, on by default
 
-> "The best way to predict the future is to invent it." — Alan Kay
+> "The best way to predict the future is to invent it." - Alan Kay
 
 ## Code
 
@@ -188,5 +188,5 @@ bun run dev
 
 ---
 
-That's it — type away and watch it render.
+That's it; type away and watch it render.
 `

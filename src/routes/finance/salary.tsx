@@ -19,7 +19,7 @@ type PeriodId = keyof SalaryBreakdown
 type PeriodOption = (typeof salaryPeriods)[number]
 
 function fmtCurrency(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return n.toFixed(2)
 }
 

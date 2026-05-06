@@ -27,10 +27,10 @@ Live in `src/components/tool-toolbar.tsx`. Three exports:
 </ToolToolbar>
 ```
 
-- `ToolToolbar` — flex strip. Wraps on mobile. No card chrome.
-- `ToolbarSegmented<T extends string>` — primary mode picker, 2–4 options.
+- `ToolToolbar`: flex strip. Wraps on mobile. No card chrome.
+- `ToolbarSegmented<T extends string>`: primary mode picker, 2–4 options.
   Auto-hides if `options.length < 2`.
-- `ToolbarChip` — boolean toggle with checkbox-square (NOT a status dot — the
+- `ToolbarChip`: boolean toggle with checkbox-square (NOT a status dot; the
   square is the affordance that reads as "click me").
 
 ## Decision tree
@@ -52,13 +52,13 @@ entrance.
 - Toolbar is **chromeless**: no border, no shadow, no background. Just
   `mb-3 flex flex-wrap items-center gap-3 px-1`. Don't wrap it in a card.
 - Label: `text-xs font-semibold uppercase tracking-wider text-muted-foreground`.
-  No violet dot — dots are reserved for **card** headings, this is a control.
+  No violet dot; dots are reserved for **card** headings, this is a control.
 - Active segment: `bg-violet text-white shadow-sm`. Inactive:
   `text-muted-foreground hover:text-foreground hover:bg-violet/5`.
 - Chip-square: empty `border-foreground/30` → on click fills `bg-violet` with
   white `TbOutlineCheck`. Hover bumps border to `border-violet/60` to signal
   affordance.
-- Theme tokens only — no raw colors.
+- Theme tokens only, no raw colors.
 
 ## Anti-patterns
 
@@ -69,7 +69,7 @@ entrance.
   users. Single input → single output, mode picker on top.
 - Don't put NumberFields, sliders, formula previews, or anything multi-line
   inside the toolbar. Those go in their own card.
-- Don't use `bg-muted-foreground/40` dots as chip indicators — the checkbox
+- Don't use `bg-muted-foreground/40` dots as chip indicators; the checkbox
   square reads as toggleable, the dot reads as passive status.
 - Don't add a violet dot before the toolbar label. That's card heading
   vocabulary, not control vocabulary.
@@ -77,7 +77,7 @@ entrance.
 ## Sweep candidates (not yet migrated)
 
 Files with `role="radiogroup"` outside the encoding/strings sweep. Each is a
-judgment call — apply Pattern E only when the picker is a primary mode that
+judgment call; apply Pattern E only when the picker is a primary mode that
 deserves to live above the cards. Calculation-mode pickers ("Solve for",
 "Operation", "Calculation mode") usually qualify; obscure secondary options
 (error correction level inside a settings panel) usually don't.
@@ -86,14 +86,14 @@ deserves to live above the cards. Calculation-mode pickers ("Solve for",
 
 - `numbers/percentage.tsx`, `numbers/random-number.tsx`,
   `numbers/decimal-precision.tsx`, `numbers/base-converter.tsx` (its `Number
-mode` picker — leave the swap pivot intact, it's separate)
+mode` picker; leave the swap pivot intact, it's separate)
 - `electrical/{ohms-law,power,amps-watts-volts}.tsx` ("Solve for", "Formula")
 - `math/{percentage,fractions,factorial,scientific-notation,ratio}.tsx`
 - `finance/{discount,salary,compound-interest}.tsx`
 - `geometry/{pythagorean,triangle,circle}.tsx`
 - `datetime/{date-add,date-diff,unix}.tsx`
 - `strings/{case,trim,sort-lines,slugify}.tsx`
-- `code/{fake-data,password,qr-code}.tsx` — bigger pages, multiple radiogroups,
+- `code/{fake-data,password,qr-code}.tsx`: bigger pages, multiple radiogroups,
   read carefully before sweeping
 - `color/{mixer,gradient,palette}.tsx`
 
@@ -101,8 +101,8 @@ mode` picker — leave the swap pivot intact, it's separate)
 mode):
 
 - Anything inside a `<details>` / settings panel
-- `code/qr-code.tsx` "Logo shape" / "Error correction" — secondary options
-- `code/password.tsx` word-count / separator radiogroups — inside the passphrase
+- `code/qr-code.tsx` "Logo shape" / "Error correction": secondary options
+- `code/password.tsx` word-count / separator radiogroups: inside the passphrase
   config
 
 When in doubt: if the radiogroup currently lives at the **top** of the page in
@@ -120,5 +120,5 @@ to other inputs, leave it.
 4. Don't change pure-logic imports, URL param keys, animations, `ToolHeader`,
    `CopyButton`, or `setToolPageMeta`.
 5. Run `bun run test` (must stay green) and click through the page in
-   `bun run dev` — verify the toolbar replaces the old card and the
+   `bun run dev`. Verify the toolbar replaces the old card and the
    input → output flow is unchanged.

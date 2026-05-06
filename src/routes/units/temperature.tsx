@@ -23,7 +23,7 @@ const unitOptions: UnitOption[] = tempUnits.map((key) => ({
 }))
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return parseFloat(n.toPrecision(8)).toString()
 }
 

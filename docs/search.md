@@ -18,7 +18,7 @@ src/lib/search/
 ├── unit-aliases.ts              alias index for the 12 unit converters
 ├── parse-query.ts               "X to Y" / "5 mb to gb" parser
 ├── recents.ts                   localStorage recents (last 6)
-├── palette-state.ts             open signal — shared between palette + nav button
+├── palette-state.ts             open signal, shared between palette + nav button
 └── *.spec.ts                    coverage for the pure modules
 ```
 
@@ -56,7 +56,7 @@ Algorithm:
 1. Lowercase + collapse whitespace.
 2. Strip leading numeric token (`5 mb to gb` → value=`"5"`).
 3. Match `/^(.+?)\s+(?:to|->|→|in)\s+(.+)$/`.
-4. Both halves must resolve via `findUnitByAlias` AND share a category — else
+4. Both halves must resolve via `findUnitByAlias` AND share a category, else
    fall through to fuzzy. (`feet to dollars` → fuzzy.)
 
 When kind is `unit`, the palette pins a violet "Convert X → Y" row above the
@@ -70,9 +70,9 @@ The `value` field is captured but unused in v1 (the route doesn't read a
 `unit-aliases.ts` builds an alias index across all 12 unit categories. Two
 sources:
 
-1. **Auto-derived from `label`** — `"Megabytes (MB)"` → `["megabytes",
+1. **Auto-derived from `label`**: `"Megabytes (MB)"` → `["megabytes",
 "megabyte"]`. Naive singularization (`-ies` / `-es` / `-s`).
-2. **Hand-authored override map** — inline at the top of the file, keyed by
+2. **Hand-authored override map**: inline at the top of the file, keyed by
    category and unit key. Add irregulars and short forms here:
    `lb → ["pound","pounds","lbs"]`, `c → ["celsius","centigrade","°c"]`, etc.
 
@@ -84,7 +84,7 @@ Disambiguators:
 - `gal` → `us_gal` (US default).
 - `imperial gallon` / `uk gallon` → `imp_gal`.
 
-A spec asserts every key in every unit `Record` has at least one alias entry —
+A spec asserts every key in every unit `Record` has at least one alias entry;
 adding a new unit fails CI until the override is extended.
 
 ## `?to=` row highlight on unit converters
@@ -102,12 +102,12 @@ flagged as the answer.
 top rows when the input is empty. `pushRecent` is called from `navigateTo`
 (skipped for unit-shortcut rows since they're parametric).
 
-Storage access is wrapped in try/catch and `isServer` checks — disabled
+Storage access is wrapped in try/catch and `isServer` checks; disabled
 storage / SSR returns `[]`.
 
 ## When you add a tool
 
-The tool's registry entry is enough to index it. **Make `keywords` rich** —
+The tool's registry entry is enough to index it. **Make `keywords` rich**;
 that's the field most users hit. Examples:
 
 ```ts
@@ -132,7 +132,7 @@ If you add a new unit to an existing converter (e.g. a new entry to
    in `unit-aliases.ts` under the right category. The spec
    (`unit-aliases.spec.ts`) will fail until you do.
 2. **For a new converter**: add a new `Source` block to the `sources` array in
-   `unit-aliases.ts` — `category`, `routeHref`, `units` import, `overrides`.
+   `unit-aliases.ts`: `category`, `routeHref`, `units` import, `overrides`.
    Then make sure the route reads both `from` and `to` query params, and apply
    the same row-highlight pattern as the existing converters.
 
@@ -141,7 +141,7 @@ If you add a new unit to an existing converter (e.g. a new entry to
 - **Unit keys keep their casing** in URLs (`?from=MB`, `?from=KiB`). Aliases
   are matched lowercased, but `unitKey` is preserved and used as-is in the
   query string. Routes look unit objects up by exact key.
-- **Power tool slug is `power-unit`** (not `power`) — the `routeHref` in
+- **Power tool slug is `power-unit`** (not `power`); the `routeHref` in
   `unit-aliases.ts` for that category must be `/units/power-unit`.
 - **Speed units have slashes** (`m/s`, `km/h`). `URLSearchParams` encodes them
   to `%2F`. Routes decode automatically when reading via `useSearchParams`.
@@ -149,5 +149,5 @@ If you add a new unit to an existing converter (e.g. a new entry to
   `e.preventDefault()` in the global handler suppresses it. Any future tool
   that wants to consume Ctrl+K inside its own input must `e.stopPropagation()`.
 - **Number-prefix queries** (`5 mb to gb`) parse correctly but the captured
-  `value` is currently dropped — the user lands on the converter and re-types
+  `value` is currently dropped; the user lands on the converter and re-types
   the value. Future: pre-fill via a `value` query param (route change required).

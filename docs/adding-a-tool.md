@@ -117,7 +117,7 @@ Append to `src/lib/tools/registry.ts`:
 
 The homepage, `/strings` index, AND the global Ctrl+K palette will pick it up
 automatically. `keywords[]` is the highest-boosted FTS field in the palette
-after `name` — make it rich (synonyms, common abbreviations, alternate
+after `name`. Make it rich (synonyms, common abbreviations, alternate
 spellings). See [search.md](search.md) for the index details.
 
 If the tool is a unit converter, also extend `src/lib/search/unit-aliases.ts`
@@ -130,23 +130,23 @@ do.
 bun run dev
 ```
 
-- Open `/strings` — your new tool shows up in the category index
-- Open `/strings/kebab-case` — the tool loads
-- Run `bun run test` — your spec runs alongside the others
-- Run `bun run build` — production build succeeds
+- Open `/strings`: your new tool shows up in the category index
+- Open `/strings/kebab-case`: the tool loads
+- Run `bun run test`: your spec runs alongside the others
+- Run `bun run build`: production build succeeds
 
 ## When the tool has a mode picker
 
 If your tool has a primary mode toggle (encode/decode, calculation mode, "solve
 for", operation, etc.), put it in the **chromeless toolbar** above the
-Input/Output cards — never in its own full-width card. See
+Input/Output cards, never in its own full-width card. See
 [tool-toolbar.md](tool-toolbar.md) for the primitives, decision tree (segmented
 vs Select vs chip), and visual rules. Canonical example:
 `src/routes/encoding/html-entities.tsx`.
 
 ## When to add a UI primitive
 
-Add solid-ui components on demand with `bunx solidui-cli@latest add <name>` —
+Add solid-ui components on demand with `bunx solidui-cli@latest add <name>`;
 each one lands in `src/components/ui/` as plain TSX you own. Don't hand-write a
 custom primitive when solid-ui has it. The shared bits already wired up
 (`Button`, `Card`, `Label`, `Separator`, `Select`, `TextField`, plus
@@ -155,6 +155,6 @@ custom primitive when solid-ui has it. The shared bits already wired up
 ## When to use URL params
 
 If the tool's config is small and primitive (a few selected options, a mode), put
-it in the URL via `useSearchParams()` — links become shareable. If the input is
+it in the URL via `useSearchParams()`; links become shareable. If the input is
 a free-form blob (a long text, a JSON payload), keep it local; URLs aren't the
 right place for that.

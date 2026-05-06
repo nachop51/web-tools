@@ -146,8 +146,8 @@
     --success: 0.94 0.06 155;
     --success-foreground: 0.55 0.16 160;
 
-    --warning: 0.95 0.08 85;
-    --warning-foreground: 0.65 0.18 50;
+    --warning: 0.32 0.10 75;
+    --warning-foreground: 0.88 0.16 85;
 
     --error: 0.95 0.04 25;
     --error-foreground: 0.6 0.22 25;
@@ -157,7 +157,7 @@
 }
 
 @layer utilities {
-  /* Tailwind v4 hardcodes bare `rounded` to 0.25rem — flatten it too. */
+  /* Tailwind v4 hardcodes bare `rounded` to 0.25rem; flatten it too. */
   .rounded {
     border-radius: 0;
   }
@@ -225,6 +225,29 @@
     animation: color-copied 950ms cubic-bezier(0.2, 0, 0.2, 1) both;
   }
 
+  /* Footer profile hover-card open: scale + unblur with a touch of overshoot,
+     anchored at Kobalte's popover transform origin. */
+  .anim-profile-card {
+    transform-origin: var(--kb-popover-content-transform-origin);
+    animation: profile-card-in 360ms cubic-bezier(0.16, 1.2, 0.3, 1) both;
+  }
+
+  /* Violet-tinted highlight that sweeps once across the card on open. */
+  .anim-profile-shine {
+    animation: profile-shine 900ms cubic-bezier(0.2, 0, 0.2, 1) 80ms both;
+  }
+
+  /* Avatar pops in with an overshoot + slight tilt. */
+  .anim-avatar-pop {
+    animation: avatar-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 100ms both;
+  }
+
+  /* Staggered fade-up for rows; pass --i (0,1,2,…) inline. */
+  .anim-row-in {
+    animation: profile-row-in 320ms cubic-bezier(0.2, 0, 0.2, 1) both;
+    animation-delay: calc(140ms + var(--i, 0) * 50ms);
+  }
+
   /* Underline grow used on the tool header title. */
   .accent-underline {
     background-image: linear-gradient(to right, oklch(var(--violet)), oklch(var(--violet)));
@@ -267,6 +290,63 @@
   }
 }
 
+@keyframes profile-card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-4px);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes profile-shine {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%) skewX(-12deg);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(140%) skewX(-12deg);
+  }
+}
+
+@keyframes avatar-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.55) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes profile-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes color-copied {
   0% {
     opacity: 0;
@@ -305,7 +385,7 @@
   }
 }
 
-/* highlight.js token-based theme — adapts to light/dark via CSS variables. */
+/* highlight.js token-based theme; adapts to light/dark via CSS variables. */
 .hljs {
   color: oklch(var(--foreground));
   background: transparent;

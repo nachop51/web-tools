@@ -17,7 +17,7 @@ import { setToolPageMeta } from '~/lib/seo'
 const quickTips = [10, 15, 18, 20, 25]
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return n.toFixed(2)
 }
 

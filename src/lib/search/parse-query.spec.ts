@@ -123,7 +123,7 @@ describe('parseQuery', () => {
     expect(parseQuery('Mb To Gb').kind).toBe('unit')
   })
 
-  it("'10mb to gb' (no space) does NOT split — fuzzy fallback", () => {
+  it("'10mb to gb' (no space) does NOT split, fuzzy fallback", () => {
     expect(parseQuery('10mb to gb').kind).toBe('fuzzy')
   })
 })

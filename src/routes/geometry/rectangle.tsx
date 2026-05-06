@@ -14,7 +14,7 @@ import { rectangle } from '~/lib/utils/geometry/rectangle'
 import { setToolPageMeta } from '~/lib/seo'
 
 function fmt(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   return parseFloat(n.toPrecision(10)).toString()
 }
 

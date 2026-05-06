@@ -9,11 +9,18 @@ import { cn } from '~/lib/utils'
 
 type TextFieldRootProps<T extends ValidComponent = 'div'> = TextFieldPrimitive.TextFieldRootProps<T> & {
   class?: string | undefined
+  warning?: boolean
 }
 
 const TextField = <T extends ValidComponent = 'div'>(props: PolymorphicProps<T, TextFieldRootProps<T>>) => {
-  const [local, others] = splitProps(props as TextFieldRootProps, ['class'])
-  return <TextFieldPrimitive.Root class={cn('flex flex-col gap-2', local.class)} {...others} />
+  const [local, others] = splitProps(props as TextFieldRootProps, ['class', 'warning'])
+  return (
+    <TextFieldPrimitive.Root
+      class={cn('group/textfield flex flex-col gap-2', local.class)}
+      data-warning={local.warning ? 'true' : undefined}
+      {...others}
+    />
+  )
 }
 
 type TextFieldInputProps<T extends ValidComponent = 'input'> = TextFieldPrimitive.TextFieldInputProps<T> & {
@@ -50,7 +57,7 @@ const TextFieldInput = <T extends ValidComponent = 'input'>(rawProps: Polymorphi
     <TextFieldPrimitive.Input
       type={local.type}
       class={cn(
-        'flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[invalid]:border-error-foreground data-[invalid]:text-error-foreground',
+        'flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 hover:border-violet/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[invalid]:border-error-foreground data-[invalid]:text-error-foreground group-data-[warning]/textfield:border-warning-foreground/70 group-data-[warning]/textfield:hover:border-warning-foreground/70 group-data-[warning]/textfield:focus-visible:ring-warning-foreground/50',
         local.class
       )}
       {...others}
@@ -67,7 +74,7 @@ const TextFieldTextArea = <T extends ValidComponent = 'textarea'>(
 ) => {
   const [local, others] = splitProps(props as TextFieldTextAreaProps & { ref?: HTMLTextAreaElement | ((el: HTMLTextAreaElement) => void) }, ['class', 'ref'])
   let el: HTMLTextAreaElement | undefined
-  // Kobalte+Polymorphic sets `value` as an attribute, which a textarea ignores —
+  // Kobalte+Polymorphic sets `value` as an attribute, which a textarea ignores;
   // only the inner text controls displayed content. Sync the attribute to `.value`
   // on mount so initial values from URL params actually show.
   onMount(() => {
@@ -99,6 +106,7 @@ const labelVariants = cva(
         label: 'data-[invalid]:text-destructive',
         description: 'font-normal text-muted-foreground',
         error: 'text-xs text-destructive',
+        warning: 'text-xs text-warning-foreground',
       },
     },
     defaultVariants: {
@@ -140,4 +148,26 @@ const TextFieldErrorMessage = <T extends ValidComponent = 'div'>(
   return <TextFieldPrimitive.ErrorMessage class={cn(labelVariants({ variant: 'error' }), local.class)} {...others} />
 }
 
-export { TextField, TextFieldInput, TextFieldTextArea, TextFieldLabel, TextFieldDescription, TextFieldErrorMessage }
+type TextFieldWarningMessageProps = {
+  class?: string
+  children?: import('solid-js').JSX.Element
+}
+
+const TextFieldWarningMessage = (props: TextFieldWarningMessageProps) => {
+  const [local, others] = splitProps(props, ['class', 'children'])
+  return (
+    <p class={cn(labelVariants({ variant: 'warning' }), local.class)} {...others}>
+      {local.children}
+    </p>
+  )
+}
+
+export {
+  TextField,
+  TextFieldInput,
+  TextFieldTextArea,
+  TextFieldLabel,
+  TextFieldDescription,
+  TextFieldErrorMessage,
+  TextFieldWarningMessage,
+}

@@ -25,12 +25,12 @@ const unitOptions: UnitOption[] = lengthUnitKeys.map((key) => ({
 }))
 
 function fmt(n: number): string {
-  if (!isFinite(n)) return '—'
+  if (!isFinite(n)) return '-'
   return parseFloat(n.toPrecision(8)).toString()
 }
 
 function fmtFun(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   if (n === 0) return '0'
   const abs = Math.abs(n)
   if (abs >= 1e6 || abs < 0.001) return n.toExponential(3)

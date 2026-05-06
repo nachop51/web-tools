@@ -152,12 +152,12 @@ export default function GcfLcm() {
             <div class="overflow-hidden rounded-md border border-border">
               <div class="flex items-center gap-3 px-4 py-3 text-sm">
                 <span class="w-52 shrink-0 text-muted-foreground">Greatest Common Factor</span>
-                <span class="flex-1 text-right font-mono tabular-nums text-2xl font-bold">{gcf() ?? '—'}</span>
+                <span class="flex-1 text-right font-mono tabular-nums text-2xl font-bold">{gcf() ?? '-'}</span>
                 <CopyButton value={() => String(gcf() ?? '')} />
               </div>
               <div class="flex items-center gap-3 border-t border-border/50 px-4 py-3 text-sm">
                 <span class="w-52 shrink-0 text-muted-foreground">Least Common Multiple</span>
-                <span class="flex-1 text-right font-mono tabular-nums text-2xl font-bold">{lcm() ?? '—'}</span>
+                <span class="flex-1 text-right font-mono tabular-nums text-2xl font-bold">{lcm() ?? '-'}</span>
                 <CopyButton value={() => String(lcm() ?? '')} />
               </div>
             </div>

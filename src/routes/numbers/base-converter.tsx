@@ -1,7 +1,12 @@
 import { useSearchParams } from '@solidjs/router'
 import { batch, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { TbOutlineArrowsExchange, TbOutlineWaveSawTool } from 'solid-icons/tb'
+import {
+  TbOutlineArrowsExchange,
+  TbOutlineChevronLeft,
+  TbOutlineChevronRight,
+  TbOutlineWaveSawTool,
+} from 'solid-icons/tb'
 import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
 import { ToolToolbar, ToolbarSegmented, ToolbarChip } from '~/components/tool-toolbar'
@@ -9,12 +14,9 @@ import { setToolPageMeta } from '~/lib/seo'
 import { TextField, TextFieldErrorMessage, TextFieldInput } from '~/components/ui/text-field'
 import { Label } from '~/components/ui/label'
 import {
-  bitsToFloat,
   type BitWidth,
   convertToBase,
   fitsInWidth,
-  floatToBits,
-  formatStoredFloat,
   formatInBase,
   groupDigits,
   parseInBase,
@@ -91,9 +93,8 @@ export default function BaseConverter() {
     const v = value()
     if (v === null) return ''
     const raw = convertToBase(v, base, { bitWidth: bitWidth(), uppercase: uppercase() })
-    if (!grouped()) return raw
-    const groupSize = STANDARD.find((s) => s.base === base)!.group
-    return groupDigits(raw, groupSize)
+    if (!grouped() || base !== 2) return raw
+    return groupDigits(raw, 4)
   }
 
   function displayFor(base: Std): string {
@@ -106,7 +107,7 @@ export default function BaseConverter() {
     setErrors(base, null)
     if (text.trim() === '') {
       setValue(null)
-      // Clear other errors too — empty input means "no value"
+      // Clear other errors too; empty input means "no value"
       for (const b of [2, 8, 10, 16] as Std[]) setErrors(b, null)
       return
     }
@@ -207,46 +208,85 @@ export default function BaseConverter() {
     })
   }
 
-  // ─── IEEE-754 inspector ──────────────────────────────────────────────────
+  // ─── Integer bits inspector ──────────────────────────────────────────────
 
-  const [precision, setPrecision] = createSignal<32 | 64>(32)
-  const [floatInput, setFloatInput] = createSignal('1')
-  const [floatError, setFloatError] = createSignal<string | null>(null)
+  const [intWidth, setIntWidth] = createSignal<8 | 16 | 32 | 64>(32)
 
-  const floatBits = createMemo(() => {
-    const text = floatInput().trim()
-    if (!text) {
-      setFloatError(null)
-      return null
+  const intBits = createMemo(() => {
+    const v = value() ?? 0n
+    const w = intWidth()
+    const unsigned = toUnsignedAtWidth(v, w)
+    const signed = toSignedAtWidth(unsigned, w)
+    const bits = unsigned.toString(2).padStart(w, '0')
+    const hex = unsigned.toString(16).padStart(w / 4, '0')
+    const oct = unsigned.toString(8)
+    const setCount = bits.split('').filter((b) => b === '1').length
+    const bytes: { bits: { char: string; idx: number }[] }[] = []
+    for (let i = 0; i < bits.length; i += 8) {
+      const byte: { char: string; idx: number }[] = []
+      for (let j = 0; j < 8 && i + j < bits.length; j++) {
+        byte.push({ char: bits.charAt(i + j), idx: i + j })
+      }
+      bytes.push({ bits: byte })
     }
-    let parsed: number
-    if (text === 'inf' || text === '+inf' || text === 'Infinity') parsed = Infinity
-    else if (text === '-inf' || text === '-Infinity') parsed = -Infinity
-    else if (text === 'nan' || text === 'NaN') parsed = NaN
-    else parsed = Number(text)
-    if (!Number.isFinite(parsed) && !Number.isNaN(parsed) && parsed !== Infinity && parsed !== -Infinity) {
-      setFloatError('Not a valid decimal number')
-      return null
-    }
-    if (Number.isNaN(parsed) && text.toLowerCase() !== 'nan') {
-      setFloatError('Not a valid decimal number')
-      return null
-    }
-    setFloatError(null)
-    return floatToBits(parsed, precision())
+    return { bits, signed, unsigned, hex, oct, setCount, totalBits: w, bytes }
   })
 
-  function flipBit(idx: number) {
-    const fb = floatBits()
-    if (!fb) return
-    const flipped = fb.bits
+  function flipIntBit(idx: number) {
+    const ib = intBits()
+    const w = intWidth()
+    const flipped = ib.bits
       .split('')
       .map((b, i) => (i === idx ? (b === '0' ? '1' : '0') : b))
       .join('')
-    const newValue = bitsToFloat(flipped, precision())
-    if (newValue === null) return
-    setFloatInput(formatStoredFloat(newValue, precision()))
+    const unsigned = BigInt('0b' + flipped)
+    const signed = toSignedAtWidth(unsigned, w)
+    setValue(signed)
   }
+
+  function stepIntValue(dir: 1 | -1) {
+    setValue((value() ?? 0n) + BigInt(dir))
+  }
+
+  const intPresets = createMemo(() => {
+    const w = intWidth()
+    const wBig = BigInt(w)
+    const intMax = (1n << (wBig - 1n)) - 1n
+    const intMin = -(1n << (wBig - 1n))
+    const uintMax = (1n << wBig) - 1n
+    let p55 = 0n
+    let pAA = 0n
+    for (let i = 0; i < w / 8; i++) {
+      p55 = (p55 << 8n) | 0x55n
+      pAA = (pAA << 8n) | 0xaan
+    }
+    const items: { label: string; value: bigint; note?: string }[] = [
+      { label: '0', value: 0n, note: 'zero: all bits clear' },
+      { label: '1', value: 1n, note: 'one: only LSB set' },
+      { label: '−1', value: -1n, note: 'minus one: all bits set in two’s complement' },
+      { label: `INT${w}_MAX`, value: intMax, note: `largest signed ${w}-bit (2^${w - 1} − 1)` },
+      { label: `INT${w}_MIN`, value: intMin, note: `smallest signed ${w}-bit (−2^${w - 1}): only sign bit set` },
+      { label: `UINT${w}_MAX`, value: uintMax, note: `largest unsigned ${w}-bit (2^${w} − 1)` },
+      { label: '0x55…', value: p55, note: 'alternating 01, common test pattern' },
+      { label: '0xAA…', value: pAA, note: 'alternating 10, common test pattern' },
+    ]
+    if (w === 8) {
+      items.push({ label: "'A'", value: 65n, note: 'ASCII letter A' })
+      items.push({ label: "'a'", value: 97n, note: 'ASCII letter a' })
+      items.push({ label: '0x80', value: 0x80n, note: 'high bit only' })
+    } else if (w === 16) {
+      items.push({ label: '0xBEEF', value: 0xbeefn, note: 'magic word' })
+      items.push({ label: '0xCAFE', value: 0xcafen, note: 'magic word' })
+    } else if (w === 32) {
+      items.push({ label: '0xDEADBEEF', value: 0xdeadbeefn, note: 'classic debug magic' })
+      items.push({ label: '0xCAFEBABE', value: 0xcafebaben, note: 'Java .class file header' })
+      items.push({ label: '0xFEEDFACE', value: 0xfeedfacen, note: 'Mach-O file header' })
+    } else if (w === 64) {
+      items.push({ label: '0xDEADBEEFCAFEBABE', value: 0xdeadbeefcafebaben, note: 'magic combo' })
+      items.push({ label: '0x123456789ABCDEF0', value: 0x123456789abcdef0n, note: 'sequential nibbles' })
+    }
+    return items
+  })
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -255,7 +295,7 @@ export default function BaseConverter() {
       <ToolHeader
         category="numbers"
         name="Base converter"
-        description="Live conversion between binary, octal, decimal, and hexadecimal — with two's complement at fixed bit widths, custom bases up to 36, and an IEEE-754 inspector."
+        description="Live conversion between binary, octal, decimal, and hexadecimal, with two's complement at fixed bit widths, custom bases up to 36, and an integer bit inspector."
       />
 
       <div class="anim-fade-up flex flex-col gap-8" style={{ 'animation-delay': '60ms' }}>
@@ -307,14 +347,34 @@ export default function BaseConverter() {
           <div class="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
             <div class="grid grid-cols-1 divide-y divide-border">
               <BaseField
+                base={10}
+                value={displayFor(10)}
+                error={errors[10]}
+                hasError={errors[10] !== null}
+                ref={(el) => (firstInputRef = el)}
+                onInput={(t) => onInput(10, t)}
+                onFocus={() => onFocus(10)}
+                onBlur={() => onBlur(10)}
+              />
+              <BaseField
                 base={2}
                 value={displayFor(2)}
                 error={errors[2]}
                 hasError={errors[2] !== null}
-                ref={(el) => (firstInputRef = el)}
                 onInput={(t) => onInput(2, t)}
                 onFocus={() => onFocus(2)}
                 onBlur={() => onBlur(2)}
+              />
+            </div>
+            <div class="grid grid-cols-1 divide-y divide-border">
+              <BaseField
+                base={16}
+                value={displayFor(16)}
+                error={errors[16]}
+                hasError={errors[16] !== null}
+                onInput={(t) => onInput(16, t)}
+                onFocus={() => onFocus(16)}
+                onBlur={() => onBlur(16)}
               />
               <BaseField
                 base={8}
@@ -324,26 +384,6 @@ export default function BaseConverter() {
                 onInput={(t) => onInput(8, t)}
                 onFocus={() => onFocus(8)}
                 onBlur={() => onBlur(8)}
-              />
-            </div>
-            <div class="grid grid-cols-1 divide-y divide-border">
-              <BaseField
-                base={10}
-                value={displayFor(10)}
-                error={errors[10]}
-                hasError={errors[10] !== null}
-                onInput={(t) => onInput(10, t)}
-                onFocus={() => onFocus(10)}
-                onBlur={() => onBlur(10)}
-              />
-              <BaseField
-                base={16}
-                value={displayFor(16)}
-                error={errors[16]}
-                hasError={errors[16] !== null}
-                onInput={(t) => onInput(16, t)}
-                onFocus={() => onFocus(16)}
-                onBlur={() => onBlur(16)}
               />
             </div>
           </div>
@@ -357,6 +397,151 @@ export default function BaseConverter() {
               </div>
             )}
           </Show>
+        </section>
+
+        {/* Integer bits inspector */}
+        <section class="relative border border-border bg-card text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
+          <div class="border-b border-border px-6 py-3 sm:px-8 flex items-center gap-3">
+            <span aria-hidden class="size-2 rounded-full bg-violet" />
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Integer inspector</h2>
+            <span class="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+              <TbOutlineWaveSawTool size={12} /> click any bit to flip
+            </span>
+          </div>
+          <div class="flex flex-col gap-5 p-6 sm:p-8">
+            <div class="flex flex-wrap items-end gap-4">
+              <div class="flex flex-col items-start gap-2 [&>div]:h-10 [&>div]:items-center">
+                <ToolbarSegmented<'8' | '16' | '32' | '64'>
+                  label="Width"
+                  value={String(intWidth()) as '8' | '16' | '32' | '64'}
+                  onChange={(v) => setIntWidth(Number(v) as 8 | 16 | 32 | 64)}
+                  options={[
+                    { value: '8', label: '8-bit' },
+                    { value: '16', label: '16-bit' },
+                    { value: '32', label: '32-bit' },
+                    { value: '64', label: '64-bit' },
+                  ]}
+                />
+              </div>
+              <div class="ml-auto inline-flex items-center gap-1.5">
+                <button
+                  type="button"
+                  aria-label="Previous integer (value − 1)"
+                  title="Previous integer (value − 1)"
+                  onClick={() => stepIntValue(-1)}
+                  class="inline-flex size-8 items-center justify-center border border-border bg-background text-muted-foreground hover:border-violet/60 hover:text-violet hover:bg-violet/5 transition-colors cursor-pointer"
+                >
+                  <TbOutlineChevronLeft size={14} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next integer (value + 1)"
+                  title="Next integer (value + 1)"
+                  onClick={() => stepIntValue(1)}
+                  class="inline-flex size-8 items-center justify-center border border-border bg-background text-muted-foreground hover:border-violet/60 hover:text-violet hover:bg-violet/5 transition-colors cursor-pointer"
+                >
+                  <TbOutlineChevronRight size={14} />
+                </button>
+                <CopyButton
+                  value={() => (value() ?? 0n).toString()}
+                  class="h-8"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="text-[11px] uppercase tracking-wider text-muted-foreground/70 mr-1">Try</span>
+              <For each={intPresets()}>
+                {(p) => (
+                  <button
+                    type="button"
+                    onClick={() => setValue(p.value)}
+                    title={p.note ?? p.label}
+                    class="border border-border bg-background px-2 py-0.5 text-[11px] font-mono text-muted-foreground hover:border-violet/60 hover:text-violet hover:bg-violet/5 transition-colors cursor-pointer"
+                  >
+                    {p.label}
+                  </button>
+                )}
+              </For>
+            </div>
+
+            <div class="anim-fade-in flex flex-col gap-4">
+              {/* Colored bit visualization */}
+              <div class="overflow-x-auto">
+                <div class="inline-flex flex-wrap gap-2 font-mono text-[13px] leading-none">
+                  <For each={intBits().bytes}>
+                    {(byte) => (
+                      <div class="flex gap-1">
+                        <For each={byte.bits}>
+                          {(b) => {
+                            const role = () => {
+                              if (b.idx === 0) return 'sign'
+                              return b.idx < intBits().totalBits / 2 ? 'high' : 'low'
+                            }
+                            const bitNum = () => intBits().totalBits - 1 - b.idx
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => flipIntBit(b.idx)}
+                                class={cn(
+                                  'flex h-7 w-5 items-center justify-center border cursor-pointer transition-colors',
+                                  role() === 'sign' &&
+                                    'border-violet-400/80 bg-violet-200/50 text-violet-500 hover:bg-violet-200/80 dark:bg-violet-500/10 dark:border-violet-500/40 dark:hover:bg-violet-500/30',
+                                  role() === 'high' &&
+                                    'border-info-foreground/40 bg-sky-200/40 hover:bg-sky-200/80 text-info-foreground dark:text-sky-400 dark:bg-sky-500/10 dark:hover:dark:bg-sky-400/40',
+                                  role() === 'low' &&
+                                    'border-emerald-300 bg-emerald-200/40 text-emerald-600 hover:bg-emerald-200/80 dark:bg-emerald-500/20 dark:border-emerald-400/40  dark:hover:bg-emerald-500/30',
+                                  b.char === '0' && 'opacity-55',
+                                  b.char === '1' &&
+                                    role() === 'sign' &&
+                                    'bg-violet-300/35 dark:bg-violet-600/20 dark:border-violet-400/60',
+                                  b.char === '1' && role() === 'high' && 'dark:bg-sky-600/20 dark:border-sky-400/60',
+                                  b.char === '1' &&
+                                    role() === 'low' &&
+                                    'bg-emerald-300/35 dark:text-emerald-500 dark:bg-emerald-500/20'
+                                )}
+                                title={`bit ${bitNum()} (2^${bitNum()})`}
+                              >
+                                {b.char}
+                              </button>
+                            )
+                          }}
+                        </For>
+                      </div>
+                    )}
+                  </For>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+                  <LegendDot class="bg-violet" label="sign (1)" />
+                  <LegendDot class="bg-info-foreground dark:bg-sky-400" label="high bits" />
+                  <LegendDot class="bg-success-foreground dark:bg-emerald-400" label="low bits" />
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div class="grid gap-3 sm:grid-cols-3">
+                <Stat
+                  label="Sign bit"
+                  mono
+                  copyable
+                  value={`${intBits().bits[0]}  (${intBits().bits[0] === '0' ? '+' : '−'})`}
+                />
+                <Stat label="Unsigned" mono copyable value={intBits().unsigned.toString()} />
+                <Stat label="Signed (two's complement)" mono copyable value={intBits().signed.toString()} />
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-3">
+                <Stat
+                  label="Hex"
+                  mono
+                  copyable
+                  value={`0x${uppercase() ? intBits().hex.toUpperCase() : intBits().hex}`}
+                />
+                <Stat label="Octal" mono copyable value={`0o${intBits().oct}`} />
+                <Stat label="Bits set" copyable value={`${intBits().setCount} / ${intBits().totalBits}`} />
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Custom base */}
@@ -413,12 +598,12 @@ export default function BaseConverter() {
                 <div
                   class={cn(
                     'flex h-10 items-center rounded-md border bg-background px-3 font-mono text-sm pr-12',
-                    customResult().value ? 'border-input text-foreground' : 'border-dashed border-border text-muted-foreground'
+                    customResult().value
+                      ? 'border-input text-foreground'
+                      : 'border-dashed border-border text-muted-foreground'
                   )}
                 >
-                  <span class="truncate">
-                    {customResult().value || `Result in base ${customToBase()}`}
-                  </span>
+                  <span class="truncate">{customResult().value || `Result in base ${customToBase()}`}</span>
                 </div>
                 <CopyButton
                   value={() => customResult().value}
@@ -430,122 +615,6 @@ export default function BaseConverter() {
           </div>
         </section>
 
-        {/* IEEE-754 inspector */}
-        <section class="relative border border-border bg-card text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <div class="border-b border-border px-6 py-3 sm:px-8 flex items-center gap-3">
-            <span aria-hidden class="size-2 rounded-full bg-violet" />
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">IEEE-754 inspector</h2>
-            <span class="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-              <TbOutlineWaveSawTool size={12} /> click any bit to flip
-            </span>
-          </div>
-          <div class="flex flex-col gap-5 p-6 sm:p-8">
-            <div class="flex flex-wrap items-end gap-4">
-              <div class="flex flex-1 flex-col gap-2 min-w-[14rem]">
-                <Label class="text-xs uppercase tracking-wider text-muted-foreground">Decimal</Label>
-                <TextField
-                  value={floatInput()}
-                  onChange={setFloatInput}
-                  validationState={floatError() ? 'invalid' : 'valid'}
-                >
-                  <TextFieldInput
-                    class="font-mono"
-                    placeholder="3.14159 or -0.1 or Infinity"
-                    spellcheck={false}
-                    autocomplete="off"
-                  />
-                  <Show when={floatError()}>
-                    <TextFieldErrorMessage>{floatError()}</TextFieldErrorMessage>
-                  </Show>
-                </TextField>
-              </div>
-
-              <ToolbarSegmented<'32' | '64'>
-                label="Precision"
-                value={String(precision()) as '32' | '64'}
-                onChange={(v) => setPrecision(Number(v) as 32 | 64)}
-                options={[
-                  { value: '32', label: '32-bit' },
-                  { value: '64', label: '64-bit' },
-                ]}
-              />
-            </div>
-
-            <Show when={floatBits()}>
-              {(fb) => (
-                <div class="anim-fade-in flex flex-col gap-4">
-                  {/* Colored bit visualization */}
-                  <div class="overflow-x-auto">
-                    <div class="inline-flex flex-wrap gap-1 font-mono text-[13px] leading-none">
-                      <For each={fb().bits.split('')}>
-                        {(bit, i) => {
-                          const expEnd = precision() === 32 ? 9 : 12
-                          const role = () => (i() === 0 ? 'sign' : i() < expEnd ? 'exp' : 'mant')
-                          return (
-                            <button
-                              type="button"
-                              onClick={() => flipBit(i())}
-                              class={cn(
-                                'flex h-7 w-5 items-center justify-center border cursor-pointer transition-colors',
-                                role() === 'sign' &&
-                                  'border-violet/40 bg-violet/10 text-violet hover:bg-violet/20',
-                                role() === 'exp' &&
-                                  'border-info-foreground/40 bg-info/40 text-info-foreground hover:bg-info/70 dark:text-sky-200',
-                                role() === 'mant' &&
-                                  'border-success-foreground/30 bg-success/30 text-success-foreground hover:bg-success/60 dark:text-emerald-200',
-                                bit === '0' && 'opacity-55'
-                              )}
-                              title={`bit ${i()} (${role()})`}
-                            >
-                              {bit}
-                            </button>
-                          )
-                        }}
-                      </For>
-                    </div>
-                    <div class="mt-2 flex gap-3 text-[11px] text-muted-foreground">
-                      <LegendDot class="bg-violet" label="sign (1)" />
-                      <LegendDot
-                        class="bg-info-foreground dark:bg-sky-400"
-                        label={`exponent (${precision() === 32 ? 8 : 11})`}
-                      />
-                      <LegendDot
-                        class="bg-success-foreground dark:bg-emerald-400"
-                        label={`mantissa (${precision() === 32 ? 23 : 52})`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Breakdown */}
-                  <div class="grid gap-3 sm:grid-cols-3">
-                    <Stat label="Sign" mono value={`${fb().sign}  (${fb().sign === '0' ? '+' : '-'})`} />
-                    <Stat
-                      label="Exponent"
-                      mono
-                      value={`${fb().exponent}${
-                        fb().classification === 'normal'
-                          ? '  (' + (parseInt(fb().exponent, 2) - (precision() === 32 ? 127 : 1023)).toString() + ')'
-                          : ''
-                      }`}
-                    />
-                    <Stat
-                      label="Mantissa"
-                      mono
-                      truncate
-                      value={fb().mantissa}
-                    />
-                  </div>
-
-                  <div class="grid gap-3 sm:grid-cols-3">
-                    <Stat label="Hex" mono copyable value={`0x${uppercase() ? fb().hex.toUpperCase() : fb().hex}`} />
-                    <Stat label="Stored value" mono value={formatStoredFloat(fb().stored, precision())} />
-                    <Stat label="Class" value={fb().classification} />
-                  </div>
-                </div>
-              )}
-            </Show>
-          </div>
-        </section>
       </div>
     </main>
   )
@@ -567,12 +636,7 @@ type BaseFieldProps = {
 function BaseField(props: BaseFieldProps) {
   const meta = () => STANDARD.find((s) => s.base === props.base)!
   return (
-    <div
-      class={cn(
-        'flex flex-col gap-1.5 px-6 py-5 sm:px-8 transition-colors',
-        props.hasError && 'bg-error/30'
-      )}
-    >
+    <div class={cn('flex flex-col gap-1.5 px-6 py-5 sm:px-8 transition-colors', props.hasError && 'bg-error/30')}>
       <div class="flex items-center justify-between gap-2">
         <Label class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <span class="font-mono text-violet">{meta().short}</span>
@@ -582,11 +646,7 @@ function BaseField(props: BaseFieldProps) {
         </Label>
         <CopyButton value={() => props.value} disabled={!props.value} class="h-6 px-1.5 py-0" />
       </div>
-      <TextField
-        value={props.value}
-        onChange={props.onInput}
-        validationState={props.hasError ? 'invalid' : 'valid'}
-      >
+      <TextField value={props.value} onChange={props.onInput} validationState={props.hasError ? 'invalid' : 'valid'}>
         <TextFieldInput
           ref={(el) => props.ref?.(el)}
           class="h-11 font-mono text-base tracking-wide"
@@ -662,11 +722,7 @@ function Stat(props: StatProps) {
     <div class="flex flex-col gap-1 border border-border bg-background px-3 py-2 relative">
       <span class="text-[10px] uppercase tracking-wider text-muted-foreground">{props.label}</span>
       <span
-        class={cn(
-          'text-sm break-all',
-          props.mono && 'font-mono',
-          props.truncate && 'truncate'
-        )}
+        class={cn('text-sm break-all', props.mono && 'font-mono', props.truncate && 'truncate')}
         title={props.truncate ? props.value : undefined}
       >
         {props.value}
@@ -687,4 +743,3 @@ function LegendDot(props: LegendDotProps) {
     </span>
   )
 }
-

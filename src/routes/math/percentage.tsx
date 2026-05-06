@@ -18,7 +18,7 @@ import { setToolPageMeta } from '~/lib/seo'
 type ModeConfig = (typeof percentageModes)[number]
 
 function fmt(n: number): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   return parseFloat(n.toPrecision(10)).toString()
 }
 

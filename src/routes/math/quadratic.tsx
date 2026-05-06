@@ -14,7 +14,7 @@ import { solveQuadratic, type QuadraticRoot } from '~/lib/utils/math/quadratic'
 import { setToolPageMeta } from '~/lib/seo'
 
 function fmt(n: number, places = 6): string {
-  if (!isFinite(n) || isNaN(n)) return '—'
+  if (!isFinite(n) || isNaN(n)) return '-'
   return parseFloat(n.toPrecision(places)).toString()
 }
 

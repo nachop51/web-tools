@@ -37,7 +37,7 @@ export default function HashTool() {
   let inputRef: HTMLTextAreaElement | undefined
 
   onMount(() => {
-    // Defer past Suspense settling — createResource above causes Suspense to
+    // Defer past Suspense settling; createResource above causes Suspense to
     // re-flush focus on this route, so a synchronous focus() in onMount loses out.
     setTimeout(() => inputRef?.focus(), 0)
   })

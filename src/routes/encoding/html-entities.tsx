@@ -65,7 +65,7 @@ export default function HTMLEntitiesTool() {
       />
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
-        {/* Toolbar — chromeless strip above the input */}
+        {/* Toolbar: chromeless strip above the input */}
         <ToolToolbar>
           <ToolbarSegmented
             label="Direction"

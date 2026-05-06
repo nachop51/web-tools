@@ -330,7 +330,7 @@ export default function FakeDataTool() {
                               </div>
                             </Match>
                             <Match when={true}>
-                              <span class="text-xs text-muted-foreground">—</span>
+                              <span class="text-xs text-muted-foreground">-</span>
                             </Match>
                           </Switch>
                         </td>
