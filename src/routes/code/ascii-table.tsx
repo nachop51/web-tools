@@ -1,6 +1,7 @@
 import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { useSearchParams } from '@solidjs/router'
 import { ToolHeader } from '~/components/tool-header'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
 import { buildAsciiTable } from '~/lib/utils/code/ascii'
 import { setToolPageMeta } from '~/lib/seo'
@@ -71,20 +72,20 @@ export default function AsciiTableTool() {
             </span>
           </div>
 
-          <div class="overflow-x-auto rounded-md border border-border">
-            <table class="w-full text-sm">
-              <thead class="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th class="px-3 py-2 text-left font-semibold">Dec</th>
-                  <th class="px-3 py-2 text-left font-semibold">Hex</th>
-                  <th class="px-3 py-2 text-left font-semibold">Oct</th>
-                  <th class="px-3 py-2 text-left font-semibold">Bin</th>
-                  <th class="px-3 py-2 text-left font-semibold">Char</th>
-                  <th class="px-3 py-2 text-left font-semibold">HTML</th>
-                  <th class="px-3 py-2 text-left font-semibold">Description</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div class="overflow-hidden rounded-md border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dec</TableHead>
+                  <TableHead>Hex</TableHead>
+                  <TableHead>Oct</TableHead>
+                  <TableHead>Bin</TableHead>
+                  <TableHead>Char</TableHead>
+                  <TableHead>HTML</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 <For each={filtered()}>
                   {(entry) => {
                     const cells = [
@@ -97,26 +98,26 @@ export default function AsciiTableTool() {
                       entry.description,
                     ]
                     return (
-                      <tr class="border-t border-border/50 transition-colors duration-300 hover:bg-violet/5 hover:duration-25">
+                      <TableRow>
                         <For each={cells}>
                           {(cell) => (
-                            <td
-                              class="cursor-pointer px-3 py-1.5 font-mono transition-colors duration-300 hover:bg-violet/10 hover:text-violet hover:duration-25"
+                            <TableCell
+                              class="cursor-pointer"
                               title={copied() === cell ? 'Copied!' : 'Click to copy'}
                               onClick={() => copyCell(cell)}
                             >
                               <Show when={copied() === cell} fallback={cell}>
                                 <span class="font-semibold text-violet">✓</span>
                               </Show>
-                            </td>
+                            </TableCell>
                           )}
                         </For>
-                      </tr>
+                      </TableRow>
                     )
                   }}
                 </For>
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             <Show when={filtered().length === 0}>
               <p class="px-4 py-8 text-center text-sm text-muted-foreground">No entries match your search.</p>
             </Show>

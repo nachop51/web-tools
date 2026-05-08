@@ -236,7 +236,7 @@ function parseDecimal(input: string | number | bigint): DecimalParseResult {
     s = s.slice(1)
   }
   if (!s) return { ok: false, error: 'Missing digits.' }
-  const m = s.match(/^(\d*)(?:\.(\d+))?$/)
+  const m = s.match(/^(\d*)(?:\.(\d*))?$/)
   if (!m || (!m[1] && !m[2])) {
     return { ok: false, error: 'Only digits and a single decimal point are allowed (e.g. 3.14, .5).' }
   }

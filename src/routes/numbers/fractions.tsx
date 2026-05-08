@@ -27,7 +27,7 @@ function fmt(n: number): string {
 }
 
 export default function FractionCalculator() {
-  setToolPageMeta('math', 'fractions')
+  setToolPageMeta('numbers', 'fractions')
   const [params, setParams] = useSearchParams<{
     op?: string
     aN?: string
@@ -75,7 +75,7 @@ export default function FractionCalculator() {
   return (
     <main class="w-full py-10">
       <ToolHeader
-        category="math"
+        category="numbers"
         name="Fraction calculator"
         description="Add, subtract, multiply, and divide fractions with automatic simplification."
       />

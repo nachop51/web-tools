@@ -8,6 +8,12 @@ import {
   TbOutlineDecimal,
   TbOutlinePercentage,
   TbOutlineFunction,
+  TbOutlineDivide,
+  TbOutlineEqual,
+  TbOutlineMath,
+  TbOutlineSuperscript,
+  TbOutlineAtom,
+  TbOutlineSlash,
 } from 'solid-icons/tb'
 import type { Component } from 'solid-js'
 import { Breadcrumb } from '~/components/breadcrumb'
@@ -23,6 +29,12 @@ const toolIcons = {
   'decimal-precision': TbOutlineDecimal,
   percentage: TbOutlinePercentage,
   'gcf-lcm': TbOutlineFunction,
+  fractions: TbOutlineDivide,
+  ratio: TbOutlineEqual,
+  factorial: TbOutlineMath,
+  quadratic: TbOutlineSuperscript,
+  'scientific-notation': TbOutlineAtom,
+  modulo: TbOutlineSlash,
 }
 
 export default function NumbersIndex() {

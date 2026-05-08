@@ -14,7 +14,7 @@ import { modulo } from '~/lib/utils/math/modulo'
 import { setToolPageMeta } from '~/lib/seo'
 
 export default function ModuloCalculator() {
-  setToolPageMeta('math', 'modulo')
+  setToolPageMeta('numbers', 'modulo')
   const [params, setParams] = useSearchParams<{ a?: string; m?: string }>()
   const [a, setASignal] = createSignal(params.a ?? '17')
   const [m, setMSignal] = createSignal(params.m ?? '5')
@@ -53,7 +53,7 @@ export default function ModuloCalculator() {
   return (
     <main class="w-full py-10">
       <ToolHeader
-        category="math"
+        category="numbers"
         name="Modulo calculator"
         description="Compute a mod m with quotient and remainder. Shows JavaScript, Python, and mathematical conventions."
       />

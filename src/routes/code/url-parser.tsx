@@ -2,6 +2,7 @@ import { useSearchParams } from '@solidjs/router'
 import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { TextField, TextFieldInput } from '~/components/ui/text-field'
 import { parseUrl, type ParsedUrl } from '~/lib/utils/code/url-parser'
 import { setToolPageMeta } from '~/lib/seo'
@@ -128,28 +129,28 @@ export default function UrlParserTool() {
                   <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Components</h2>
                 </div>
                 <div class="overflow-hidden rounded-md border border-border">
-                  <table class="w-full text-sm">
-                    <tbody>
+                  <Table>
+                    <TableBody>
                       <For each={ROWS}>
                         {(row) => {
                           const value = createMemo(() => p()[row.key])
                           return (
                             <Show when={value()}>
-                              <tr class="border-b border-border/50 last:border-0 transition-colors hover:bg-violet/5">
-                                <td class="w-32 px-4 py-2.5 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                              <TableRow>
+                                <TableCell class="w-32 px-4 py-2.5 font-sans text-xs uppercase tracking-wider text-muted-foreground font-semibold tabular-nums-none hover:bg-transparent hover:text-muted-foreground">
                                   {row.label}
-                                </td>
-                                <td class="px-4 py-2.5 font-mono break-all">{value()}</td>
-                                <td class="px-2 py-2.5 text-right w-16">
+                                </TableCell>
+                                <TableCell class="px-4 py-2.5 break-all">{value()}</TableCell>
+                                <TableCell class="px-2 py-2.5 text-right w-16 hover:bg-transparent">
                                   <CopyButton value={() => value() ?? ''} />
-                                </td>
-                              </tr>
+                                </TableCell>
+                              </TableRow>
                             </Show>
                           )
                         }}
                       </For>
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </section>
 
@@ -162,28 +163,28 @@ export default function UrlParserTool() {
                     </h2>
                   </div>
                   <div class="overflow-hidden rounded-md border border-border">
-                    <table class="w-full text-sm">
-                      <thead class="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
-                        <tr>
-                          <th class="px-4 py-2 text-left font-semibold">Key</th>
-                          <th class="px-4 py-2 text-left font-semibold">Value</th>
-                          <th class="px-4 py-2 w-16" />
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead class="px-4 py-2">Key</TableHead>
+                          <TableHead class="px-4 py-2">Value</TableHead>
+                          <TableHead class="px-4 py-2 w-16" />
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         <For each={queryEntries()}>
                           {([k, v]) => (
-                            <tr class="border-t border-border/50 transition-colors hover:bg-violet/5">
-                              <td class="px-4 py-2.5 font-mono text-violet">{k}</td>
-                              <td class="px-4 py-2.5 font-mono break-all">{v}</td>
-                              <td class="px-2 py-2.5 text-right">
+                            <TableRow>
+                              <TableCell class="px-4 py-2.5 text-violet">{k}</TableCell>
+                              <TableCell class="px-4 py-2.5 break-all">{v}</TableCell>
+                              <TableCell class="px-2 py-2.5 text-right hover:bg-transparent">
                                 <CopyButton value={() => v} />
-                              </td>
-                            </tr>
+                              </TableCell>
+                            </TableRow>
                           )}
                         </For>
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </section>
               </Show>

@@ -7,7 +7,6 @@ export type CategoryId =
   | 'code'
   | 'color'
   | 'electrical'
-  | 'math'
   | 'finance'
   | 'geometry'
 
@@ -30,8 +29,8 @@ export type Tool = {
 export const categories: Category[] = [
   {
     id: 'numbers',
-    name: 'Numbers',
-    description: 'Convert between bases, Roman numerals, words, and more.',
+    name: 'Numbers & Math',
+    description: 'Bases, Roman numerals, words, percentages, fractions, and other number tools.',
     href: '/numbers',
   },
   {
@@ -75,12 +74,6 @@ export const categories: Category[] = [
     name: 'Electrical',
     description: "Ohm's law, power formulas, and unit conversions for electronics.",
     href: '/electrical',
-  },
-  {
-    id: 'math',
-    name: 'Math',
-    description: 'Percentages, fractions, primes, and other math calculators.',
-    href: '/math',
   },
   {
     id: 'finance',
@@ -384,20 +377,29 @@ export const tools: Tool[] = [
   },
   // Numbers Phase 5
   {
-    slug: 'percentage',
-    category: 'numbers',
-    name: 'Percentage calculator',
-    description: 'Solve X% of Y, what % is X of Y, percentage change, and percent error.',
-    href: '/numbers/percentage',
-    keywords: ['percentage', 'percent', 'change', 'error', 'calculator'],
-  },
-  {
     slug: 'gcf-lcm',
     category: 'numbers',
     name: 'GCF / LCM',
-    description: 'Find the Greatest Common Factor and Least Common Multiple of two or more integers.',
+    description:
+      'Greatest Common Factor and Least Common Multiple of integers, with prime factorization grid, Bezout coefficients, common divisors, and pairwise GCD.',
     href: '/numbers/gcf-lcm',
-    keywords: ['gcf', 'gcd', 'lcm', 'greatest common factor', 'least common multiple', 'divisor'],
+    keywords: [
+      'gcf',
+      'gcd',
+      'lcm',
+      'greatest common factor',
+      'least common multiple',
+      'divisor',
+      'common divisors',
+      'bezout',
+      'extended euclidean',
+      'coprime',
+      'prime factorization',
+      'number theory',
+      'divisibility',
+      'pairwise',
+      'modular inverse',
+    ],
   },
 
   // Units Phase 4
@@ -735,61 +737,84 @@ export const tools: Tool[] = [
     keywords: ['named', 'css', 'color', 'rebeccapurple', 'hex', 'rgb', 'reference'],
   },
 
-  // Math
+  // Math (folded into Numbers)
   {
     slug: 'percentage',
-    category: 'math',
+    category: 'numbers',
     name: 'Percentage calculator',
-    description: 'Calculate percentages: % of a number, what % of X is Y, % change, increase, decrease, error, and reverse.',
-    href: '/math/percentage',
-    keywords: ['percentage', 'percent', 'what percent', 'change', 'increase', 'decrease', 'error', 'calculate', 'ratio'],
+    description: 'Solve A% of B = C for any variable, % change, and % adjust — with worked-out steps and a part-of-whole bar.',
+    href: '/numbers/percentage',
+    keywords: [
+      'percentage', 'percent', '%', 'solve', 'equation', 'of', 'what percent',
+      'reverse', 'change', 'increase', 'decrease', 'adjust', 'delta',
+      'percentage points', 'pp', 'points', 'calculate', 'ratio',
+    ],
   },
   {
     slug: 'fractions',
-    category: 'math',
+    category: 'numbers',
     name: 'Fraction calculator',
     description: 'Add, subtract, multiply, and divide fractions with automatic simplification.',
-    href: '/math/fractions',
+    href: '/numbers/fractions',
     keywords: ['fraction', 'numerator', 'denominator', 'add', 'subtract', 'multiply', 'divide', 'simplify'],
   },
   {
     slug: 'ratio',
-    category: 'math',
+    category: 'numbers',
     name: 'Ratio solver',
-    description: 'Simplify ratios to lowest terms or solve for a missing value in a proportion.',
-    href: '/math/ratio',
-    keywords: ['ratio', 'proportion', 'simplify', 'solve', 'missing'],
+    description: 'Simplify ratios, solve proportions, split totals into parts, and compute aspect ratios.',
+    href: '/numbers/ratio',
+    keywords: [
+      'ratio',
+      'proportion',
+      'simplify',
+      'solve',
+      'missing',
+      'split',
+      'divide',
+      'parts',
+      'share',
+      'aspect',
+      'aspect ratio',
+      '16:9',
+      '4:3',
+      '21:9',
+      'scale',
+      'recipe',
+      'fraction',
+      'odds',
+    ],
   },
   {
     slug: 'factorial',
-    category: 'math',
+    category: 'numbers',
     name: 'Factorial & combinations',
     description: 'Calculate n!, permutations (nPr), and combinations (nCr).',
-    href: '/math/factorial',
+    href: '/numbers/factorial',
     keywords: ['factorial', 'permutation', 'combination', 'ncr', 'npr', 'combinatorics'],
   },
   {
     slug: 'quadratic',
-    category: 'math',
+    category: 'numbers',
     name: 'Quadratic formula',
     description: 'Solve ax²+bx+c=0. Shows discriminant and real or complex roots.',
-    href: '/math/quadratic',
+    href: '/numbers/quadratic',
     keywords: ['quadratic', 'equation', 'roots', 'discriminant', 'formula', 'parabola', 'solve'],
   },
   {
     slug: 'scientific-notation',
-    category: 'math',
+    category: 'numbers',
     name: 'Scientific notation',
     description: 'Convert numbers between standard decimal and scientific notation.',
-    href: '/math/scientific-notation',
+    href: '/numbers/scientific-notation',
     keywords: ['scientific', 'notation', 'exponent', 'exponential', 'engineering', 'convert'],
   },
   {
     slug: 'modulo',
-    category: 'math',
+    category: 'numbers',
     name: 'Modulo calculator',
     description: 'Compute a mod m showing quotient and remainder for JS, Python, and math conventions.',
-    href: '/math/modulo',
+    href: '/numbers/modulo',
     keywords: ['modulo', 'modulus', 'remainder', 'quotient', 'division', 'mod'],
   },
 

@@ -15,7 +15,16 @@ const buildSha = (() => {
 const buildDate = new Date().toISOString().slice(0, 10)
 
 export default defineConfig({
-  plugins: [solidStart(), tailwindcss(), nitro()],
+  plugins: [
+    solidStart(),
+    tailwindcss(),
+    nitro({
+      routeRules: {
+        '/math': { redirect: { to: '/numbers', statusCode: 301 } },
+        '/math/**': { redirect: { to: '/numbers/**', statusCode: 301 } },
+      },
+    }),
+  ],
   define: {
     __BUILD_SHA__: JSON.stringify(buildSha),
     __BUILD_DATE__: JSON.stringify(buildDate),

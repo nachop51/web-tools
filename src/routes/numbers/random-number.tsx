@@ -2,7 +2,7 @@ import { useSearchParams } from '@solidjs/router'
 import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { createVirtualizer } from '@tanstack/solid-virtual'
 import { TbOutlineCheck, TbOutlineCopy } from 'solid-icons/tb'
-import { CopyButton } from '~/components/copy-button'
+import { CopyArrayButton } from '~/components/copy-array-button'
 import { ToolHeader } from '~/components/tool-header'
 import { ToolToolbar, ToolbarSegmented, ToolbarChip } from '~/components/tool-toolbar'
 import { Button } from '~/components/ui/button'
@@ -22,7 +22,6 @@ import { cn } from '~/lib/utils'
 type Mode = 'int' | 'float' | 'gaussian' | 'dice'
 type DieSides = 4 | 6 | 8 | 10 | 12 | 20 | 100
 type SortOrder = 'none' | 'asc' | 'desc'
-type SepId = 'newline' | 'comma' | 'space' | 'tab'
 
 type SearchParams = {
   mode?: string
@@ -36,7 +35,6 @@ type SearchParams = {
   ndice?: string
   unique?: string
   sort?: string
-  sep?: string
 }
 
 const MODE_OPTIONS: { value: Mode; label: string }[] = [
@@ -54,16 +52,8 @@ const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
 
 const DIE_TYPES: DieSides[] = [4, 6, 8, 10, 12, 20, 100]
 
-const SEP_OPTIONS: { id: SepId; label: string; char: string }[] = [
-  { id: 'newline', label: '↵', char: '\n' },
-  { id: 'comma', label: ',', char: ', ' },
-  { id: 'space', label: '·', char: ' ' },
-  { id: 'tab', label: '⇥', char: '\t' },
-]
-
 const isMode = (v?: string): v is Mode => ['int', 'float', 'gaussian', 'dice'].includes(v ?? '')
 const isSortOrder = (v?: string): v is SortOrder => ['none', 'asc', 'desc'].includes(v ?? '')
-const isSepId = (v?: string): v is SepId => ['newline', 'comma', 'space', 'tab'].includes(v ?? '')
 const isDieSides = (v?: string): v is DieSides => [4, 6, 8, 10, 12, 20, 100].includes(Number(v ?? '0'))
 
 export default function RandomNumberTool() {
@@ -74,10 +64,9 @@ export default function RandomNumberTool() {
   const mode = createMemo<Mode>(() => (isMode(params.mode) ? params.mode : 'int'))
 
   // Shared
-  const [count, setCountSignal] = createSignal(params.count ?? '5')
+  const [count, setCountSignal] = createSignal(params.count ?? '1')
   const [unique, setUniqueSignal] = createSignal(params.unique === '1')
   const [sortOrder, setSortOrderSignal] = createSignal<SortOrder>(isSortOrder(params.sort) ? params.sort : 'none')
-  const [sep, setSepSignal] = createSignal<SepId>(isSepId(params.sep) ? params.sep : 'newline')
   const [bypassWarning, setBypassWarningSignal] = createSignal(false)
 
   // Int/Float
@@ -138,10 +127,6 @@ export default function RandomNumberTool() {
     setSortOrderSignal(v)
     setParams({ sort: v === 'none' ? undefined : v }, { replace: true })
   }
-  function setSep(v: SepId) {
-    setSepSignal(v)
-    setParams({ sep: v === 'newline' ? undefined : v }, { replace: true })
-  }
 
   // Memos
   const countNum = createMemo(() => Math.max(1, parseInt(count(), 10) || 1))
@@ -163,9 +148,16 @@ export default function RandomNumberTool() {
     return false
   })
 
-  const sepChar = createMemo(() => SEP_OPTIONS.find((s) => s.id === sep())?.char ?? '\n')
-  const outputText = createMemo(() => results().join(sepChar()))
   const stats = createMemo(() => (results().length > 1 ? computeStats(results()) : null))
+
+  const heroFontClass = createMemo(() => {
+    const len = String(results()[0] ?? '').length
+    if (len <= 6) return 'text-7xl sm:text-8xl'
+    if (len <= 12) return 'text-5xl sm:text-6xl'
+    if (len <= 20) return 'text-3xl sm:text-4xl'
+    if (len <= 32) return 'text-2xl sm:text-3xl'
+    return 'text-xl sm:text-2xl'
+  })
 
   function generate() {
     if (isInvalid() || isDangerousCount()) return
@@ -199,6 +191,10 @@ export default function RandomNumberTool() {
   }
 
   let inputRef: HTMLInputElement | undefined
+
+  // Initial generation runs synchronously at setup so the first paint already
+  // shows a result instead of swapping in after hydration.
+  generate()
 
   onMount(() => {
     const handler = (e: KeyboardEvent) => {
@@ -527,31 +523,11 @@ export default function RandomNumberTool() {
                 </Show>
               </div>
 
-              {/* Separator chips + copy button */}
-              <div class="flex items-center gap-2">
-                <Show when={results().length > 1}>
-                  <div role="radiogroup" aria-label="Copy separator" class="flex gap-1">
-                    <For each={SEP_OPTIONS}>
-                      {(s) => (
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked={sep() === s.id}
-                          onClick={() => setSep(s.id)}
-                          title={s.id}
-                          class={cn(
-                            'border px-2 py-0.5 font-mono text-xs cursor-pointer transition-[border-color,background-color,color] duration-150',
-                            sep() === s.id ? 'border-violet bg-violet text-white' : 'border-border bg-background text-muted-foreground hover:border-violet/60 hover:text-violet'
-                          )}
-                        >
-                          {s.label}
-                        </button>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-                <CopyButton value={outputText} disabled={results().length === 0} />
-              </div>
+              <CopyArrayButton
+                values={() => results()}
+                disabled={results().length === 0}
+                storageKey="random-number"
+              />
             </div>
 
             {/* Results display */}
@@ -568,9 +544,9 @@ export default function RandomNumberTool() {
                   when={results().length === 1}
                   fallback={<VirtualResultsGrid items={results()} animKey={animKey()} />}
                 >
-                  <div class="anim-fade-up flex flex-1 flex-col items-center justify-center gap-6" data-key={animKey()}>
-                    <div class="break-all text-center font-mono text-7xl font-bold tracking-tight sm:text-8xl">{results()[0]}</div>
-                    <CopyButton value={outputText} />
+                  <div class="anim-fade-up flex flex-1 flex-col items-center justify-center gap-6 px-4" data-key={animKey()}>
+                    <div class={cn('w-full break-all text-center font-mono font-bold tracking-tight transition-[font-size] duration-200', heroFontClass())}>{results()[0]}</div>
+                    <CopyArrayButton values={() => results()} storageKey="random-number" />
                   </div>
                 </Show>
               </Show>
@@ -631,10 +607,10 @@ function StatCard(props: StatCardProps) {
     <Tooltip openDelay={250}>
       <TooltipTrigger
         as="div"
-        class="group relative flex cursor-help flex-col gap-1 rounded-md border border-border bg-muted/30 px-3 py-2 transition-colors hover:border-violet/40"
+        class="group relative flex min-w-0 cursor-help flex-col gap-1 rounded-md border border-border bg-muted/30 px-3 py-2 transition-colors hover:border-violet/40"
       >
         <span class="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{props.label}</span>
-        <span class="font-mono text-sm font-semibold tabular-nums">{props.value()}</span>
+        <span class="block truncate pr-7 font-mono text-sm font-semibold tabular-nums">{props.value()}</span>
         <button
           type="button"
           onClick={handleCopy}
@@ -650,7 +626,10 @@ function StatCard(props: StatCardProps) {
           </Show>
         </button>
       </TooltipTrigger>
-      <TooltipContent class="max-w-xs text-xs">{props.tip}</TooltipContent>
+      <TooltipContent class="max-w-xs text-xs">
+        <div class="mb-1 break-all font-mono font-semibold">{props.value()}</div>
+        <div class="text-muted-foreground">{props.tip}</div>
+      </TooltipContent>
     </Tooltip>
   )
 }
@@ -717,8 +696,11 @@ function VirtualResultsGrid(props: VirtualResultsGridProps) {
               >
                 <For each={rowItems()}>
                   {(n) => (
-                    <div class="flex h-9 items-center justify-center rounded-md border border-border bg-muted/40 px-3 text-center font-mono text-sm tabular-nums">
-                      {n}
+                    <div
+                      class="flex h-9 items-center rounded-md border border-border bg-muted/40 px-3 font-mono text-sm tabular-nums"
+                      title={String(n)}
+                    >
+                      <span class="block min-w-0 flex-1 truncate text-center">{n}</span>
                     </div>
                   )}
                 </For>

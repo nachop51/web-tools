@@ -12,6 +12,7 @@ import {
   NumberFieldLabel,
 } from '~/components/ui/number-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 import { setToolPageMeta } from '~/lib/seo'
 import { compoundInterest, compoundingOptions, type CompoundingId } from '~/lib/utils/finance/compound-interest'
@@ -188,32 +189,26 @@ export default function CompoundInterestCalculator() {
             </div>
 
             <div class="anim-fade-up overflow-hidden rounded-md border border-violet/30 bg-violet/5">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-violet/20 bg-violet/10">
-                    <th class="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Year
-                    </th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Balance
-                    </th>
-                    <th class="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Interest earned
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-violet/15">
+              <Table variant="accent">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Year</TableHead>
+                    <TableHead class="text-right">Balance</TableHead>
+                    <TableHead class="text-right">Interest earned</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   <For each={visibleSchedule()}>
                     {(row) => (
-                      <tr class="transition-colors duration-150 hover:bg-violet/10">
-                        <td class="px-4 py-2.5 font-mono">{row.year}</td>
-                        <td class="px-4 py-2.5 text-right font-mono">${fmt(row.balance)}</td>
-                        <td class="px-4 py-2.5 text-right font-mono text-violet">+${fmt(row.interestEarned)}</td>
-                      </tr>
+                      <TableRow>
+                        <TableCell>{row.year}</TableCell>
+                        <TableCell class="text-right">${fmt(row.balance)}</TableCell>
+                        <TableCell class="text-right text-violet">+${fmt(row.interestEarned)}</TableCell>
+                      </TableRow>
                     )}
                   </For>
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             <Show when={hasMore() && !showAll()}>

@@ -22,7 +22,7 @@ const modeOptions: { value: Mode; label: string }[] = [
 ]
 
 export default function ScientificNotation() {
-  setToolPageMeta('math', 'scientific-notation')
+  setToolPageMeta('numbers', 'scientific-notation')
   const [params, setParams] = useSearchParams<{
     mode?: string
     n?: string

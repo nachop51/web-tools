@@ -1,15 +1,12 @@
 import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, onMount, Show } from 'solid-js'
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js'
 import { CopyButton } from '~/components/copy-button'
 import { ToolHeader } from '~/components/tool-header'
-import { ToolToolbar } from '~/components/tool-toolbar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { TextField, TextFieldTextArea } from '~/components/ui/text-field'
 import { caseDefs, caseConverters, type CaseKey } from '~/lib/utils/strings/case'
 import { setToolPageMeta } from '~/lib/seo'
+import { cn } from '~/lib/utils'
 import { urlText } from '~/lib/utils/url-state'
-
-type CaseDef = (typeof caseDefs)[number]
 
 export default function CaseConverter() {
   setToolPageMeta('strings', 'case')
@@ -28,8 +25,6 @@ export default function CaseConverter() {
     return 'upper'
   })
 
-  const selectedDef = createMemo<CaseDef>(() => caseDefs.find((d) => d.key === mode()) ?? caseDefs[0])
-
   const output = createMemo(() => caseConverters[mode()](input()))
 
   let inputRef: HTMLTextAreaElement | undefined
@@ -47,29 +42,39 @@ export default function CaseConverter() {
       />
 
       <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
-        <ToolToolbar>
-          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Case</span>
-          <Select<CaseDef>
-            options={caseDefs}
-            optionValue="key"
-            optionTextValue="label"
-            value={selectedDef()}
-            onChange={(v) => v && setParams({ mode: v.key }, { replace: true })}
-            itemComponent={(itemProps) => (
-              <SelectItem item={itemProps.item}>
-                <span class="flex flex-col">
-                  <span class="font-mono text-sm">{itemProps.item.rawValue.label}</span>
-                  <span class="font-mono text-xs text-muted-foreground">{itemProps.item.rawValue.example}</span>
-                </span>
-              </SelectItem>
-            )}
-          >
-            <SelectTrigger aria-label="Case" class="h-8 w-56 font-mono text-sm">
-              <SelectValue<CaseDef>>{(state) => state.selectedOption()?.label}</SelectValue>
-            </SelectTrigger>
-            <SelectContent />
-          </Select>
-        </ToolToolbar>
+        <section aria-label="Case" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          <For each={caseDefs}>
+            {(def) => {
+              const preview = createMemo(() => caseConverters[def.key](input() || def.example))
+              const isSelected = () => mode() === def.key
+              return (
+                <button
+                  type="button"
+                  aria-pressed={isSelected()}
+                  onClick={() => setParams({ mode: def.key }, { replace: true })}
+                  class={cn(
+                    'group relative flex min-h-[5.5rem] flex-col items-start gap-1.5 overflow-hidden rounded-md border p-3 text-left transition-all duration-150',
+                    isSelected()
+                      ? 'border-violet bg-violet/10 shadow-sm ring-1 ring-violet/40'
+                      : 'border-border bg-card hover:-translate-y-0.5 hover:border-violet/40 hover:bg-violet/5 hover:shadow-sm',
+                  )}
+                >
+                  <span
+                    class={cn(
+                      'text-[10px] font-semibold uppercase tracking-wider transition-colors',
+                      isSelected() ? 'text-violet' : 'text-muted-foreground group-hover:text-foreground',
+                    )}
+                  >
+                    {def.label}
+                  </span>
+                  <span class="line-clamp-2 font-mono text-xs leading-relaxed break-all text-foreground/90">
+                    {preview()}
+                  </span>
+                </button>
+              )
+            }}
+          </For>
+        </section>
 
         <div class="grid gap-6 md:grid-cols-2">
           {/* Input */}

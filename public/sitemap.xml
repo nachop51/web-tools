@@ -46,11 +46,6 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
     <loc>https://tools.nachop.dev/finance</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
@@ -356,37 +351,32 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/percentage</loc>
+    <loc>https://tools.nachop.dev/numbers/fractions</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/fractions</loc>
+    <loc>https://tools.nachop.dev/numbers/ratio</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/ratio</loc>
+    <loc>https://tools.nachop.dev/numbers/factorial</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/factorial</loc>
+    <loc>https://tools.nachop.dev/numbers/quadratic</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/quadratic</loc>
+    <loc>https://tools.nachop.dev/numbers/scientific-notation</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/math/scientific-notation</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://tools.nachop.dev/math/modulo</loc>
+    <loc>https://tools.nachop.dev/numbers/modulo</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>

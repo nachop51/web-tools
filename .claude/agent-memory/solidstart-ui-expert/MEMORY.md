@@ -4,3 +4,5 @@
 - [Dual-pane converter pattern](design_dual_pane_pattern.md) — bidirectional editable panes + swap pivot, prototyped on html-entities.
 - [Hydration mismatch from JSX prop + Show](feedback_hydration_jsx_props.md) — don't pass JSX-children through a prop wrapped in Show; inline instead.
 - [Pattern E toolbar primitives](design_pattern_e_toolbar.md) — ToolToolbar/ToolbarSegmented/ToolbarChip in src/components/tool-toolbar.tsx; replaces Mode cards.
+- [Table variants](design_table_variants.md) — default/accent/form via cva + context; pick by cell content type (data/result/form-control).
+- [Inline-equation + hero-result](design_inline_equation_hero.md) — strip form chrome, render answer at text-6xl/7xl violet; inputs as dotted-underline text.

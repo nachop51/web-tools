@@ -26,7 +26,7 @@ function formatRoot(root: QuadraticRoot): string {
 }
 
 export default function QuadraticFormula() {
-  setToolPageMeta('math', 'quadratic')
+  setToolPageMeta('numbers', 'quadratic')
   const [params, setParams] = useSearchParams<{ a?: string; b?: string; c?: string }>()
   const [a, setASignal] = createSignal(params.a ?? '1')
   const [b, setBSignal] = createSignal(params.b ?? '-5')
@@ -75,7 +75,7 @@ export default function QuadraticFormula() {
   return (
     <main class="w-full py-10">
       <ToolHeader
-        category="math"
+        category="numbers"
         name="Quadratic formula"
         description="Solve ax² + bx + c = 0. Shows discriminant and real or complex roots."
       />

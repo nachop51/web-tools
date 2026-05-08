@@ -14,7 +14,6 @@ import {
   TbOutlineTerminal,
   TbOutlinePalette,
   TbOutlineBolt,
-  TbOutlineCalculator,
   TbOutlineCurrencyDollar,
   TbOutlineHexagon,
   TbOutlineSearch,
@@ -34,13 +33,12 @@ const categoryIcons: Record<CategoryId, (props: { size?: number; class?: string 
   code: TbOutlineTerminal,
   color: TbOutlinePalette,
   electrical: TbOutlineBolt,
-  math: TbOutlineCalculator,
   finance: TbOutlineCurrencyDollar,
   geometry: TbOutlineHexagon,
 }
 
 const inlineIds: CategoryId[] = ['numbers', 'units', 'strings', 'encoding', 'datetime', 'code', 'color']
-const moreIds: CategoryId[] = ['math', 'electrical', 'finance', 'geometry']
+const moreIds: CategoryId[] = ['electrical', 'finance', 'geometry']
 const byId = (id: CategoryId): Category => categories.find((c) => c.id === id)!
 const inlineCategories = inlineIds.map(byId)
 const moreCategories = moreIds.map(byId)

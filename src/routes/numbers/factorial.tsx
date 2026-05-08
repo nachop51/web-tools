@@ -23,7 +23,7 @@ const modeOptions: { value: Mode; label: string }[] = [
 ]
 
 export default function FactorialCalculator() {
-  setToolPageMeta('math', 'factorial')
+  setToolPageMeta('numbers', 'factorial')
   const [params, setParams] = useSearchParams<{ mode?: string; n?: string; r?: string }>()
   const mode = createMemo<Mode>(() => {
     const p = params.mode
@@ -60,7 +60,7 @@ export default function FactorialCalculator() {
   return (
     <main class="w-full py-10">
       <ToolHeader
-        category="math"
+        category="numbers"
         name="Factorial & combinations"
         description="Calculate n!, permutations (nPr), and combinations (nCr)."
       />

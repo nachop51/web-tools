@@ -11,7 +11,6 @@ import {
   TbOutlineTerminal,
   TbOutlinePalette,
   TbOutlineBolt,
-  TbOutlineCalculator,
   TbOutlineCurrencyDollar,
   TbOutlineHexagon,
 } from 'solid-icons/tb'
@@ -28,7 +27,6 @@ const categoryIcons: Record<CategoryId, Component<{ size?: number; class?: strin
   code: TbOutlineTerminal,
   color: TbOutlinePalette,
   electrical: TbOutlineBolt,
-  math: TbOutlineCalculator,
   finance: TbOutlineCurrencyDollar,
   geometry: TbOutlineHexagon,
 }

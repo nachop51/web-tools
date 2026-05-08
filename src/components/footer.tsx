@@ -14,7 +14,7 @@ const PERSONAL = 'https://nachop.dev'
 const REPO_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}`
 const SUGGEST_URL = `${REPO_URL}/issues/new?labels=tool-suggestion&title=${encodeURIComponent('Tool suggestion: ')}`
 const COMMIT_URL = `${REPO_URL}/commit/${__BUILD_SHA__}`
-const AVATAR_URL = `https://github.com/${GITHUB_USER}.png?size=160`
+const AVATAR_URL = `https://avatars.githubusercontent.com/u/79727818?v=4`
 
 const TOOL_COUNT = tools.length
 const YEAR = new Date().getFullYear()
@@ -54,16 +54,10 @@ function ProfileCard() {
             <span class="font-mono text-[11px] text-muted-foreground">@{GITHUB_USER}</span>
           </div>
         </div>
-        <p
-          class="anim-row-in mt-3 text-xs leading-relaxed text-muted-foreground"
-          style={{ '--i': 1 }}
-        >
+        <p class="anim-row-in mt-3 text-xs leading-relaxed text-muted-foreground" style={{ '--i': 1 }}>
           Software engineer building tiny, fast, client-side dev tools. TypeScript, Solid, and the open web.
         </p>
-        <div
-          class="anim-row-in mt-3 flex items-center gap-1 border-t border-border/60 pt-3"
-          style={{ '--i': 2 }}
-        >
+        <div class="anim-row-in mt-3 flex items-center gap-1 border-t border-border/60 pt-3" style={{ '--i': 2 }}>
           {socials.map(({ href, label, Icon, external }) => (
             <a
               href={href}
@@ -96,10 +90,7 @@ export default function Footer() {
       <Link rel="preload" as="image" href={AVATAR_URL} fetchpriority="low" />
       <div class="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col gap-3">
-          <A
-            href="/"
-            class="group flex w-fit items-center gap-2 font-mono text-sm font-semibold tracking-tight"
-          >
+          <A href="/" class="group flex w-fit items-center gap-2 font-mono text-sm font-semibold tracking-tight">
             <span class="relative inline-flex size-6 items-center justify-center">
               <span
                 aria-hidden
@@ -171,10 +162,7 @@ export default function Footer() {
                   {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   class="group flex size-8 items-center justify-center rounded-md text-muted-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted hover:text-foreground active:scale-95"
                 >
-                  <Icon
-                    size={16}
-                    class="transition-colors duration-200 group-hover:text-violet"
-                  />
+                  <Icon size={16} class="transition-colors duration-200 group-hover:text-violet" />
                 </a>
               </li>
             ))}

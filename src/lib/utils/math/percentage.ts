@@ -60,3 +60,69 @@ export function calculatePercentage(mode: PercentageMode, a: number, b: number):
       return a / (1 - b / 100)
   }
 }
+
+export type SolveTarget = 'a' | 'b' | 'c'
+
+export interface SolveResult {
+  a: number
+  b: number
+  c: number
+  target: SolveTarget
+}
+
+// Equation: (A / 100) * B = C — A is percentage, B is whole, C is part.
+export function solvePercentage(input: {
+  a?: number
+  b?: number
+  c?: number
+  target: SolveTarget
+}): SolveResult | null {
+  const { a, b, c, target } = input
+  if (target === 'c') {
+    if (a == null || b == null || !isFinite(a) || !isFinite(b)) return null
+    const next = (a / 100) * b
+    if (!isFinite(next)) return null
+    return { a, b, c: next, target }
+  }
+  if (target === 'a') {
+    if (b == null || c == null || !isFinite(b) || !isFinite(c)) return null
+    if (b === 0) return null
+    const next = (c / b) * 100
+    if (!isFinite(next)) return null
+    return { a: next, b, c, target }
+  }
+  // target === 'b'
+  if (a == null || c == null || !isFinite(a) || !isFinite(c)) return null
+  if (a === 0) return null
+  const next = (c / a) * 100
+  if (!isFinite(next)) return null
+  return { a, b: next, c, target }
+}
+
+export interface ChangeResult {
+  from: number
+  to: number
+  delta: number
+  pctChange: number
+  ppDelta: number
+}
+
+export function percentChange(from: number, to: number): ChangeResult | null {
+  if (!isFinite(from) || !isFinite(to)) return null
+  if (from === 0) return null
+  const delta = to - from
+  const pctChange = (delta / Math.abs(from)) * 100
+  return { from, to, delta, pctChange, ppDelta: delta }
+}
+
+export interface AdjustResult {
+  value: number
+  signedPct: number
+  result: number
+  delta: number
+}
+
+export function percentAdjust(value: number, signedPct: number): AdjustResult {
+  const result = value * (1 + signedPct / 100)
+  return { value, signedPct, result, delta: result - value }
+}

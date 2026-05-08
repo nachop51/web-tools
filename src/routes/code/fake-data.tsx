@@ -6,6 +6,7 @@ import { ToolHeader } from '~/components/tool-header'
 import { Button } from '~/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { Label } from '~/components/ui/label'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { TextField, TextFieldInput, TextFieldTextArea } from '~/components/ui/text-field'
 import {
   NumberField,
@@ -207,25 +208,25 @@ export default function FakeDataTool() {
 
           <Show when={activeTab() === 'visual'}>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-border text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    <th class="pb-2 pr-4 w-40">Field name</th>
-                    <th class="pb-2 pr-4 w-36">Type</th>
-                    <th class="pb-2 pr-2">Options</th>
-                    <th class="pb-2 w-8" />
-                  </tr>
-                </thead>
-                <tbody>
+              <Table variant="form">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead class="w-40">Field name</TableHead>
+                    <TableHead class="w-36">Type</TableHead>
+                    <TableHead class="pr-2">Options</TableHead>
+                    <TableHead class="w-8 pr-0" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   <For each={fields}>
                     {(field, index) => (
-                      <tr class="border-b border-border/40 last:border-0">
-                        <td class="py-2 pr-4">
+                      <TableRow>
+                        <TableCell>
                           <TextField value={field.name} onChange={(v) => setFields(index(), 'name', v)}>
                             <TextFieldInput class="h-9 w-full font-mono text-sm" placeholder="field name" />
                           </TextField>
-                        </td>
-                        <td class="py-2 pr-4">
+                        </TableCell>
+                        <TableCell>
                           <Select<{ value: FieldType; label: string }>
                             options={FIELD_TYPES}
                             optionValue="value"
@@ -246,8 +247,8 @@ export default function FakeDataTool() {
                             </SelectTrigger>
                             <SelectContent />
                           </Select>
-                        </td>
-                        <td class="py-2 pr-2">
+                        </TableCell>
+                        <TableCell class="pr-2">
                           <Switch>
                             <Match when={field.type === 'integer' || field.type === 'float'}>
                               <div class="flex items-center gap-2">
@@ -333,8 +334,8 @@ export default function FakeDataTool() {
                               <span class="text-xs text-muted-foreground">-</span>
                             </Match>
                           </Switch>
-                        </td>
-                        <td class="py-2 text-center">
+                        </TableCell>
+                        <TableCell class="text-center pr-0">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -344,12 +345,12 @@ export default function FakeDataTool() {
                           >
                             ✕
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
                   </For>
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
             <button
               type="button"

@@ -11,6 +11,7 @@ import {
   NumberFieldInput,
 } from '~/components/ui/number-field'
 import { Slider, SliderFill, SliderThumb, SliderTrack } from '~/components/ui/slider'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { TextField, TextFieldInput, TextFieldLabel } from '~/components/ui/text-field'
 import { setToolPageMeta } from '~/lib/seo'
 import { cn } from '~/lib/utils'
@@ -415,54 +416,46 @@ function Ladder(props: { n: number; currentDepth: number; onPick: (d: number) =>
   })
 
   return (
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse font-mono text-xs tabular-nums">
-        <thead>
-          <tr class="text-[10px] uppercase tracking-wider text-muted-foreground">
-            <th class="px-3 py-2 text-left font-semibold">Depth</th>
-            <th class="px-3 py-2 text-right font-semibold">Floor</th>
-            <th class="px-3 py-2 text-right font-semibold">Round</th>
-            <th class="px-3 py-2 text-right font-semibold">Ceil</th>
-            <th class="px-3 py-2 text-right font-semibold">Truncate</th>
-            <th class="px-3 py-2 text-right font-semibold">Sig figs</th>
-            <th class="px-3 py-2 text-right font-semibold">|err vs round|</th>
-          </tr>
-        </thead>
-        <tbody>
-          <For each={rows()}>
-            {(row) => {
-              const active = () => row.d === props.currentDepth
-              return (
-                <tr
-                  onClick={() => props.onPick(row.d)}
-                  class={cn(
-                    'cursor-pointer border-t border-border/60 transition-colors',
-                    active()
-                      ? 'bg-violet/5 text-foreground'
-                      : 'text-muted-foreground hover:bg-violet/5 hover:text-foreground'
-                  )}
-                >
-                  <td
-                    class={cn(
-                      'px-3 py-1.5 text-left',
-                      active() && 'font-semibold text-violet'
-                    )}
-                  >
-                    {row.d}
-                  </td>
-                  <td class="px-3 py-1.5 text-right">{row.floor}</td>
-                  <td class="px-3 py-1.5 text-right">{row.round}</td>
-                  <td class="px-3 py-1.5 text-right">{row.ceil}</td>
-                  <td class="px-3 py-1.5 text-right">{row.trunc}</td>
-                  <td class="px-3 py-1.5 text-right">{row.sig}</td>
-                  <td class="px-3 py-1.5 text-right">{row.absErr}</td>
-                </tr>
-              )
-            }}
-          </For>
-        </tbody>
-      </table>
-    </div>
+    <Table class="border-collapse text-xs">
+      <TableHeader>
+        <TableRow>
+          <TableHead>Depth</TableHead>
+          <TableHead class="text-right">Floor</TableHead>
+          <TableHead class="text-right">Round</TableHead>
+          <TableHead class="text-right">Ceil</TableHead>
+          <TableHead class="text-right">Truncate</TableHead>
+          <TableHead class="text-right">Sig figs</TableHead>
+          <TableHead class="text-right">|err vs round|</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <For each={rows()}>
+          {(row) => {
+            const active = () => row.d === props.currentDepth
+            return (
+              <TableRow
+                data-state={active() ? 'selected' : undefined}
+                onClick={() => props.onPick(row.d)}
+                class={cn(
+                  'cursor-pointer',
+                  !active() && 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <TableCell class={cn('text-left', active() && 'font-semibold text-violet')}>
+                  {row.d}
+                </TableCell>
+                <TableCell class="text-right">{row.floor}</TableCell>
+                <TableCell class="text-right">{row.round}</TableCell>
+                <TableCell class="text-right">{row.ceil}</TableCell>
+                <TableCell class="text-right">{row.trunc}</TableCell>
+                <TableCell class="text-right">{row.sig}</TableCell>
+                <TableCell class="text-right">{row.absErr}</TableCell>
+              </TableRow>
+            )
+          }}
+        </For>
+      </TableBody>
+    </Table>
   )
 }
 
