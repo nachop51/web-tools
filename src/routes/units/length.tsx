@@ -1,32 +1,33 @@
-import { useSearchParams } from '@solidjs/router'
-import { createMemo, createSignal, For, Show, onMount } from 'solid-js'
+import { createMemo, createSignal, For, Show } from 'solid-js'
 import { TbOutlineChevronDown, TbOutlineRocket } from 'solid-icons/tb'
-import { ToolHeader } from '~/components/tool-header'
 import { CopyButton } from '~/components/copy-button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { ToolHeader } from '~/components/tool-header'
+import { UnitConverter, type UnitConverterState, type UnitRow } from '~/components/unit-converter'
 import {
-  NumberField,
-  NumberFieldErrorMessage,
-  NumberFieldGroup,
-  NumberFieldIncrementTrigger,
-  NumberFieldDecrementTrigger,
-  NumberFieldInput,
-} from '~/components/ui/number-field'
-import { convert } from '~/lib/utils/units/converter'
-import { funLengthUnitKeys, funLengthUnits, lengthUnitKeys, lengthUnits } from '~/lib/utils/units/length'
-import { cn } from '~/lib/utils'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table'
 import { setToolPageMeta } from '~/lib/seo'
+import { cn } from '~/lib/utils'
+import { convert } from '~/lib/utils/units/converter'
+import {
+  funLengthUnitKeys,
+  funLengthUnits,
+  lengthUnitKeys,
+  lengthUnits,
+} from '~/lib/utils/units/length'
 
-type UnitOption = { label: string; value: string }
-
-const unitOptions: UnitOption[] = lengthUnitKeys.map((key) => ({
-  label: lengthUnits[key].label,
-  value: key,
+const UNITS: UnitRow[] = lengthUnitKeys.map((k) => ({
+  key: k,
+  label: lengthUnits[k].label,
 }))
 
-function fmt(n: number): string {
-  if (!isFinite(n)) return '-'
-  return parseFloat(n.toPrecision(8)).toString()
+function lengthConvert(value: number, from: string, to: string): number {
+  return convert(value, lengthUnits[from].factor, lengthUnits[to].factor)
 }
 
 function fmtFun(n: number): string {
@@ -39,37 +40,6 @@ function fmtFun(n: number): string {
 
 export default function LengthConverter() {
   setToolPageMeta('units', 'length')
-  const [params, setParams] = useSearchParams<{ from?: string; to?: string; v?: string }>()
-
-  const initialFrom = params.from && lengthUnits[params.from] ? params.from : 'km'
-
-  const [inputValue, setInputValueSignal] = createSignal(params.v ?? '')
-  const [fromUnit, setFromUnit] = createSignal(initialFrom)
-  const [showFun, setShowFun] = createSignal(false)
-  let inputRef: HTMLInputElement | undefined
-
-  onMount(() => {
-    inputRef?.focus()
-  })
-
-  function setInputValue(v: string) {
-    setInputValueSignal(v)
-    setParams({ v: v || undefined }, { replace: true })
-  }
-
-  const numericValue = createMemo(() => parseFloat(inputValue()))
-
-  const isInvalid = createMemo(() => inputValue().length > 0 && isNaN(numericValue()))
-
-  const hasValue = createMemo(() => inputValue().length > 0 && !isNaN(numericValue()))
-
-  const selectedOption = createMemo(() => unitOptions.find((o) => o.value === fromUnit()) ?? unitOptions[1])
-
-  function handleFromChange(opt: UnitOption | null) {
-    if (!opt) return
-    setFromUnit(opt.value)
-    setParams({ from: opt.value }, { replace: true })
-  }
 
   return (
     <main class="w-full py-10">
@@ -78,151 +48,107 @@ export default function LengthConverter() {
         name="Length converter"
         description="Convert between meters, kilometers, miles, feet, inches, and more."
       />
-
-      <div class="anim-fade-up flex flex-col gap-6" style={{ 'animation-delay': '60ms' }}>
-        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
-          <div class="mb-4 flex items-center gap-2">
-            <span aria-hidden class="size-2 rounded-full bg-violet" />
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Input</h2>
-          </div>
-
-          <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
-            <NumberField
-              value={inputValue() || undefined}
-              onChange={setInputValue}
-              format={false}
-              validationState={isInvalid() ? 'invalid' : 'valid'}
-              class="flex flex-col gap-2"
-            >
-              <NumberFieldGroup>
-                <NumberFieldInput ref={inputRef} placeholder="Enter a value..." class="h-12 font-mono text-base" />
-                <NumberFieldIncrementTrigger />
-                <NumberFieldDecrementTrigger />
-              </NumberFieldGroup>
-              <Show when={isInvalid()}>
-                <NumberFieldErrorMessage>Enter a valid number</NumberFieldErrorMessage>
-              </Show>
-            </NumberField>
-
-            <Select<UnitOption>
-              options={unitOptions}
-              optionValue="value"
-              optionTextValue="label"
-              value={selectedOption()}
-              onChange={handleFromChange}
-              itemComponent={(itemProps) => (
-                <SelectItem item={itemProps.item}>{itemProps.item.rawValue.label}</SelectItem>
-              )}
-            >
-              <SelectTrigger aria-label="From unit" class="h-12 w-full md:w-56">
-                <SelectValue<UnitOption>>{(state) => state.selectedOption()?.label}</SelectValue>
-              </SelectTrigger>
-              <SelectContent />
-            </Select>
-          </div>
-        </section>
-
-        <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
-          <div class="mb-4 flex items-center gap-2">
-            <span aria-hidden class="size-2 rounded-full bg-violet" />
-            <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Conversions</h2>
-          </div>
-
-          <Show
-            when={hasValue()}
-            fallback={<div class="px-4 py-10 text-center text-sm text-muted-foreground">Enter a value above</div>}
-          >
-            <div class="anim-fade-up overflow-hidden rounded-md border border-border">
-              <For each={lengthUnitKeys}>
-                {(unit) => {
-                  const converted = createMemo(() =>
-                    fmt(convert(numericValue(), lengthUnits[fromUnit()].factor, lengthUnits[unit].factor))
-                  )
-
-                  return (
-                    <div
-                      class={cn(
-                        'flex items-center gap-3 border-t border-border/50 px-4 py-2.5 text-sm transition-colors hover:bg-violet/5',
-                        unit === fromUnit() && 'bg-violet/5'
-                      )}
-                    >
-                      <span
-                        class={cn(
-                          'w-44 shrink-0',
-                          unit === fromUnit() ? 'font-semibold text-foreground' : 'text-muted-foreground'
-                        )}
-                      >
-                        {lengthUnits[unit].label}
-                      </span>
-                      <span class="flex-1 text-right font-mono tabular-nums">{converted()}</span>
-                      <CopyButton value={() => converted()} />
-                    </div>
-                  )
-                }}
-              </For>
-            </div>
-          </Show>
-        </section>
-
-        {/* Fun scale */}
-        <section class="relative rounded-lg border border-border bg-card text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <button
-            type="button"
-            onClick={() => setShowFun((v) => !v)}
-            aria-expanded={showFun()}
-            class={cn(
-              'flex w-full items-center justify-between gap-3 p-6 sm:p-8 text-left cursor-pointer',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg'
-            )}
-          >
-            <span class="flex items-center gap-2">
-              <span aria-hidden class="size-2 rounded-full bg-violet" />
-              <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Fun scale</h2>
-              <TbOutlineRocket size={15} class="ml-1 text-violet" aria-hidden />
-            </span>
-            <TbOutlineChevronDown
-              size={16}
-              class={cn('text-muted-foreground transition-transform duration-200', showFun() && 'rotate-180')}
-              aria-hidden
-            />
-          </button>
-
-          <Show when={showFun()}>
-            <div class="border-t border-border px-6 pb-6 pt-4 sm:px-8 sm:pb-8">
-              <Show
-                when={hasValue()}
-                fallback={
-                  <div class="px-4 py-10 text-center text-sm text-muted-foreground">
-                    Enter a value to see fun comparisons
-                  </div>
-                }
-              >
-                <div class="anim-fade-up overflow-hidden rounded-md border border-border">
-                  <For each={funLengthUnitKeys}>
-                    {(unit) => {
-                      const converted = createMemo(() =>
-                        fmtFun(convert(numericValue(), lengthUnits[fromUnit()].factor, funLengthUnits[unit].factor))
-                      )
-
-                      return (
-                        <div class="flex items-center gap-3 border-t border-border/50 px-4 py-2.5 text-sm transition-colors hover:bg-violet/5">
-                          <span class="shrink-0 text-base leading-none">{funLengthUnits[unit].emoji}</span>
-                          <div class="w-40 shrink-0">
-                            <div class="font-medium text-foreground">{funLengthUnits[unit].label}</div>
-                            <div class="text-xs text-muted-foreground">{funLengthUnits[unit].description}</div>
-                          </div>
-                          <span class="flex-1 text-right font-mono tabular-nums">{converted()}</span>
-                          <CopyButton value={() => converted()} />
-                        </div>
-                      )
-                    }}
-                  </For>
-                </div>
-              </Show>
-            </div>
-          </Show>
-        </section>
-      </div>
+      <UnitConverter
+        units={UNITS}
+        convert={lengthConvert}
+        defaultUnit="km"
+        presets={['1', '10', '100', '1000']}
+        extras={(state) => <FunScale state={state} />}
+      />
     </main>
+  )
+}
+
+function FunScale(props: { state: UnitConverterState }) {
+  const [open, setOpen] = createSignal(false)
+
+  return (
+    <section aria-label="Fun scale" class="flex flex-col gap-3">
+      <button
+        type="button"
+        onClick={() => setOpen(!open())}
+        aria-expanded={open()}
+        class={cn(
+          'flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3 text-left',
+          'transition-colors duration-150 hover:border-violet/60 hover:bg-violet/5',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+        )}
+      >
+        <span class="flex items-center gap-2">
+          <span aria-hidden class="size-1.5 rounded-full bg-violet" />
+          <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Fun scale
+          </span>
+          <TbOutlineRocket size={13} class="ml-1 text-violet" aria-hidden />
+        </span>
+        <TbOutlineChevronDown
+          size={14}
+          class={cn(
+            'text-muted-foreground transition-transform duration-200',
+            open() && 'rotate-180'
+          )}
+          aria-hidden
+        />
+      </button>
+
+      <Show when={open()}>
+        <Show
+          when={props.state.hasValue()}
+          fallback={
+            <div class="flex min-h-24 items-center justify-center rounded-md border border-dashed border-border bg-muted/20 text-sm text-muted-foreground">
+              Enter a value above to see fun comparisons
+            </div>
+          }
+        >
+          <div class="anim-fade-up overflow-hidden rounded-md border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead class="w-12" aria-label="Icon" />
+                  <TableHead class="w-[34%]">Comparison</TableHead>
+                  <TableHead>About</TableHead>
+                  <TableHead class="text-right">Count</TableHead>
+                  <TableHead class="w-[64px] text-right" aria-label="Copy" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <For each={funLengthUnitKeys}>
+                  {(unit) => {
+                    const value = createMemo(() =>
+                      fmtFun(
+                        convert(
+                          props.state.numericValue(),
+                          lengthUnits[props.state.fromUnit()].factor,
+                          funLengthUnits[unit].factor
+                        )
+                      )
+                    )
+                    return (
+                      <TableRow>
+                        <TableCell class="text-base leading-none">
+                          {funLengthUnits[unit].emoji}
+                        </TableCell>
+                        <TableCell class="font-sans text-sm font-medium text-foreground">
+                          {funLengthUnits[unit].label}
+                        </TableCell>
+                        <TableCell class="text-xs text-muted-foreground/80">
+                          {funLengthUnits[unit].description}
+                        </TableCell>
+                        <TableCell class="text-right text-sm tabular-nums">
+                          {value()}
+                        </TableCell>
+                        <TableCell class="py-1 text-right hover:bg-transparent">
+                          <CopyButton value={() => value()} />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  }}
+                </For>
+              </TableBody>
+            </Table>
+          </div>
+        </Show>
+      </Show>
+    </section>
   )
 }

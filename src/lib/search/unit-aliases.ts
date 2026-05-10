@@ -3,10 +3,10 @@ import { lengthUnits } from '~/lib/utils/units/length'
 import { massUnits } from '~/lib/utils/units/mass'
 import { tempUnitDefs } from '~/lib/utils/units/temperature'
 import { timeUnits } from '~/lib/utils/units/time'
-import { volumeUnits } from '~/lib/utils/units/volume'
+import { volumeUnits } from '~/lib/utils/geometry/volume'
 import { speedUnits } from '~/lib/utils/units/speed'
-import { areaUnits } from '~/lib/utils/units/area'
-import { angleUnits } from '~/lib/utils/units/angle'
+import { areaUnits } from '~/lib/utils/geometry/area'
+import { angleUnits } from '~/lib/utils/geometry/angle'
 import { pressureUnits } from '~/lib/utils/units/pressure'
 import { energyUnits } from '~/lib/utils/units/energy'
 import { powerUnits } from '~/lib/utils/units/power'
@@ -114,7 +114,7 @@ const sources: Source[] = [
   },
   {
     category: 'volume',
-    routeHref: '/units/volume',
+    routeHref: '/geometry/volume',
     units: volumeUnits,
     overrides: {
       l: ['liter', 'litre', 'liters', 'litres'],
@@ -148,7 +148,7 @@ const sources: Source[] = [
   },
   {
     category: 'area',
-    routeHref: '/units/area',
+    routeHref: '/geometry/area',
     units: areaUnits,
     overrides: {
       m2: ['square meter', 'square meters', 'sqm', 'm²'],
@@ -165,7 +165,7 @@ const sources: Source[] = [
   },
   {
     category: 'angle',
-    routeHref: '/units/angle',
+    routeHref: '/geometry/angle',
     units: angleUnits,
     overrides: {
       deg: ['degree', 'degrees', '°'],

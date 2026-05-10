@@ -6,14 +6,10 @@ import {
   TbOutlineGauge,
   TbOutlineScale,
   TbOutlineThermometer,
-  TbOutlineBottle,
-  TbOutlineSquare,
   TbOutlineFlame,
   TbOutlineWind,
-  TbOutlineAngle,
   TbOutlinePlug,
 } from 'solid-icons/tb'
-import type { Component } from 'solid-js'
 import { Breadcrumb } from '~/components/breadcrumb'
 import { ToolCard } from '~/components/tool-card'
 import { categoryById, toolsByCategory } from '~/lib/tools/registry'
@@ -26,11 +22,8 @@ const toolIcons = {
   time: TbOutlineClock,
   data: TbOutlineDatabase,
   speed: TbOutlineGauge,
-  volume: TbOutlineBottle,
-  area: TbOutlineSquare,
   energy: TbOutlineFlame,
   pressure: TbOutlineWind,
-  angle: TbOutlineAngle,
   'power-unit': TbOutlinePlug,
 }
 

@@ -89,6 +89,34 @@ src/
 - **Clients-side only**: every tool runs in the browser. Don't add server-side
   logic for tools.
 
+## Category placement (verb rule)
+
+Place a tool by the **primary user verb**, not by raw subject. Verbs:
+**convert**, **compute**, **transform**, **format/parse**, **generate**, **inspect**.
+
+Default mapping:
+
+| Verb | Home category |
+|---|---|
+| convert (equivalent forms) | `units`, `encoding`, `color` |
+| compute (derive new value) | `numbers`, `geometry`, `electrical`, `finance` |
+| transform (text in → text out) | `strings` |
+| format/parse, generate, inspect | `code` (with overlap into `numbers` for inspectors) |
+
+**Domain-locks-verb exception:** if a tool is only meaningful inside one
+domain, the domain category wins over the verb. Examples:
+
+- `length` converter → `units` (length applies anywhere)
+- `area` / `angle` / `volume` converter → `geometry` (only meaningful as
+  geometric quantities)
+- `color` converter → `color` (domain-locked)
+- `jwt` decoder → `encoding` (verb wins; no domain lock)
+
+Tiebreaker when unsure: ask "where would a user *guess* first?"
+
+Min ~5 tools to deserve a top-level category. Below that, fold or commit to
+growing — don't ship an orphan category.
+
 ## Adding a tool
 
 See [docs/adding-a-tool.md](docs/adding-a-tool.md) for the full recipe. TL;DR:
@@ -98,6 +126,7 @@ See [docs/adding-a-tool.md](docs/adding-a-tool.md) for the full recipe. TL;DR:
 3. `src/routes/<category>/<name>.tsx`: UI
 4. Append a `Tool` entry in `src/lib/tools/registry.ts`. `keywords[]` is what
    the command palette FTS hits, make it rich
+5. Add the URL to `public/sitemap.xml` (manual; no auto-gen)
 
 Adding a unit converter (or a unit to an existing one) also requires extending
 the alias map. See [docs/search.md](docs/search.md).

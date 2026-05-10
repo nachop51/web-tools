@@ -5,8 +5,20 @@ import {
   TbOutlineRectangle,
   TbOutlineTriangle,
   TbOutlineSquareRoot,
+  TbOutlineSquare,
+  TbOutlineAngle,
+  TbOutlineBottle,
+  TbOutlineMathSin,
+  TbOutlineMathCos,
+  TbOutlineSphere,
+  TbOutlineCylinder,
+  TbOutlinePolygon,
+  TbOutlineMapPin,
+  TbOutlineFunction,
+  TbOutlineVector,
+  TbOutlineLasso,
+  TbOutlineShape,
 } from 'solid-icons/tb'
-import type { Component } from 'solid-js'
 import { Breadcrumb } from '~/components/breadcrumb'
 import { ToolCard } from '~/components/tool-card'
 import { categoryById, toolsByCategory } from '~/lib/tools/registry'
@@ -17,6 +29,20 @@ const toolIcons = {
   rectangle: TbOutlineRectangle,
   triangle: TbOutlineTriangle,
   pythagorean: TbOutlineSquareRoot,
+  area: TbOutlineSquare,
+  angle: TbOutlineAngle,
+  volume: TbOutlineBottle,
+  'trig-calculator': TbOutlineMathSin,
+  'unit-circle': TbOutlineMathCos,
+  sphere: TbOutlineSphere,
+  cylinder: TbOutlineCylinder,
+  'regular-polygon': TbOutlinePolygon,
+  'distance-midpoint': TbOutlineMapPin,
+  'slope-line': TbOutlineFunction,
+  'vector-calc': TbOutlineVector,
+  shoelace: TbOutlineLasso,
+  ellipse: TbOutlineCircle,
+  quadrilateral: TbOutlineShape,
 }
 
 export default function GeometryIndex() {

@@ -13,6 +13,7 @@ import {
 } from '~/components/ui/number-field'
 import { solveRightTriangle, type RightTriangleSolveFor, type RightTriangleResult } from '~/lib/utils/geometry/triangle'
 import { setToolPageMeta } from '~/lib/seo'
+import { PythagoreanFigure } from '~/components/geometry/pythagorean-figure'
 
 function fmt(n: number): string {
   if (!isFinite(n) || isNaN(n)) return '-'
@@ -242,6 +243,24 @@ export default function PythagoreanTheorem() {
             </NumberField>
           </div>
         </section>
+
+        {/* Figure */}
+        <Show when={result()}>
+          {(res) => (
+            <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">
+              <div class="mb-4 flex items-center gap-2">
+                <span aria-hidden class="size-2 rounded-full bg-violet" />
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Figure</h2>
+              </div>
+              <div class="anim-fade-in">
+                <PythagoreanFigure data={res()} />
+              </div>
+              <p class="mt-3 text-center text-xs text-muted-foreground">
+                Square areas: a² + b² = c²
+              </p>
+            </section>
+          )}
+        </Show>
 
         {/* Result */}
         <section class="relative rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md sm:p-8">

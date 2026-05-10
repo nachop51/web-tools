@@ -106,12 +106,12 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/units/volume</loc>
+    <loc>https://tools.nachop.dev/geometry/volume</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/units/area</loc>
+    <loc>https://tools.nachop.dev/geometry/area</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -126,7 +126,7 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://tools.nachop.dev/units/angle</loc>
+    <loc>https://tools.nachop.dev/geometry/angle</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
@@ -457,6 +457,61 @@
   </url>
   <url>
     <loc>https://tools.nachop.dev/electrical/amps-watts-volts</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/trig-calculator</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/unit-circle</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/sphere</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/cylinder</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/regular-polygon</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/distance-midpoint</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/slope-line</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/vector-calc</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/shoelace</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/ellipse</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://tools.nachop.dev/geometry/quadrilateral</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
